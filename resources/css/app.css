@@ -1,0 +1,187 @@
+@import "tailwindcss";
+@import "@fontsource-variable/hanken-grotesk";
+
+@source "../views";
+
+/*
+ * Rialto 7 — mapa-guía del llano.
+ * Tierra: el verde petróleo de la marca. Agua: el fondo crema. Color plano, sin degradados.
+ * Cápsulas de color para controles y estados; la cápsula sol es la acción principal.
+ */
+@theme {
+    --font-sans: "Hanken Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+
+    --color-tierra: #0b4a3b;
+    --color-tierra-oscura: #073328;
+    --color-tierra-clara: #dfeae3;
+    --color-sabana: #8ed462;
+    --color-sabana-clara: #e4f3d6;
+    --color-agua: #f5f1e4;
+    --color-agua-honda: #ebe5d2;
+    --color-tinta: #2c2e2a;
+    --color-tinta-suave: #585c53;
+    --color-linea: #d8d0b8;
+    --color-sol: #ffd23f;
+    --color-sol-clara: #fff1bf;
+    --color-coral: #ff6b5a;
+    --color-coral-clara: #ffe1dc;
+    --color-coral-tinta: #a8321f;
+    --color-laguna: #4fa6e3;
+    --color-laguna-clara: #dcecf9;
+    --color-laguna-tinta: #175a87;
+    --color-lila: #ebc1ff;
+    --color-lila-clara: #f6e6ff;
+
+    --radius-lobulo: 1.375rem;
+
+    --ease-rebote: cubic-bezier(0.34, 1.45, 0.64, 1);
+    --ease-salida: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+    html { -webkit-text-size-adjust: 100%; scroll-padding-top: 6rem; }
+    body {
+        @apply bg-agua text-tinta font-sans antialiased;
+        font-size: 1rem;
+        line-height: 1.5;
+        font-feature-settings: "ss01";
+    }
+    ::selection { background: var(--color-sol); color: var(--color-tinta); }
+    input, textarea { caret-color: var(--color-tierra); }
+    :focus-visible { outline: 3px solid var(--color-laguna); outline-offset: 2px; border-radius: 0.5rem; }
+    a { text-underline-offset: 0.18em; text-decoration-thickness: 1.5px; }
+    h1, h2, h3 { text-wrap: balance; }
+    [x-cloak] { display: none !important; }
+
+    html { scrollbar-color: var(--color-tierra) var(--color-agua-honda); }
+    ::-webkit-scrollbar { width: 12px; height: 12px; }
+    ::-webkit-scrollbar-track { background: var(--color-agua-honda); }
+    ::-webkit-scrollbar-thumb { background: var(--color-tierra); border-radius: 999px; border: 3px solid var(--color-agua-honda); }
+
+    input[type="checkbox"] { accent-color: var(--color-tierra); width: 1.25rem; height: 1.25rem; }
+    input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    }
+}
+
+@layer components {
+    /* Titulares compactos: una sola familia, el peso y el tamaño hacen la jerarquía */
+    .titular { @apply font-extrabold tracking-[-0.035em]; line-height: 0.98; }
+    .codigo { @apply font-bold text-[0.8125rem] tracking-[0.06em] text-tierra uppercase cifra; white-space: nowrap; }
+    .apoyo { @apply text-tinta-suave; }
+
+    /* ---- Botones: cápsulas que ceden y rebotan al pulsar ---- */
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-full font-bold whitespace-nowrap select-none
+               min-h-11 px-5 text-[0.9375rem] leading-none cursor-pointer;
+        transition: transform 0.4s var(--ease-rebote), background-color 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+    .btn:active:not(:disabled) { transform: scale(0.96); }
+    .btn:disabled, .btn[aria-disabled="true"] { @apply opacity-55 cursor-not-allowed; }
+    .btn-sol { @apply bg-sol text-tinta hover:bg-[#ffc81a]; }
+    .btn-tierra { @apply bg-tierra text-white hover:bg-tierra-oscura; }
+    .btn-linea { @apply bg-transparent text-tinta border-[1.5px] border-tinta hover:bg-tinta hover:text-agua; }
+    .btn-linea-clara { @apply bg-transparent text-white border-[1.5px] border-white/80 hover:bg-white hover:text-tierra; }
+    .btn-grande { @apply min-h-13 px-6 text-base; }
+    .btn-mini { @apply min-h-9 px-3.5 text-sm; }
+    /* Chip redondo que viaja en el borde de la cápsula (la flecha de la acción) */
+    .btn .chip { @apply -mr-3 grid size-8 place-items-center rounded-full bg-tinta text-white; transition: transform 0.4s var(--ease-rebote); }
+    .btn:hover .chip { transform: translateX(3px); }
+    .btn-tierra .chip { @apply bg-sol text-tinta; }
+    .enlace { @apply font-semibold text-tierra underline hover:text-tierra-oscura; }
+    .enlace-peligro { @apply font-semibold text-coral-tinta underline hover:text-[#7e2416] cursor-pointer; }
+
+    /* ---- Cápsulas de filtro: el chip de conteo cruza al frente cuando la cápsula está activa ---- */
+    .capsula {
+        @apply inline-flex items-center gap-2 rounded-full border-[1.5px] border-linea bg-white pl-4 pr-1.5 min-h-10
+               text-sm font-semibold text-tinta whitespace-nowrap no-underline;
+        transition: background-color 0.2s, border-color 0.2s, transform 0.4s var(--ease-rebote);
+    }
+    .capsula:hover { @apply border-tierra; }
+    .capsula .conteo { @apply grid min-w-7 h-7 place-items-center rounded-full bg-agua px-1.5 text-xs font-bold cifra; }
+    .capsula[aria-current] { @apply flex-row-reverse bg-tierra border-tierra text-white pl-1.5 pr-4; }
+    .capsula[aria-current] .conteo { @apply bg-sol text-tinta; }
+    .capsula-quitar { @apply pr-3; }
+
+    /* ---- Campos ---- */
+    .etiqueta { @apply mb-1.5 block text-sm font-bold text-tinta; }
+    .campo {
+        @apply block w-full min-h-12 rounded-2xl border-[1.5px] border-linea bg-white px-4 text-base text-tinta
+               placeholder:text-tinta-suave/80;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .campo:focus { @apply border-tierra outline-none; box-shadow: 0 0 0 4px rgb(11 74 59 / 0.15); }
+    textarea.campo { @apply py-3; }
+    select.campo { @apply appearance-none pr-10; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%232c2e2a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E") no-repeat right 1rem center; }
+    .campo.is-invalid, .was-validated .campo:invalid { @apply border-coral; box-shadow: 0 0 0 4px rgb(255 107 90 / 0.18); }
+    .campo.is-valid { @apply border-sabana; }
+    .error-campo { @apply mt-1.5 hidden text-sm font-semibold text-coral-tinta; }
+    .campo.is-invalid ~ .error-campo, .was-validated .campo:invalid ~ .error-campo,
+    .is-invalid ~ .error-campo, .grupo-invalido .error-campo { @apply block; }
+    .ayuda { @apply mt-1.5 text-sm text-tinta-suave; }
+    /* Campo con unidad (Bs., %, USD) pegada a un lado */
+    .grupo-campo { @apply flex items-stretch; }
+    .grupo-campo > .unidad { @apply grid place-items-center whitespace-nowrap border-[1.5px] border-linea bg-agua-honda px-4 text-sm font-bold text-tinta-suave; }
+    .grupo-campo > .unidad:first-child { @apply rounded-l-2xl border-r-0; }
+    .grupo-campo > .unidad:last-child { @apply rounded-r-2xl border-l-0; }
+    .grupo-campo > .campo:not(:first-child) { @apply rounded-l-none; }
+    .grupo-campo > .campo:not(:last-child) { @apply rounded-r-none; }
+
+    /* ---- Superficies ---- */
+    .lobulo { @apply rounded-lobulo border border-linea bg-white; }
+    .lobulo-tierra { @apply rounded-lobulo bg-tierra text-white; }
+    .seccion-titulo { @apply text-xl font-extrabold tracking-[-0.02em]; }
+
+    /* ---- Estados: una cápsula plana por estado ---- */
+    .estado { @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[0.8125rem] font-bold leading-tight whitespace-nowrap; }
+    .estado::before { content: ""; @apply size-2 rounded-full bg-current; }
+    .estado-disponible, .estado-confirmado, .estado-convertida, .estado-activo { @apply bg-sabana-clara text-tierra; }
+    .estado-bajo { @apply bg-sol-clara text-[#6b4b00]; }
+    .estado-agotado, .estado-anulado, .estado-rechazada, .estado-inactivo { @apply bg-coral-clara text-coral-tinta; }
+    .estado-pendiente { @apply bg-lila-clara text-[#5b2c78]; }
+    .estado-info { @apply bg-laguna-clara text-laguna-tinta; }
+
+    /* ---- Avisos ---- */
+    .aviso { @apply flex gap-3 rounded-2xl px-4 py-3 text-[0.9375rem]; }
+    .aviso-exito { @apply bg-sabana-clara text-tierra-oscura; }
+    .aviso-error { @apply bg-coral-clara text-[#6e1f12]; }
+    .aviso-info { @apply bg-laguna-clara text-[#0f3f61]; }
+    .aviso-atencion { @apply bg-sol-clara text-[#4d3600]; }
+
+    /* ---- Tablas del personal: densas, cifras alineadas, reglas a 1 px ---- */
+    .tabla { @apply w-full border-collapse text-[0.9375rem]; }
+    .tabla th { @apply border-b-2 border-tinta px-3 py-2.5 text-left text-xs font-bold uppercase tracking-[0.08em] text-tinta-suave; }
+    .tabla td { @apply border-b border-linea px-3 py-3 align-middle; }
+    .tabla tbody tr { transition: background-color 0.15s; }
+    .tabla tbody tr:hover { @apply bg-agua; }
+    .tabla .num { @apply text-right cifra whitespace-nowrap; }
+
+    /* ---- Paginación ---- */
+    .paginas { @apply flex flex-wrap items-center gap-1.5; }
+    .paginas a, .paginas span { @apply grid min-w-10 h-10 place-items-center rounded-full px-3 text-sm font-bold cifra; }
+    .paginas a { @apply bg-white border border-linea hover:border-tierra; }
+    .paginas [aria-current] { @apply bg-tierra text-white; }
+    .paginas .inactiva { @apply text-tinta-suave/60; }
+
+    /* ---- Imagen en lóbulo: la foto o silueta se recorta con la forma del mapa ---- */
+    .img-lobulo { clip-path: url(#forma-lobulo); }
+}
+
+/* Cifras tabulares: precios, cantidades y códigos se alinean en columna */
+@utility cifra {
+    font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* ---- Aviso flotante (agregar sin recargar) ---- */
+.toast {
+    position: fixed; left: 50%; bottom: max(1rem, env(safe-area-inset-bottom)); z-index: 60;
+    transform: translate(-50%, 140%); opacity: 0;
+    transition: transform 0.4s var(--ease-rebote), opacity 0.2s;
+}
+.toast[data-visible] { transform: translate(-50%, 0); opacity: 1; }
+
+/* Spinner de los botones en espera */
+.girando { width: 1em; height: 1em; border-radius: 999px; border: 2.5px solid currentColor; border-right-color: transparent; animation: girar 0.7s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }

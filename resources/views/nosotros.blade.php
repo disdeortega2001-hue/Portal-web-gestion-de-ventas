@@ -1,0 +1,198 @@
+@extends('layouts.app')
+@section('titulo', 'Nuestra historia')
+
+@php
+    // Línea de vida (reseña histórica del Capítulo I). Cuando se conozcan los años exactos de la
+    // importación desde Brasil y de la representación exclusiva, reemplaza «Oficio» y «Alianzas» por el año.
+    $hitos = [
+        ['1963', 'Fundación', 'Nace Inversiones Campagna, una empresa familiar al servicio del productor llanero.'],
+        ['Oficio', 'Importación desde Brasil', 'Traemos repuestos y equipos difíciles de conseguir en el país.'],
+        ['Alianzas', 'Agente autorizado exclusivo', 'Representamos en Venezuela a Marchesan Tatu, Colombo Aemco, Vicon y Lumagi.'],
+        ['2024', 'Ahora somos Rialto 7', 'Nuevo nombre e imagen, con los valores de siempre.'],
+        [(string) now()->year, 'Catálogo en línea', 'Existencias, precios y cotizaciones desde la finca.'],
+    ];
+    // Pilares: los valores que la reseña atribuye a la empresa desde su fundación
+    $pilares = [
+        ['escudo', 'Confianza', 'Más de seis décadas en manos de la misma familia.'],
+        ['usuarios', 'Atención cercana', 'Te atiende gente del llano que conoce tu trabajo.'],
+        ['caja', 'Conocimiento de cada pieza', 'Te ayudamos a dar con el repuesto correcto.'],
+    ];
+    $cifras = [
+        [$anios, '+', 'años de trayectoria'],
+        [count($marcas), '', 'marcas exclusivas'],
+        [$totalProductos, '', 'productos en línea'],
+        ['24/7', '', 'catálogo abierto'],
+    ];
+@endphp
+
+@section('cabecera')
+    <p class="inline-flex items-center gap-2 rounded-full border border-white/25 px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-white/85">
+        <span class="size-2 rounded-full bg-sol" aria-hidden="true"></span> Valle de la Pascua desde {{ \App\Http\Controllers\NosotrosController::FUNDACION }}
+    </p>
+    <h1 class="titular mt-4 max-w-3xl text-[2.25rem] sm:text-5xl lg:text-[4rem]">Desde 1963 junto al <span class="text-sol">productor llanero</span></h1>
+    <p class="mt-3 max-w-2xl text-white/80 sm:text-lg">Maquinaria agrícola y repuestos para que el campo siga trabajando.</p>
+
+    <dl class="mt-8 grid max-w-4xl grid-cols-2 gap-x-6 gap-y-5 border-t border-white/15 pt-6 sm:grid-cols-4 lg:mt-10">
+        @foreach($cifras as [$valor, $extra, $etiqueta])
+            <div>
+                <dt class="sr-only">{{ $etiqueta }}</dt>
+                <dd class="titular cifra text-4xl lg:text-5xl">{{ $valor }}<span class="text-sol">{{ $extra }}</span></dd>
+                <dd class="mt-1.5 text-xs font-bold uppercase tracking-[0.12em] text-white/70">{{ $etiqueta }}</dd>
+            </div>
+        @endforeach
+    </dl>
+@endsection
+
+@section('contenido')
+{{-- Resumen: quiénes somos, en dos frases --}}
+<section aria-labelledby="t-historia" class="relative grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-end lg:gap-16">
+    <svg class="pointer-events-none absolute -left-40 -top-16 -z-10 w-[30rem] text-sabana/25" viewBox="0 0 400 260" aria-hidden="true"><path fill="currentColor" d="M58 64C96 14 170 0 236 18c58 16 86 -4 128 26 40 28 40 84 14 118-24 32-4 70-48 88-50 20-104-12-160 0C114 262 40 244 14 196-10 152 26 104 58 64Z"/></svg>
+    <div>
+        <p class="text-xs font-bold uppercase tracking-[0.16em] text-tierra">Nuestra historia</p>
+        <h2 id="t-historia" class="titular mt-2 text-3xl sm:text-4xl">Una empresa familiar del llano guariqueño</h2>
+    </div>
+    <p class="text-lg text-tinta-suave">Empezamos en 1963 como Inversiones Campagna. Hoy, como Inversiones Rialto 7 C.A., seguimos en manos de la familia fundadora y somos el único agente autorizado en Venezuela de cuatro marcas de maquinaria y repuestos.</p>
+</section>
+
+{{-- Línea de vida: el año grande arriba, la pista de años y tarjetas que se deslizan --}}
+<section aria-labelledby="t-trayectoria" class="mt-16 lg:mt-20"
+         x-data="{
+            i: 0, n: {{ count($hitos) }},
+            ir(k) {
+                this.i = (k + this.n) % this.n;
+                const pista = this.$refs.pista, tarjeta = pista.children[this.i];
+                const destino = Math.min(tarjeta.offsetLeft - pista.offsetLeft, pista.scrollWidth - pista.clientWidth);
+                pista.scrollTo({ left: destino, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+                // Si el navegador no anima el desplazamiento (pestaña en segundo plano, ahorro de energía), salta directo
+                setTimeout(() => { if (Math.abs(pista.scrollLeft - destino) > 4) pista.scrollLeft = destino; }, 600);
+            },
+            // Al deslizar con el dedo: si la tarjeta activa salió de la vista, se activa la primera visible
+            seguir() {
+                const pista = this.$refs.pista, x = (t) => t.offsetLeft - pista.offsetLeft;
+                const activa = pista.children[this.i];
+                if (x(activa) >= pista.scrollLeft - 8 && x(activa) + activa.offsetWidth <= pista.scrollLeft + pista.clientWidth + 8) return;
+                const k = [...pista.children].findIndex(t => x(t) >= pista.scrollLeft - 8);
+                if (k >= 0) this.i = k;
+            }
+         }"
+         @keydown.arrow-right.prevent="ir(i + 1)" @keydown.arrow-left.prevent="ir(i - 1)">
+    <div class="flex flex-wrap items-end justify-between gap-6">
+        <div>
+            <p class="text-xs font-bold uppercase tracking-[0.16em] text-tierra">Línea de vida</p>
+            <h2 id="t-trayectoria" class="titular mt-2 text-3xl sm:text-4xl">Nuestra trayectoria</h2>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="lobulo px-5 py-3" aria-hidden="true">
+                <p class="titular cifra text-4xl text-tierra"><span x-text="@js(array_column($hitos, 0))[i]">{{ $hitos[0][0] }}</span> <span class="text-xl text-tinta-suave">/ {{ now()->year }}</span></p>
+                <p class="mt-1 text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-tinta-suave">Año actual</p>
+            </div>
+            <button type="button" x-cloak class="grid size-12 place-items-center rounded-full border-[1.5px] border-tinta hover:bg-tinta hover:text-agua" @click="ir(i - 1)" aria-label="Momento anterior"><x-icono nombre="flecha-izq" /></button>
+            <button type="button" x-cloak class="grid size-12 place-items-center rounded-full bg-tierra text-white hover:bg-tierra-oscura" @click="ir(i + 1)" aria-label="Momento siguiente"><x-icono nombre="flecha" /></button>
+        </div>
+    </div>
+
+    {{-- Pista de años: la línea se llena hasta el momento activo --}}
+    <div class="relative mt-8 hidden sm:block" x-cloak>
+        <div class="absolute inset-x-2 top-[0.6875rem] h-[3px] rounded-full bg-linea" aria-hidden="true"></div>
+        <div class="absolute left-2 top-[0.6875rem] h-[3px] rounded-full bg-tierra transition-[width] duration-500 ease-[var(--ease-salida)]"
+             :style="`width: calc((100% - 1rem) * ${i / (n - 1)})`" aria-hidden="true"></div>
+        <ol class="relative flex justify-between">
+            @foreach($hitos as $k => [$cuando])
+                <li class="flex flex-col items-center">
+                    <button type="button" class="grid size-6 place-items-center rounded-full border-[3px] bg-agua transition-transform duration-300"
+                            :class="i >= {{ $k }} ? 'border-tierra' : 'border-linea'" @click="ir({{ $k }})" aria-label="Ir a {{ $cuando }}">
+                        <span class="size-2.5 rounded-full" :class="i === {{ $k }} ? 'bg-sol' : (i > {{ $k }} ? 'bg-tierra' : 'bg-transparent')"></span>
+                    </button>
+                    <span class="cifra mt-2 text-xs font-bold" :class="i === {{ $k }} ? 'text-tierra' : 'text-tinta-suave'">{{ $cuando }}</span>
+                </li>
+            @endforeach
+        </ol>
+    </div>
+
+    {{-- Tarjetas: se deslizan con el dedo, las flechas o los años --}}
+    <ol x-ref="pista" @scroll.debounce.120ms="seguir()" tabindex="0" aria-label="Momentos de nuestra historia"
+        class="-mx-4 mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-4 px-4 pb-4 [scrollbar-width:none] sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:scroll-px-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
+        @foreach($hitos as $k => [$cuando, $titulo, $texto])
+            <li class="lobulo flex w-[82%] shrink-0 snap-start flex-col p-6 transition-[border-color,box-shadow] duration-300 sm:w-[46%] lg:w-[calc((100%-2rem)/3)]"
+                :class="i === {{ $k }} && '!border-tierra shadow-[0_0_0_1px_var(--color-tierra)]'">
+                <span class="cifra self-start rounded-full px-3 py-1 text-sm font-extrabold transition-colors duration-300"
+                      :class="i === {{ $k }} ? 'bg-sol text-tinta' : 'bg-agua-honda text-tinta-suave'">{{ $cuando }}</span>
+                <h3 class="mt-4 text-xl font-extrabold tracking-tight">{{ $titulo }}</h3>
+                <p class="mt-2 text-tinta-suave">{{ $texto }}</p>
+                <div class="mt-auto flex items-center gap-3 pt-6">
+                    <span class="h-[3px] flex-1 overflow-hidden rounded-full bg-agua-honda"><span class="block h-full bg-tierra transition-[width] duration-500" :style="`width: ${i === {{ $k }} ? 100 : 0}%`"></span></span>
+                    <span class="cifra text-xs font-bold text-tinta-suave">{{ sprintf('%02d', $k + 1) }}</span>
+                </div>
+            </li>
+        @endforeach
+    </ol>
+
+    <div class="mt-2 flex items-center justify-center gap-4" x-cloak>
+        <div class="flex gap-1.5">
+            @foreach($hitos as $k => $hito)
+                <button type="button" class="h-2 rounded-full transition-all duration-300" :class="i === {{ $k }} ? 'w-7 bg-tierra' : 'w-2 bg-linea hover:bg-tinta-suave'" @click="ir({{ $k }})" aria-label="Momento {{ $k + 1 }}"></button>
+            @endforeach
+        </div>
+        <span class="cifra rounded-full border border-linea bg-white px-3 py-1 text-xs font-bold text-tinta-suave" aria-live="polite"><span class="text-tierra" x-text="String(i + 1).padStart(2, '0')">01</span> | {{ sprintf('%02d', count($hitos)) }}</span>
+    </div>
+</section>
+
+{{-- Pilares --}}
+<section aria-labelledby="t-pilares" class="mt-16 lg:mt-20">
+    <p class="text-xs font-bold uppercase tracking-[0.16em] text-tierra">Nuestros pilares</p>
+    <h2 id="t-pilares" class="titular mt-2 text-3xl sm:text-4xl">Lo que nos define</h2>
+    <ul class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+        @foreach($pilares as $k => [$icono, $titulo, $texto])
+            <li @class(['flex flex-col p-7', 'lobulo-tierra' => $k === 0, 'lobulo' => $k !== 0])>
+                <span @class(['grid size-12 place-items-center rounded-2xl', 'bg-sol text-tinta' => $k === 0, 'bg-tierra-clara text-tierra' => $k !== 0])><x-icono :nombre="$icono" class="size-6" /></span>
+                <h3 class="mt-5 text-xl font-extrabold tracking-tight">{{ $titulo }}</h3>
+                <p @class(['mt-2', 'text-white/80' => $k === 0, 'text-tinta-suave' => $k !== 0])>{{ $texto }}</p>
+            </li>
+        @endforeach
+    </ul>
+</section>
+
+{{-- Marcas de representación exclusiva --}}
+<section aria-labelledby="t-marcas" class="mt-16 lg:mt-20">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <p class="text-xs font-bold uppercase tracking-[0.16em] text-tierra">Marcas que representamos</p>
+            <h2 id="t-marcas" class="titular mt-2 text-3xl sm:text-4xl">Agente autorizado exclusivo en Venezuela</h2>
+        </div>
+        <p class="max-w-sm text-tinta-suave">Repuestos y equipos originales, con el respaldo directo del fabricante.</p>
+    </div>
+
+    <ul class="mt-8 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+        @foreach($marcas as $marca)
+            <li class="lobulo flex flex-col overflow-hidden p-3.5 sm:p-5">
+                <div class="overflow-hidden rounded-2xl ring-1 ring-tinta/10">
+                    <img src="{{ asset($marca['logo']) }}" alt="Logo de {{ $marca['nombre'] }}"
+                         @class(['h-20 w-full sm:h-28', 'bg-[#173C8A] object-contain' => $marca['nombre'] === 'Marchesan Tatu', 'bg-white object-cover' => $marca['nombre'] !== 'Marchesan Tatu'])>
+                </div>
+                <p class="mt-4 text-lg font-extrabold leading-tight tracking-tight sm:mt-5 sm:text-xl">{{ $marca['nombre'] }}</p>
+                @if($marca['categorias'])
+                    <p class="mt-1 text-sm text-tinta-suave">{{ implode(' · ', $marca['categorias']) }}</p>
+                @endif
+                <a href="{{ route('catalogo.index', ['marca' => $marca['nombre']]) }}" class="enlace mt-auto inline-flex items-center gap-1.5 self-start pt-4 text-sm font-bold sm:pt-5 sm:text-base">
+                    @if($marca['productos'])Ver {{ $marca['productos'] }} {{ $marca['productos'] === 1 ? 'producto' : 'productos' }}@else Ver productos @endif
+                    <x-icono nombre="flecha" class="size-4" />
+                </a>
+            </li>
+        @endforeach
+    </ul>
+</section>
+
+{{-- Dónde estamos --}}
+<section aria-labelledby="t-visitanos" class="mt-16 flex flex-col gap-6 rounded-[2rem] bg-agua-honda p-7 sm:flex-row sm:items-center sm:justify-between lg:mt-20 lg:p-9">
+    <div>
+        <h2 id="t-visitanos" class="text-2xl font-extrabold tracking-tight">Visítanos o consulta desde tu finca</h2>
+        <p class="mt-2 flex items-start gap-1.5 text-tinta-suave"><x-icono nombre="ubicacion" class="mt-0.5 size-5 shrink-0" /> Av. Las Industrias, Edificio Campagna, Valle de la Pascua, Guárico · <span class="whitespace-nowrap">RIF J-50668510-8</span></p>
+    </div>
+    <div class="flex shrink-0 flex-wrap gap-2">
+        @if($wa = \App\Support\Contacto::whatsapp('Hola, vi el portal de Rialto 7 y quiero hacer una consulta.'))
+            <a href="{{ $wa }}" class="btn btn-linea" target="_blank" rel="noopener"><x-icono nombre="whatsapp" /> Escríbenos</a>
+        @endif
+        <a href="{{ route('catalogo.index') }}" class="btn btn-sol">Ver el catálogo <span class="chip"><x-icono nombre="flecha" class="size-4" /></span></a>
+    </div>
+</section>
+@endsection
