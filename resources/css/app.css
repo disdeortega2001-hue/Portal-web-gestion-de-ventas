@@ -1,37 +1,37 @@
 @import "tailwindcss";
-@import "@fontsource/barlow/400.css";
-@import "@fontsource/barlow/500.css";
-@import "@fontsource/barlow/600.css";
-@import "@fontsource/barlow/700.css";
-@import "@fontsource/barlow-condensed/600.css";
-@import "@fontsource/barlow-condensed/700.css";
-@import "@fontsource/barlow-condensed/800.css";
+@import "@fontsource-variable/raleway";
+@import "@fontsource-variable/raleway/wght-italic.css";
 
 @source "../views";
 
 /*
- * Rialto 7 — la librea de fábrica.
- * Carrocería verde Rialto, franjas verde-blanco-amarillo como las calcomanías de los implementos,
- * números grandes en círculos blancos y paneles rectos. Barlow Condensed rotula; Barlow se lee.
- * Los nombres de los colores se conservan de la versión anterior para no tocar la lógica de las vistas.
+ * Rialto 7 — azul de campo.
+ * Azul y amarillo de las marcas que representa (como Marchesan Tatu), con el verde Rialto de acento
+ * en el logo y en el sello de agente exclusivo. Fotos de campo a sangre, titulares en mayúsculas
+ * con palabras resaltadas en amarillo, arcos azules sobre las imágenes y entradas suaves al desplazarse.
+ * Los nombres de los colores se conservan de versiones anteriores para no tocar la lógica de las vistas:
+ * «tierra» es el azul principal, «sol» el amarillo y «agua» el fondo.
  */
 @theme {
-    --font-sans: "Barlow", ui-sans-serif, system-ui, sans-serif;
-    --font-rotulo: "Barlow Condensed", "Barlow", ui-sans-serif, sans-serif;
+    --font-sans: "Raleway Variable", ui-sans-serif, system-ui, sans-serif;
+    --font-rotulo: "Raleway Variable", ui-sans-serif, system-ui, sans-serif;
 
-    --color-tierra: #0b4a3b;          /* verde Rialto: la carrocería */
-    --color-tierra-oscura: #06291f;
-    --color-tierra-clara: #d6e6dc;    /* campo verde claro de la librea */
-    --color-sabana: #2f9e63;          /* disponible */
+    --color-tierra: #0d5192;          /* azul principal */
+    --color-tierra-oscura: #052b70;   /* azul profundo */
+    --color-noche: #031c46;           /* azul noche: secciones oscuras y pie */
+    --color-tierra-clara: #dce8f5;    /* azul claro de apoyo */
+    --color-rialto: #0b4a3b;          /* verde del logo: acento de marca */
+    --color-rialto-claro: #dcebe4;
+    --color-sabana: #2e9b5f;          /* disponible */
     --color-sabana-clara: #dcf1e3;
-    --color-agua: #f2f3f0;            /* gris de taller: el fondo */
-    --color-agua-honda: #e4e7e2;
-    --color-tinta: #10241d;
-    --color-tinta-suave: #4b5852;
-    --color-linea: #ccd3cd;
-    --color-sol: #f5b800;             /* amarillo de la franja: la acción principal */
-    --color-sol-clara: #fff0b8;
-    --color-coral: #d63a2c;           /* rojo señal: agotado y error */
+    --color-agua: #f4f6f9;            /* fondo general */
+    --color-agua-honda: #e7ecf2;
+    --color-tinta: #0f1b2d;
+    --color-tinta-suave: #4a5668;
+    --color-linea: #d3dbe5;
+    --color-sol: #ffd300;             /* amarillo: acción principal y resaltado */
+    --color-sol-clara: #fff4b3;
+    --color-coral: #d63a2c;
     --color-coral-clara: #fbe3e0;
     --color-coral-tinta: #a2271b;
     --color-laguna: #2f6fb0;
@@ -40,22 +40,23 @@
     --color-lila: #c9b6ea;
     --color-lila-clara: #efe8fa;
 
-    --radius-lobulo: 3px;
+    --radius-lobulo: 8px;
 
     --ease-rebote: cubic-bezier(0.2, 0.9, 0.3, 1);
     --ease-salida: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @layer base {
-    html { -webkit-text-size-adjust: 100%; scroll-padding-top: 6rem; }
+    html { -webkit-text-size-adjust: 100%; scroll-padding-top: 6rem; scroll-behavior: smooth; }
     body {
         @apply bg-agua text-tinta font-sans antialiased;
         font-size: 1.0625rem;
-        line-height: 1.5;
+        line-height: 1.55;
+        font-variant-numeric: lining-nums;   /* Raleway trae números antiguos por defecto */
     }
     ::selection { background: var(--color-sol); color: var(--color-tinta); }
     input, textarea { caret-color: var(--color-tierra); }
-    :focus-visible { outline: 3px solid var(--color-sol); outline-offset: 2px; }
+    :focus-visible { outline: 3px solid var(--color-sol); outline-offset: 2px; border-radius: 4px; }
     a { text-underline-offset: 0.2em; text-decoration-thickness: 2px; }
     h1, h2, h3 { text-wrap: balance; }
     [x-cloak] { display: none !important; }
@@ -63,137 +64,126 @@
     html { scrollbar-color: var(--color-tierra) var(--color-agua-honda); }
     ::-webkit-scrollbar { width: 12px; height: 12px; }
     ::-webkit-scrollbar-track { background: var(--color-agua-honda); }
-    ::-webkit-scrollbar-thumb { background: var(--color-tierra); border: 3px solid var(--color-agua-honda); }
+    ::-webkit-scrollbar-thumb { background: var(--color-tierra); border: 3px solid var(--color-agua-honda); border-radius: 999px; }
 
     input[type="checkbox"], input[type="radio"] { accent-color: var(--color-tierra); width: 1.25rem; height: 1.25rem; }
     input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
 
     @media (prefers-reduced-motion: reduce) {
-        *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+        html { scroll-behavior: auto; }
+        *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-delay: 0ms !important; }
     }
 }
 
 @layer components {
-    /* Rótulos: condensada, mayúsculas, compacta, como la placa de modelo de un implemento */
-    .titular { @apply font-rotulo font-extrabold uppercase; letter-spacing: -0.005em; line-height: 0.92; }
-    .codigo { @apply font-rotulo font-bold text-[0.9375rem] tracking-[0.05em] text-tierra uppercase cifra; white-space: nowrap; }
+    /* Titulares en mayúsculas, gruesos y compactos; <em> resalta en amarillo (sobre azul) o en azul (sobre claro) */
+    .titular { @apply font-rotulo font-black uppercase; letter-spacing: -0.01em; line-height: 1.02; }
+    .titular em { font-style: normal; color: var(--color-tierra); }
+    .sobre-azul .titular em, .titular.sobre-azul em { color: var(--color-sol); }
+    .codigo { @apply font-bold text-[0.9375rem] tracking-[0.04em] text-tierra uppercase cifra; white-space: nowrap; }
     .apoyo { @apply text-tinta-suave; }
-    .seccion-titulo { @apply font-rotulo text-2xl font-extrabold uppercase tracking-[0.01em]; }
+    .seccion-titulo { @apply text-xl font-extrabold uppercase tracking-[0.01em]; }
 
-    /* ---- La franja: verde, blanco, amarillo, blanco, verde (cortes netos, sin degradado) ---- */
-    .franja {
-        height: 0.75rem;
-        background: linear-gradient(to bottom,
-            var(--color-tierra) 0 28%, #fff 28% 38%, var(--color-sol) 38% 62%, #fff 62% 72%, var(--color-tierra) 72% 100%);
-    }
-    .franja-fina { height: 0.4rem; }
-    .franja-v {
-        width: 0.75rem;
-        background: linear-gradient(to right,
-            var(--color-tierra) 0 28%, #fff 28% 38%, var(--color-sol) 38% 62%, #fff 62% 72%, var(--color-tierra) 72% 100%);
-    }
-    /* Sobre carrocería verde, la franja lleva blanco por fuera para no perderse */
-    .franja-clara {
-        background: linear-gradient(to bottom, #fff 0 22%, var(--color-sol) 22% 58%, #fff 58% 70%, transparent 70%);
-    }
+    /* Barra amarilla bajo los títulos de sección, como en las páginas de las marcas */
+    .subrayado { @apply relative pb-4; }
+    .subrayado::after { content: ""; position: absolute; left: 0; bottom: 0; width: 4.5rem; height: 5px; background: var(--color-sol); border-radius: 3px; }
+    .subrayado-centro::after { left: 50%; transform: translateX(-50%); }
 
-    /* ---- Círculo numerado: el número de carrera; aquí cuenta unidades, pasos o el 7 de la marca ---- */
+    /* Compatibilidad con la versión anterior: la franja ahora es una línea amarilla fina */
+    .franja { height: 4px; background: var(--color-sol); }
+    .franja-fina { height: 3px; }
+    .franja-v { width: 4px; background: var(--color-sol); }
+    .franja-clara { background: var(--color-sol); }
+    .panel-tapa { @apply relative; }
+
+    /* Círculo numerado: existencia, pasos y conteos */
     .ruedo {
-        @apply grid shrink-0 place-items-center rounded-full bg-white font-rotulo font-extrabold text-tinta cifra;
-        border: 3px solid var(--color-tinta);
+        @apply grid shrink-0 place-items-center rounded-full bg-white font-extrabold text-tierra-oscura cifra;
+        border: 3px solid var(--color-tierra);
         line-height: 1;
     }
 
-    /* ---- Botones: paneles rectos con el talón de franjas a la izquierda ---- */
+    /* ---- Botones: rectángulos firmes con flecha ---- */
     .btn {
-        @apply relative inline-flex items-center justify-center gap-2 rounded-[2px] font-rotulo font-bold uppercase whitespace-nowrap select-none
-               min-h-12 px-5 text-[1.0625rem] leading-none tracking-[0.04em] cursor-pointer border-[1.5px] border-transparent;
-        transition: transform 0.25s var(--ease-rebote), background-color 0.15s, color 0.15s, border-color 0.15s;
+        @apply relative inline-flex items-center justify-center gap-2.5 rounded-[6px] font-bold uppercase whitespace-nowrap select-none
+               min-h-12 px-6 text-[0.9375rem] leading-none tracking-[0.06em] cursor-pointer border-2 border-transparent;
+        transition: transform 0.25s var(--ease-rebote), background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
     }
-    .btn:active:not(:disabled) { transform: translateY(1px); }
+    .btn:hover:not(:disabled) { transform: translateY(-2px); }
+    .btn:active:not(:disabled) { transform: translateY(0); }
     .btn:disabled, .btn[aria-disabled="true"] { @apply opacity-55 cursor-not-allowed; }
-    .btn-sol, .btn-tierra { padding-left: 1.85rem; }
-    .btn-sol::before, .btn-tierra::before {
-        content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 0.95rem;
-        background: linear-gradient(to right, var(--talon-a) 0 34%, #fff 34% 50%, var(--talon-b) 50% 82%, transparent 82%);
-    }
-    .btn-sol { @apply bg-sol text-tinta hover:bg-[#ffc71f]; --talon-a: var(--color-tierra); --talon-b: var(--color-tierra); }
-    .btn-tierra { @apply bg-tierra text-white hover:bg-tierra-oscura; --talon-a: var(--color-sol); --talon-b: var(--color-sol); }
-    .btn-linea { @apply bg-white text-tinta border-tinta hover:bg-tinta hover:text-white; }
-    .btn-linea-clara { @apply bg-transparent text-white border-white/80 hover:bg-white hover:text-tierra; }
-    .btn-grande { @apply min-h-14 px-7 text-lg; }
-    .btn-grande.btn-sol, .btn-grande.btn-tierra { padding-left: 2.25rem; }
-    .btn-mini { @apply min-h-10 px-3.5 text-[0.9375rem]; }
-    .btn-mini.btn-sol, .btn-mini.btn-tierra { padding-left: 1.35rem; }
-    .btn-mini.btn-sol::before, .btn-mini.btn-tierra::before { width: 0.6rem; }
-    /* Flecha de la acción: un cuadro oscuro pegado al borde derecho */
-    .btn .chip { @apply -mr-2 grid size-8 place-items-center bg-tinta text-white; transition: transform 0.25s var(--ease-rebote); }
-    .btn:hover .chip { transform: translateX(3px); }
-    .btn-tierra .chip { @apply bg-sol text-tinta; }
+    .btn-sol { @apply bg-sol text-tierra-oscura hover:bg-[#ffdf33]; box-shadow: 0 6px 18px -8px rgb(255 211 0 / 0.7); }
+    .btn-tierra { @apply bg-tierra text-white hover:bg-tierra-oscura; box-shadow: 0 6px 18px -8px rgb(13 81 146 / 0.7); }
+    .btn-linea { @apply bg-white text-tierra-oscura border-tierra hover:bg-tierra hover:text-white; }
+    .btn-linea-clara { @apply bg-transparent text-white border-white/70 hover:bg-white hover:text-tierra-oscura; }
+    .btn-grande { @apply min-h-14 px-8 text-base; }
+    .btn-mini { @apply min-h-10 px-4 text-[0.8125rem]; }
+    .btn .chip { @apply -mr-1 grid size-6 place-items-center; transition: transform 0.25s var(--ease-rebote); }
+    .btn:hover .chip { transform: translateX(4px); }
     .enlace { @apply font-semibold text-tierra underline hover:text-tierra-oscura; }
     .enlace-peligro { @apply font-semibold text-coral-tinta underline hover:text-[#7e1d14] cursor-pointer; }
 
-    /* ---- Categorías: placas rectas con su conteo en un círculo ---- */
+    /* ---- Categorías: pestañas con su conteo ---- */
     .capsula {
-        @apply inline-flex items-center gap-2.5 rounded-[2px] border-[1.5px] border-linea bg-white pl-3.5 pr-1.5 min-h-11
-               font-rotulo text-[1rem] font-bold uppercase tracking-[0.03em] text-tinta whitespace-nowrap no-underline;
-        transition: background-color 0.15s, border-color 0.15s;
+        @apply inline-flex items-center gap-2.5 rounded-[6px] border-2 border-linea bg-white pl-4 pr-1.5 min-h-11
+               text-[0.875rem] font-bold uppercase tracking-[0.03em] text-tinta whitespace-nowrap no-underline;
+        transition: background-color 0.2s, border-color 0.2s, color 0.2s;
     }
-    .capsula:hover { @apply border-tierra; }
-    .capsula .conteo { @apply grid size-8 place-items-center rounded-full border-2 border-tinta bg-white text-sm font-extrabold cifra; }
+    .capsula:hover { @apply border-tierra text-tierra; }
+    .capsula .conteo { @apply grid min-w-8 h-8 place-items-center rounded-[4px] bg-agua px-1.5 text-sm font-extrabold cifra; }
     .capsula[aria-current] { @apply bg-tierra border-tierra text-white; }
-    .capsula[aria-current] .conteo { @apply border-white bg-sol text-tinta; }
+    .capsula[aria-current] .conteo { @apply bg-sol text-tierra-oscura; }
     .capsula-quitar { @apply pr-3; }
 
-    /* ---- Campos: al enfocarlos, el talón amarillo marca dónde se escribe ---- */
+    /* ---- Campos ---- */
     .etiqueta { @apply mb-1.5 block text-[0.9375rem] font-bold text-tinta; }
     .campo {
-        @apply block w-full min-h-12 rounded-[2px] border-[1.5px] border-[#b5beb8] bg-white px-4 text-base text-tinta
+        @apply block w-full min-h-12 rounded-[6px] border-2 border-linea bg-white px-4 text-base text-tinta
                placeholder:text-tinta-suave/80;
-        transition: border-color 0.15s, box-shadow 0.15s;
+        transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .campo:focus { @apply border-tierra outline-none; box-shadow: inset 6px 0 0 var(--color-sol), 0 0 0 3px rgb(11 74 59 / 0.18); padding-left: 1.4rem; }
+    .campo:focus { @apply border-tierra outline-none; box-shadow: 0 0 0 4px rgb(13 81 146 / 0.15); }
     textarea.campo { @apply py-3; }
-    select.campo { @apply appearance-none pr-10; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2310241d' stroke-width='2.2' stroke-linecap='square'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E") no-repeat right 1rem center; }
-    .campo.is-invalid, .was-validated .campo:invalid { @apply border-coral; box-shadow: 0 0 0 3px rgb(214 58 44 / 0.18); }
+    select.campo { @apply appearance-none pr-10; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%230d5192' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E") no-repeat right 1rem center; }
+    .campo.is-invalid, .was-validated .campo:invalid { @apply border-coral; box-shadow: 0 0 0 4px rgb(214 58 44 / 0.15); }
     .campo.is-valid { @apply border-sabana; }
     .error-campo { @apply mt-1.5 hidden text-sm font-semibold text-coral-tinta; }
     .campo.is-invalid ~ .error-campo, .was-validated .campo:invalid ~ .error-campo,
     .is-invalid ~ .error-campo, .grupo-invalido .error-campo { @apply block; }
     .ayuda { @apply mt-1.5 text-sm text-tinta-suave; }
     .grupo-campo { @apply flex items-stretch; }
-    .grupo-campo > .unidad { @apply grid place-items-center whitespace-nowrap border-[1.5px] border-[#b5beb8] bg-agua-honda px-4 font-rotulo font-bold uppercase text-tinta-suave; }
-    .grupo-campo > .unidad:first-child { @apply rounded-l-[2px] border-r-0; }
-    .grupo-campo > .unidad:last-child { @apply rounded-r-[2px] border-l-0; }
+    .grupo-campo > .unidad { @apply grid place-items-center whitespace-nowrap border-2 border-linea bg-agua-honda px-4 font-bold text-tinta-suave; }
+    .grupo-campo > .unidad:first-child { @apply rounded-l-[6px] border-r-0; }
+    .grupo-campo > .unidad:last-child { @apply rounded-r-[6px] border-l-0; }
     .grupo-campo > .campo:not(:first-child) { @apply rounded-l-none; }
     .grupo-campo > .campo:not(:last-child) { @apply rounded-r-none; }
 
-    /* ---- Paneles de carrocería: rectos, con regla de 1 px ---- */
+    /* ---- Paneles ---- */
     .lobulo { @apply rounded-lobulo border border-linea bg-white; }
     .lobulo-tierra { @apply rounded-lobulo bg-tierra text-white; }
-    .panel-tapa { @apply relative overflow-hidden; }
-    .panel-tapa::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 0.4rem;
-        background: linear-gradient(to bottom, var(--color-tierra) 0 28%, #fff 28% 38%, var(--color-sol) 38% 62%, #fff 62% 72%, var(--color-tierra) 72% 100%); }
+    /* Tarjeta que se eleva al pasar el cursor */
+    .tarjeta-viva { transition: transform 0.35s var(--ease-salida), box-shadow 0.35s var(--ease-salida), border-color 0.2s; }
+    .tarjeta-viva:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -22px rgb(5 43 112 / 0.45); border-color: var(--color-tierra); }
 
-    /* ---- Estados: placas rectas de color plano ---- */
-    .estado { @apply inline-flex items-center gap-1.5 rounded-[2px] px-2.5 py-1 font-rotulo text-[0.875rem] font-bold uppercase tracking-[0.04em] leading-tight whitespace-nowrap; }
-    .estado::before { content: ""; @apply size-2 bg-current; }
-    .estado-disponible, .estado-confirmado, .estado-convertida, .estado-activo { @apply bg-sabana-clara text-tierra; }
+    /* ---- Estados ---- */
+    .estado { @apply inline-flex items-center gap-1.5 rounded-[4px] px-2.5 py-1 text-[0.8125rem] font-bold uppercase tracking-[0.03em] leading-tight whitespace-nowrap; }
+    .estado::before { content: ""; @apply size-2 rounded-full bg-current; }
+    .estado-disponible, .estado-confirmado, .estado-convertida, .estado-activo { @apply bg-sabana-clara text-[#14613a]; }
     .estado-bajo { @apply bg-sol-clara text-[#5f4400]; }
     .estado-agotado, .estado-anulado, .estado-rechazada, .estado-inactivo { @apply bg-coral-clara text-coral-tinta; }
     .estado-pendiente { @apply bg-lila-clara text-[#4c2a7a]; }
     .estado-info { @apply bg-laguna-clara text-laguna-tinta; }
 
     /* ---- Avisos ---- */
-    .aviso { @apply flex gap-3 rounded-[3px] px-4 py-3 text-[0.9375rem]; }
-    .aviso-exito { @apply bg-sabana-clara text-tierra-oscura; }
+    .aviso { @apply flex gap-3 rounded-[6px] px-4 py-3 text-[0.9375rem]; }
+    .aviso-exito { @apply bg-sabana-clara text-[#0f4a2b]; }
     .aviso-error { @apply bg-coral-clara text-[#6e1a10]; }
     .aviso-info { @apply bg-laguna-clara text-[#0f3a61]; }
     .aviso-atencion { @apply bg-sol-clara text-[#4a3500]; }
 
-    /* ---- Tablas del personal: densas, cifras alineadas, reglas a 1 px ---- */
+    /* ---- Tablas del personal ---- */
     .tabla { @apply w-full border-collapse text-[0.9375rem]; }
-    .tabla th { @apply border-b-2 border-tinta px-3 py-2.5 text-left font-rotulo text-[0.8125rem] font-bold uppercase tracking-[0.08em] text-tinta-suave; }
+    .tabla th { @apply border-b-2 border-tierra px-3 py-2.5 text-left text-xs font-extrabold uppercase tracking-[0.08em] text-tierra-oscura; }
     .tabla td { @apply border-b border-linea px-3 py-3 align-middle; }
     .tabla tbody tr { transition: background-color 0.15s; }
     .tabla tbody tr:hover { @apply bg-agua; }
@@ -201,12 +191,11 @@
 
     /* ---- Paginación ---- */
     .paginas { @apply flex flex-wrap items-center gap-1.5; }
-    .paginas a, .paginas span { @apply grid min-w-11 h-11 place-items-center rounded-[2px] px-3 font-rotulo text-base font-bold cifra; }
-    .paginas a { @apply bg-white border border-linea hover:border-tierra; }
+    .paginas a, .paginas span { @apply grid min-w-11 h-11 place-items-center rounded-[6px] px-3 font-bold cifra; }
+    .paginas a { @apply bg-white border-2 border-linea hover:border-tierra; }
     .paginas [aria-current] { @apply bg-tierra text-white; }
     .paginas .inactiva { @apply text-tinta-suave/60; }
 
-    /* Compatibilidad: la forma de lóbulo ya no existe; la imagen queda recta */
     .img-lobulo { clip-path: none; }
 }
 
@@ -214,6 +203,27 @@
 @utility cifra {
     font-variant-numeric: tabular-nums lining-nums;
 }
+
+/* ================= Movimiento =================
+ * Con JavaScript, lo marcado con data-revelar entra subiendo al aparecer en pantalla; sin JavaScript
+ * (o con «reducir movimiento») todo se ve desde el principio.
+ */
+@keyframes subir { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+.js [data-entrar] { animation: subir 0.9s var(--ease-salida) both; animation-delay: calc(var(--orden, 0) * 120ms + 150ms); }
+.js [data-revelar] { opacity: 0; transform: translateY(32px); transition: opacity 0.8s var(--ease-salida), transform 0.8s var(--ease-salida); transition-delay: calc(var(--orden, 0) * 90ms); }
+.js [data-revelar].visible { opacity: 1; transform: none; }
+
+/* Portada: las fotos se relevan con un zoom lento (efecto Ken Burns) */
+.diapositiva { opacity: 0; transform: scale(1.12); transition: opacity 1.4s ease, transform 7s linear; }
+.diapositiva.activa { opacity: 1; transform: scale(1); }
+/* Barra de avance del punto activo */
+@keyframes avanzar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.punto-progreso { transform-origin: left center; animation: avanzar var(--duracion, 6s) linear forwards; }
+/* Punto que late en el sello y rueda del indicador «desliza» */
+@keyframes latir { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.8); } }
+.latido { animation: latir 2s ease-in-out infinite; }
+@keyframes bajar { 0% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(10px); opacity: 0; } 100% { transform: translateY(0); opacity: 0; } }
+.rueda-scroll { animation: bajar 1.8s ease-in-out infinite; }
 
 /* ---- Aviso flotante (agregar sin recargar) ---- */
 .toast {
@@ -226,7 +236,3 @@
 /* Spinner de los botones en espera */
 .girando { width: 1em; height: 1em; border-radius: 999px; border: 2.5px solid currentColor; border-right-color: transparent; animation: girar 0.7s linear infinite; }
 @keyframes girar { to { transform: rotate(360deg); } }
-
-/* La franja de la portada entra una sola vez, de arriba hacia abajo, como la calcomanía al aplicarse */
-@keyframes calcar { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
-.calcar { animation: calcar 0.9s var(--ease-salida) both; }

@@ -504,3 +504,27 @@ Los textos están en las listas `$hitos`, `$pilares` y `$cifras` al inicio de la
 - **Tablero**: accesos rápidos. **Reportes**: períodos de un toque (hoy, semana, mes, mes pasado, año).
 
 **Pruebas:** `tests/Feature/PortalCompletoTest.php` (12 casos). Total al 27/10/2026: **111 pruebas, 459 verificaciones**, todas aprobadas.
+
+## 15. Estilo «Azul de campo» (27/10/2026)
+
+A pedido de la usuaria, el portal toma el estilo y las animaciones de cicmelinst.com, con los colores de Marchesan (es.marchesan.com.br). El verde del logo Rialto queda como acento de marca. Las reglas del diseño están en `DESIGN.md`.
+
+- **Colores:**
+  - azul principal `#0D5192`, azul profundo `#052B70` y azul noche `#031C46`;
+  - amarillo `#FFD300` para la acción principal;
+  - verde Rialto `#0B4A3B` solo en el logo y el sello «desde 1963».
+- **Letra:** Raleway variable. Los titulares van en mayúsculas, con una palabra resaltada y un subrayado amarillo.
+- **Portada:**
+  - cinco fotos a pantalla completa que se relevan cada 6 s con un zoom lento: la fachada del Edificio Campagna y cuatro fotos de campo;
+  - arcos azules, cifras que cuentan e indicador «Desliza»;
+  - la tasa del día aparece junto a «Los más pedidos».
+- **Movimiento:**
+  - las secciones entran subiendo al desplazarse (`data-revelar`) y las cifras cuentan (`data-contar`);
+  - con «reducir movimiento» activado, todo se muestra de una vez y la portada no rota.
+- **Fotos:**
+  - están en `public/img/portada/`: la fachada y el equipo, enviados por la empresa, y las fotos de campo de Unsplash;
+  - los créditos de las fotos de campo están en `public/img/portada/CREDITOS.txt`.
+- **Nuestra historia:** la fachada de la sede junto al resumen, y la foto del equipo junto a los pilares.
+- **Gestión:** el mismo azul y amarillo, sin fotos ni animaciones de entrada. Los gráficos y los PDF también pasaron al azul.
+
+**Pruebas:** 111 pruebas, 460 verificaciones, todas aprobadas.

@@ -5,17 +5,17 @@
 <title>{{ $cotizacion->codigo }}</title>
 {{-- DomPDF solo entiende CSS 2.1 básico: sin flexbox ni variables CSS --}}
 <style>
-    body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #1d211c; }
-    .encabezado { border-bottom: 3px solid #0b4a3b; padding-bottom: 8px; margin-bottom: 14px; }
-    .marca { font-size: 22px; font-weight: bold; color: #0b4a3b; }
-    .muted { color: #545b52; }
+    body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #0f1b2d; }
+    .encabezado { border-bottom: 3px solid #0d5192; padding-bottom: 8px; margin-bottom: 14px; }
+    .marca { font-size: 22px; font-weight: bold; color: #0d5192; }
+    .muted { color: #4a5668; }
     table { width: 100%; border-collapse: collapse; }
-    th { background: #0b4a3b; color: #fff; text-align: left; padding: 6px; }
-    td { border-bottom: 1px solid #d6d1c2; padding: 6px; }
+    th { background: #0d5192; color: #fff; text-align: left; padding: 6px; }
+    td { border-bottom: 1px solid #d3dbe5; padding: 6px; }
     .der { text-align: right; }
     .totales { width: 45%; margin-left: 55%; margin-top: 12px; }
     .totales td { border: none; padding: 3px 6px; }
-    .total { font-size: 14px; font-weight: bold; border-top: 2px solid #1d211c !important; }
+    .total { font-size: 14px; font-weight: bold; border-top: 2px solid #0f1b2d !important; }
 </style>
 </head>
 <body>

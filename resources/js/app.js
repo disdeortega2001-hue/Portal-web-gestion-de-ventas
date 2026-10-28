@@ -114,5 +114,51 @@ window.addEventListener('pageshow', (e) => {
     if (e.persisted) document.querySelectorAll('[aria-busy="true"]').forEach(desbloquear);
 });
 
+/*
+ * Movimiento al desplazarse: lo marcado con data-revelar entra subiendo la primera vez que aparece,
+ * y los números con data-contar cuentan desde cero. Sin IntersectionObserver o con «reducir movimiento»
+ * todo se muestra de una vez (la clase .js del <html> es la que oculta al inicio).
+ */
+const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window);
+
+function contar(el) {
+    const final = parseFloat(el.dataset.contar);
+    if (Number.isNaN(final) || sinMovimiento) return;
+    const inicio = performance.now(), duracion = 1400;
+    const paso = (t) => {
+        const avance = Math.min(1, (t - inicio) / duracion);
+        el.textContent = Math.round(final * (1 - Math.pow(1 - avance, 3))).toLocaleString('es-VE');
+        if (avance < 1) requestAnimationFrame(paso);
+    };
+    requestAnimationFrame(paso);
+}
+
+if (sinMovimiento) {
+    document.querySelectorAll('[data-revelar]').forEach((el) => el.classList.add('visible'));
+} else {
+    const observador = new IntersectionObserver((entradas) => {
+        entradas.forEach((entrada) => {
+            if (!entrada.isIntersecting) return;
+            entrada.target.classList.add('visible');
+            entrada.target.querySelectorAll('[data-contar]').forEach(contar);
+            if (entrada.target.matches('[data-contar]')) contar(entrada.target);
+            observador.unobserve(entrada.target);
+        });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('[data-revelar], [data-contar]').forEach((el) => observador.observe(el));
+}
+
+// Portada: las fotos se relevan solas cada 6 s con zoom lento; los puntos llevan la barra de avance
+Alpine.data('portada', (total, duracion = 6000) => ({
+    actual: 0, total, duracion, temporizador: null,
+    init() {
+        if (sinMovimiento || total < 2) return;
+        this.programar();
+        document.addEventListener('visibilitychange', () => (document.hidden ? clearTimeout(this.temporizador) : this.programar()));
+    },
+    programar() { clearTimeout(this.temporizador); this.temporizador = setTimeout(() => this.ir(this.actual + 1), this.duracion); },
+    ir(i) { this.actual = (i + this.total) % this.total; if (!sinMovimiento) this.programar(); },
+}));
+
 window.Alpine = Alpine;
 Alpine.start();

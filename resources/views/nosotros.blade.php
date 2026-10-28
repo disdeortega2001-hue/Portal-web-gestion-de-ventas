@@ -39,7 +39,7 @@
         @foreach($cifras as [$valor, $extra, $etiqueta])
             <div class="border-b border-r border-white/20 px-4 py-4">
                 <dt class="sr-only">{{ $etiqueta }}</dt>
-                <dd class="titular cifra text-5xl">{{ $valor }}<span class="text-sol">{{ $extra }}</span></dd>
+                <dd class="titular cifra text-5xl">@if(is_int($valor))<span data-contar="{{ $valor }}">{{ $valor }}</span>@else{{ $valor }}@endif<span class="text-sol">{{ $extra }}</span></dd>
                 <dd class="mt-1.5 text-sm font-semibold text-white/75">{{ $etiqueta }}</dd>
             </div>
         @endforeach
@@ -47,13 +47,16 @@
 @endsection
 
 @section('contenido')
-{{-- Resumen: quiénes somos, en dos frases --}}
-<section aria-labelledby="t-historia" class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-end lg:gap-16">
-    <div>
-        <h2 id="t-historia" class="titular text-4xl sm:text-5xl">Una empresa familiar del llano guariqueño</h2>
-        <div class="franja mt-5 max-w-xs" aria-hidden="true"></div>
+{{-- Resumen: quiénes somos, en dos frases, junto a la fachada de la sede --}}
+<section aria-labelledby="t-historia" class="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
+    <figure class="relative" data-revelar>
+        <img src="{{ asset('img/portada/sede-fachada.jpg') }}" alt="Fachada del Edificio Campagna, sede de Inversiones Rialto 7 en Valle de la Pascua" width="1600" height="1000" class="aspect-[16/10] w-full rounded-[10px] object-cover" loading="lazy">
+        <figcaption class="absolute -bottom-5 left-5 rounded-[8px] bg-tierra-oscura px-5 py-3 text-sm font-bold text-white shadow-[0_18px_40px_-20px_rgb(5_43_112/0.6)]">Edificio Campagna · Valle de la Pascua</figcaption>
+    </figure>
+    <div data-revelar style="--orden:1">
+        <h2 id="t-historia" class="titular subrayado text-4xl text-tierra-oscura sm:text-5xl">Una empresa <em>familiar</em> del llano guariqueño</h2>
+        <p class="mt-6 text-lg text-tinta-suave">Empezamos en 1963 como Inversiones Campagna. Hoy, como Inversiones Rialto 7 C.A., seguimos en manos de la familia fundadora y somos el único agente autorizado en Venezuela de cuatro marcas de maquinaria y repuestos.</p>
     </div>
-    <p class="text-lg text-tinta-suave">Empezamos en 1963 como Inversiones Campagna. Hoy, como Inversiones Rialto 7 C.A., seguimos en manos de la familia fundadora y somos el único agente autorizado en Venezuela de cuatro marcas de maquinaria y repuestos.</p>
 </section>
 
 {{-- Línea de vida: el año grande arriba, la pista de años y tarjetas que se deslizan --}}
@@ -78,8 +81,8 @@
             }
          }"
          @keydown.arrow-right.prevent="ir(i + 1)" @keydown.arrow-left.prevent="ir(i - 1)">
-    <div class="flex flex-wrap items-end justify-between gap-6">
-        <h2 id="t-trayectoria" class="titular text-4xl sm:text-5xl">Nuestra trayectoria</h2>
+    <div class="flex flex-wrap items-end justify-between gap-6" data-revelar>
+        <h2 id="t-trayectoria" class="titular subrayado text-4xl text-tierra-oscura sm:text-5xl">Nuestra trayectoria</h2>
         <div class="flex items-center gap-3">
             <div class="lobulo panel-tapa px-5 pb-3 pt-5" aria-hidden="true">
                 <p class="titular cifra text-5xl text-tierra"><span x-text="@js(array_column($hitos, 0))[i]">{{ $hitos[0][0] }}</span> <span class="text-2xl text-tinta-suave">/ {{ now()->year }}</span></p>
@@ -136,30 +139,41 @@
     </div>
 </section>
 
-{{-- Pilares --}}
-<section aria-labelledby="t-pilares" class="mt-16 lg:mt-20">
-    <h2 id="t-pilares" class="titular text-4xl sm:text-5xl">Lo que nos define</h2>
-    <ul class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-        @foreach($pilares as $k => [$icono, $titulo, $texto])
-            <li @class(['panel-tapa flex flex-col p-7 pt-9', 'lobulo-tierra' => $k === 0, 'lobulo' => $k !== 0])>
-                <span class="ruedo size-14"><x-icono :nombre="$icono" class="size-6 text-tierra" /></span>
-                <h3 class="mt-5 font-rotulo text-2xl font-extrabold uppercase leading-tight">{{ $titulo }}</h3>
-                <p @class(['mt-2', 'text-white/80' => $k === 0, 'text-tinta-suave' => $k !== 0])>{{ $texto }}</p>
-            </li>
-        @endforeach
-    </ul>
+{{-- Pilares, junto a la foto del equipo --}}
+<section aria-labelledby="t-pilares" class="mt-16 grid grid-cols-1 items-center gap-10 lg:mt-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
+    <div>
+        <h2 id="t-pilares" class="titular subrayado text-4xl text-tierra-oscura sm:text-5xl" data-revelar>Lo que nos <em>define</em></h2>
+        <ul class="mt-8 grid gap-4">
+            @foreach($pilares as $k => [$icono, $titulo, $texto])
+                <li class="lobulo tarjeta-viva flex items-start gap-5 p-5 sm:p-6" data-revelar style="--orden:{{ $k }}">
+                    <span class="ruedo size-14 shrink-0"><x-icono :nombre="$icono" class="size-6 text-tierra" /></span>
+                    <div>
+                        <h3 class="text-xl font-black uppercase leading-tight">{{ $titulo }}</h3>
+                        <p class="mt-1 text-tinta-suave">{{ $texto }}</p>
+                    </div>
+                </li>
+            @endforeach
+        </ul>
+    </div>
+    <figure class="relative" data-revelar style="--orden:1">
+        <img src="{{ asset('img/portada/sede-equipo.jpg') }}" alt="El equipo de Inversiones Rialto 7 celebrando el 63 aniversario en la tienda" width="1000" height="750" class="w-full rounded-[10px] object-cover" loading="lazy">
+        <figcaption class="absolute -bottom-6 right-6 rounded-[8px] bg-sol px-6 py-4 text-tierra-oscura shadow-[0_18px_40px_-20px_rgb(5_43_112/0.6)]">
+            <span class="block text-4xl font-black leading-none cifra"><span data-contar="{{ $anios }}">{{ $anios }}</span></span>
+            <span class="text-xs font-extrabold uppercase tracking-[0.08em]">años en la misma familia</span>
+        </figcaption>
+    </figure>
 </section>
 
 {{-- Marcas de representación exclusiva --}}
-<section aria-labelledby="t-marcas" class="mt-16 lg:mt-20">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <h2 id="t-marcas" class="titular text-4xl sm:text-5xl">Agente autorizado exclusivo en Venezuela</h2>
+<section aria-labelledby="t-marcas" class="mt-20 lg:mt-24">
+    <div class="flex flex-wrap items-end justify-between gap-4" data-revelar>
+        <h2 id="t-marcas" class="titular subrayado text-4xl text-tierra-oscura sm:text-5xl">Agente autorizado <em>exclusivo</em> en Venezuela</h2>
         <p class="max-w-sm text-tinta-suave">Repuestos y equipos originales, con el respaldo directo del fabricante.</p>
     </div>
 
     <ul class="mt-8 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         @foreach($marcas as $marca)
-            <li class="lobulo panel-tapa flex flex-col overflow-hidden p-3.5 pt-6 sm:p-5 sm:pt-7">
+            <li class="lobulo tarjeta-viva flex flex-col overflow-hidden p-3.5 sm:p-5" data-revelar style="--orden:{{ $loop->index }}">
                 <div class="overflow-hidden rounded-[3px] ring-1 ring-tinta/10">
                     <img src="{{ asset($marca['logo']) }}" alt="Logo de {{ $marca['nombre'] }}"
                          @class(['h-20 w-full sm:h-28', 'bg-[#173C8A] object-contain' => $marca['nombre'] === 'Marchesan Tatu', 'bg-white object-cover' => $marca['nombre'] !== 'Marchesan Tatu'])>
@@ -178,12 +192,13 @@
 </section>
 
 {{-- Dónde estamos --}}
-<section aria-labelledby="t-visitanos" class="lobulo-tierra panel-tapa mt-16 flex flex-col gap-6 p-7 pt-10 sm:flex-row sm:items-center sm:justify-between lg:mt-20 lg:p-9">
-    <div>
+<section aria-labelledby="t-visitanos" class="sobre-azul relative mt-16 flex flex-col gap-6 overflow-hidden rounded-[10px] bg-tierra-oscura p-7 text-white sm:flex-row sm:items-center sm:justify-between lg:mt-20 lg:p-10" data-revelar>
+    <x-arcos class="pointer-events-none absolute inset-y-0 right-0 h-full w-[28rem]" />
+    <div class="relative">
         <h2 id="t-visitanos" class="titular text-3xl">Visítanos o consulta desde tu finca</h2>
         <p class="mt-2 flex items-start gap-1.5 text-white/80"><x-icono nombre="ubicacion" class="mt-0.5 size-5 shrink-0" /> Av. Las Industrias, Edificio Campagna, Valle de la Pascua, Guárico · <span class="whitespace-nowrap">RIF J-50668510-8</span></p>
     </div>
-    <div class="flex shrink-0 flex-wrap gap-2">
+    <div class="relative flex shrink-0 flex-wrap gap-2">
         @if($wa = \App\Support\Contacto::whatsapp('Hola, vi el portal de Rialto 7 y quiero hacer una consulta.'))
             <a href="{{ $wa }}" class="btn btn-linea-clara" target="_blank" rel="noopener"><x-icono nombre="whatsapp" /> Escríbenos</a>
         @endif

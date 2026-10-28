@@ -1,0 +1,6 @@
+Fotos de la portada: Unsplash (https://unsplash.com/license), uso comercial libre, sin atribución obligatoria.
+Se reemplazarán por fotos propias de la sede cuando la empresa las entregue.
+campo-1: https://unsplash.com/photos/_dnc3j1oVlk  (tractor sembrando, surcos al atardecer)
+campo-2: https://unsplash.com/photos/-MRR3ZV5XQw  (tractor en campo arado)
+campo-3: https://unsplash.com/photos/oNr54SBGEX4  (campo verde visto desde el aire)
+campo-4: https://unsplash.com/photos/_G10bOt74J4  (tractor al atardecer)

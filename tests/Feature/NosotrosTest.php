@@ -33,7 +33,7 @@ class NosotrosTest extends TestCase
 
         $this->get(route('nosotros'))
             ->assertOk()
-            ->assertSee((now()->year - 1963) . '<span class="text-sol">+</span>', false)
+            ->assertSee('data-contar="' . (now()->year - 1963) . '"', false)
             ->assertSeeInOrder(['Fundación', 'Importación desde Brasil', 'Agente autorizado exclusivo', 'Ahora somos Rialto 7', 'Catálogo en línea'])
             ->assertSeeInOrder(['Confianza', 'Atención cercana', 'Conocimiento de cada pieza'])
             ->assertSee('Ver 2 productos')

@@ -31,13 +31,14 @@ class PortalCompletoTest extends TestCase
 
     /* ---------- Sitio público ---------- */
 
-    public function test_la_portada_muestra_la_pizarra_las_marcas_y_los_mas_pedidos(): void
+    public function test_la_portada_muestra_la_tasa_las_marcas_y_los_mas_pedidos(): void
     {
         $this->crearProducto(['codigo_fabrica' => 'CC55', 'nombre' => 'Cruceta 30 x 106', 'stock' => 8]);
 
         $this->get('/')->assertOk()
-            ->assertSee('Pizarra del día')
+            ->assertSee('Tasa del día')
             ->assertSee('Bs. 36,50')
+            ->assertSee('img/portada/sede-fachada.jpg', false)
             ->assertSeeInOrder(['Marchesan Tatu', 'Colombo Aemco', 'Vicon', 'Lumagi'])
             ->assertSee('Los más pedidos')
             ->assertSee('CC55')

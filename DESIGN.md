@@ -1,21 +1,22 @@
 ---
 name: Rialto 7
-description: Portal de ventas de repuestos y maquinaria agrícola, vestido con la librea de fábrica de Inversiones Rialto 7.
+description: Portal de ventas de repuestos y maquinaria agrícola de Inversiones Rialto 7, en el azul y amarillo de las marcas que representa.
 colors:
+  azul-principal: "#0d5192"
+  azul-profundo: "#052b70"
+  azul-noche: "#031c46"
+  azul-claro: "#dce8f5"
+  amarillo: "#ffd300"
+  amarillo-claro: "#fff4b3"
   verde-rialto: "#0b4a3b"
-  verde-rialto-oscuro: "#06291f"
-  campo-verde-claro: "#d6e6dc"
-  amarillo-franja: "#f5b800"
-  amarillo-franja-pulsado: "#ffc71f"
-  amarillo-claro: "#fff0b8"
-  gris-taller: "#f2f3f0"
-  gris-taller-hondo: "#e4e7e2"
-  blanco-competencia: "#ffffff"
-  tinta: "#10241d"
-  tinta-suave: "#4b5852"
-  regla: "#ccd3cd"
-  borde-campo: "#b5beb8"
-  verde-disponible: "#2f9e63"
+  verde-rialto-claro: "#dcebe4"
+  fondo: "#f4f6f9"
+  fondo-hondo: "#e7ecf2"
+  blanco: "#ffffff"
+  tinta: "#0f1b2d"
+  tinta-suave: "#4a5668"
+  linea: "#d3dbe5"
+  verde-disponible: "#2e9b5f"
   verde-disponible-claro: "#dcf1e3"
   rojo-senal: "#d63a2c"
   rojo-senal-claro: "#fbe3e0"
@@ -25,182 +26,132 @@ colors:
   lila-pendiente-claro: "#efe8fa"
 typography:
   display:
-    fontFamily: "Barlow Condensed, Barlow, sans-serif"
-    fontSize: "5.5rem"
-    fontWeight: 800
-    lineHeight: 0.92
-    letterSpacing: "-0.005em"
+    fontFamily: "Raleway Variable, system-ui, sans-serif"
+    fontSize: "4.5rem"
+    fontWeight: 900
+    lineHeight: 1.02
+    letterSpacing: "-0.01em"
+    textTransform: uppercase
   headline:
-    fontFamily: "Barlow Condensed, Barlow, sans-serif"
+    fontFamily: "Raleway Variable, system-ui, sans-serif"
     fontSize: "3rem"
-    fontWeight: 800
-    lineHeight: 0.92
+    fontWeight: 900
+    lineHeight: 1.02
+    textTransform: uppercase
   title:
-    fontFamily: "Barlow Condensed, Barlow, sans-serif"
-    fontSize: "1.5rem"
-    fontWeight: 800
-    lineHeight: 1.1
+    fontFamily: "Raleway Variable, system-ui, sans-serif"
+    fontSize: "1.25rem"
+    fontWeight: 900
+    lineHeight: 1.15
+    textTransform: uppercase
   body:
-    fontFamily: "Barlow, system-ui, sans-serif"
+    fontFamily: "Raleway Variable, system-ui, sans-serif"
     fontSize: "1.0625rem"
     fontWeight: 400
-    lineHeight: 1.5
+    lineHeight: 1.55
   label:
-    fontFamily: "Barlow Condensed, Barlow, sans-serif"
-    fontSize: "1.0625rem"
-    fontWeight: 700
-    letterSpacing: "0.04em"
-  numeral:
-    fontFamily: "Barlow Condensed, Barlow, sans-serif"
-    fontSize: "1.5rem"
+    fontFamily: "Raleway Variable, system-ui, sans-serif"
+    fontSize: "0.8125rem"
     fontWeight: 800
-    fontFeature: "tnum, lnum"
+    letterSpacing: "0.08em"
+    textTransform: uppercase
+  numeral:
+    fontFamily: "Raleway Variable, system-ui, sans-serif"
+    fontSize: "2.25rem"
+    fontWeight: 900
+    fontFeature: "lnum, tnum"
 rounded:
-  control: "2px"
-  panel: "3px"
-  ruedo: "9999px"
-spacing:
-  gutter-mobile: "16px"
-  gutter-tablet: "24px"
-  gutter-desktop: "32px"
-  section: "80px"
-components:
-  button-primary:
-    backgroundColor: "{colors.amarillo-franja}"
-    textColor: "{colors.tinta}"
-    typography: "{typography.label}"
-    rounded: "{rounded.control}"
-    padding: "0 20px 0 30px"
-    height: "48px"
-  button-primary-hover:
-    backgroundColor: "{colors.amarillo-franja-pulsado}"
-  button-carroceria:
-    backgroundColor: "{colors.verde-rialto}"
-    textColor: "{colors.blanco-competencia}"
-    typography: "{typography.label}"
-    rounded: "{rounded.control}"
-    height: "48px"
-  button-linea:
-    backgroundColor: "{colors.blanco-competencia}"
-    textColor: "{colors.tinta}"
-    typography: "{typography.label}"
-    rounded: "{rounded.control}"
-    height: "48px"
-  input:
-    backgroundColor: "{colors.blanco-competencia}"
-    textColor: "{colors.tinta}"
-    typography: "{typography.body}"
-    rounded: "{rounded.control}"
-    height: "48px"
-  panel:
-    backgroundColor: "{colors.blanco-competencia}"
-    rounded: "{rounded.panel}"
-  panel-carroceria:
-    backgroundColor: "{colors.verde-rialto}"
-    textColor: "{colors.blanco-competencia}"
-    rounded: "{rounded.panel}"
-  ruedo:
-    backgroundColor: "{colors.blanco-competencia}"
-    textColor: "{colors.tinta}"
-    typography: "{typography.numeral}"
-    rounded: "{rounded.ruedo}"
-    size: "56px"
+  control: "6px"
+  panel: "8px"
+  photo: "10px"
+  pill: "999px"
 ---
 
 # Design System: Rialto 7
 
 ## Overview
 
-**Creative North Star: "La librea de fábrica"**
+**Azul de campo.** El portal viste los colores de las marcas que Rialto 7 representa en Venezuela: el azul profundo y el amarillo de Marchesan Tatu. El verde del logo Rialto queda como acento de marca. La portada abre con fotos de campo y de la sede a sangre, que se relevan solas con un zoom lento. Encima van arcos azules translúcidos y titulares en mayúsculas con una palabra resaltada en amarillo. Al bajar, cada bloque entra subiendo con suavidad y las cifras cuentan hasta su valor, en la línea de cicmelinst.com.
 
-El portal viste los colores de Inversiones Rialto 7 como un implemento agrícola viste los de su fabricante: una carrocería verde, una franja verde-blanco-amarillo que recorre las piezas, números grandes en círculos blancos y paneles rectos de chapa. Es un taller ordenado, no una tienda gris: el productor entiende de un vistazo si hay la pieza (el número del círculo), cuánto cuesta y cómo cotizarla.
-
-La portada (modo Persuadir) lleva la franja vertical con el círculo del 7, la pizarra del día y la fila de marcas como la fila de patrocinadores. El catálogo, la cotización y el panel del personal (modo Operar) usan la misma gramática con más densidad y menos gesto: reglas a 1 px, cifras tabulares y la franja solo como tapa de los paneles.
-
-Se rechazó expresamente: las formas onduladas («costas») y las cápsulas redondeadas del diseño anterior.
-
-**Key Characteristics:**
-- Color plano a página completa: carrocería verde, fondo gris de taller, blanco de competencia.
-- La franja verde-blanco-amarillo como firma: cierra la barra superior, tapa los paneles y marca el talón de los botones.
-- Rótulos en Barlow Condensed extranegrita en mayúsculas; texto corrido en Barlow.
-- Esquinas casi rectas (2–3 px); el único círculo es el ruedo numerado.
-- Sin sombras: la profundidad la dan los paneles, las reglas y el color.
+Hay dos mundos que comparten tokens. El público (portada, catálogo, historia, contacto) es expresivo: fotos, arcos y movimiento. El de gestión (tablero, pedidos, inventario, reportes) es sobrio: el mismo azul y amarillo, sin fotos ni animaciones de entrada, pensado para escanear.
 
 ## Colors
 
-Una carrocería verde con una franja amarilla, sobre el gris claro de un taller; los colores de señal solo informan estados.
-
 ### Primary
-- **Verde Rialto** (#0b4a3b): el verde del logo. Carrocería: cabeceras de página, riel del personal, pie, paneles verdes y botones secundarios llenos.
-- **Verde Rialto oscuro** (#06291f): pie de página y estado pulsado de la carrocería.
-- **Campo verde claro** (#d6e6dc): el campo de la librea (franja vertical de la portada, celda de la tasa, totales destacados).
+- **Azul principal** `#0d5192`: enlaces, títulos sobre claro, botón secundario, círculo de existencias, gráficos.
+- **Azul profundo** `#052b70`: cabeceras de página, secciones oscuras, titulares grandes.
+- **Azul noche** `#031c46`: pie de página y degradados sobre fotos.
 
 ### Secondary
-- **Amarillo franja** (#f5b800): la acción principal (botón «Mi cotización», «Agregar», «Crear pedido»), el paso actual, la pestaña activa del menú y la banda central de la franja.
+- **Amarillo** `#ffd300`: la acción principal (Agregar, Mi cotización), la palabra resaltada en titulares sobre azul, el subrayado de 5 px bajo los títulos y el foco del teclado.
+- **Verde Rialto** `#0b4a3b`: solo en el fondo del logo y en el sello «Valle de la Pascua desde 1963». No compite con el azul.
 
 ### Tertiary (señales)
-- **Verde disponible** (#2f9e63 / #dcf1e3): existencia y estados confirmados.
-- **Rojo señal** (#d63a2c / #fbe3e0 / #a2271b): agotado, error y acciones destructivas.
-- **Azul información** (#2f6fb0 / #deeaf6): avisos informativos y compatibilidad.
-- **Lila pendiente** (#efe8fa con texto #4c2a7a): cotizaciones y pedidos pendientes.
+- Verde disponible `#2e9b5f`, rojo señal `#d63a2c`, azul info `#2f6fb0` y lila pendiente: estados de existencia y de pedido. Siempre con su versión clara de fondo.
 
 ### Neutral
-- **Gris de taller** (#f2f3f0): fondo de todas las páginas.
-- **Gris de taller hondo** (#e4e7e2): campos de unidad, cajas de imagen vacías.
-- **Blanco de competencia** (#ffffff): paneles, barra superior, círculos numerados.
-- **Tinta** (#10241d) y **tinta suave** (#4b5852): texto principal y de apoyo.
-- **Regla** (#ccd3cd) y **borde de campo** (#b5beb8): líneas de 1 px y bordes de controles.
+- Fondo `#f4f6f9`, fondo hondo `#e7ecf2`, blanco para paneles, línea `#d3dbe5`.
+- Tinta `#0f1b2d` para el texto; tinta suave `#4a5668` para el texto de apoyo.
 
 ### Named Rules
-**La regla de la franja.** La franja siempre va en el mismo orden (verde, blanco, amarillo, blanco, verde) y con cortes netos; nunca como degradado ni como acento suelto de color.
-**La regla de la señal.** El rojo y el verde de estado solo marcan existencia, error o confirmación; nunca decoran.
+- **Un amarillo por vista.** El amarillo marca la acción principal; si todo es amarillo, nada lo es.
+- **El verde es firma, no interfaz.** Nunca en botones, enlaces ni gráficos.
 
 ## Typography
 
-**Display Font:** Barlow Condensed (autoalojada con @fontsource)
-**Body Font:** Barlow (autoalojada con @fontsource)
-
-**Character:** Una sola familia de raíz DIN, la de las placas de modelo y la señalética de carretera: la condensada rotula y numera, la normal se lee al sol.
+Raleway variable en todo el portal, con números de forma «lining» (Raleway trae números antiguos por defecto).
 
 ### Hierarchy
-- **Display** (800, 3.25–5.5rem, 0.92): titular de la portada y de las cabeceras de página, en mayúsculas.
-- **Headline** (800, 2.25–3rem, 0.92): títulos de sección.
-- **Title** (800, 1.5rem): títulos de panel, nombres de marca, pasos.
-- **Body** (400–600, 1.0625rem, 1.5): texto corrido a 65–75 caracteres por línea.
-- **Label** (700, 0.94–1.06rem, +0.04em, mayúsculas): botones, pestañas, navegación, encabezados de tabla.
-- **Numeral** (800, cifras tabulares): códigos de fábrica, precios, existencias y conteos.
+- **Titular** (`.titular`): peso 900, mayúsculas, interlineado 1.02. La palabra clave va en `<em>`: amarillo sobre azul, azul sobre claro.
+- **Subrayado** (`.subrayado`): barra amarilla de 5 px bajo el titular de cada sección.
+- **Cuerpo**: 17 px, interlineado 1.55, líneas de 60 a 75 caracteres.
+- **Etiquetas**: 13 px, peso 800, mayúsculas, espaciado 0.08em.
+- **Cifras**: peso 900 con números tabulares para precios, existencias y códigos.
 
 ### Named Rules
-**La regla del código.** El código de fábrica se escribe siempre en la condensada extranegrita, en verde Rialto y con cifras tabulares: es la verdad del producto.
+- No se usan rótulos pequeños encima de los titulares: el subrayado amarillo hace ese trabajo.
 
 ## Layout
 
-Contenedor de 1320 px centrado con medianiles de 16, 24 y 32 px (celular, tableta, escritorio). La portada ocupa el ancho completo y deja a la izquierda una franja vertical de librea de 96–112 px desde 1024 px. El catálogo usa una barra lateral de filtros de 16 rem en escritorio que en el celular se vuelve una hoja inferior. El panel del personal tiene un riel verde fijo de 16 rem con la franja vertical en su borde derecho; en el celular el riel se abre como menú. Ritmo de secciones: 56 px en el celular, 80 px en escritorio, con más espacio arriba de un título que debajo. Resolución mínima del personal: 1366 × 768.
+- Ancho máximo de 1320 px con márgenes de 16, 24 y 32 px.
+- Las secciones públicas alternan blanco, fondo claro y azul profundo, con 64 a 96 px de aire vertical.
+- La portada ocupa la pantalla completa en escritorio. En el celular, la foto lleva su propio recorte vertical.
+- En gestión, el riel lateral fijo y las tablas densas mandan.
 
 ## Elevation & Depth
 
-Plano por completo: no hay sombras de profundidad. La jerarquía se construye con paneles blancos sobre gris, paneles verdes de carrocería, reglas de 1 px y la franja de tapa. El único anillo es el foco: contorno amarillo de 3 px, y en los campos un talón amarillo interior de 6 px a la izquierda.
+- Paneles blancos con borde de línea. Al pasar el cursor, `.tarjeta-viva` sube 4 px y gana una sombra azul suave.
+- La cabecera gana sombra al desplazarse.
+- Las insignias sobre las fotos (años de trayectoria, nombre de la sede) flotan con una sombra azul difusa.
+- No hay sombras duras desplazadas.
 
 ## Shapes
 
-Esquinas de 2 px en controles y de 3 px en paneles: chapa cortada, no plástico redondeado. El círculo se reserva al ruedo numerado (existencia, pasos, conteos del menú y el 7 de la marca). Las imágenes de producto van rectas, contenidas sobre el gris, con mezcla multiplicar para que el fondo blanco de la foto desaparezca.
+- Controles con 6 px de radio y paneles con 8 px.
+- Fotos con 10 px de radio; las insignias y los estados son píldoras.
+- El círculo con borde azul (`.ruedo`) lleva la existencia sobre la foto del producto.
+- Los arcos (`<x-arcos>`) son dos curvas concéntricas translúcidas a la derecha de las secciones azules.
 
 ## Components
 
-- **Botón principal (amarillo franja):** panel recto con el talón de tres franjas a la izquierda (verde, blanco, verde), rótulo en mayúsculas y, cuando lleva flecha, un cuadro tinta pegado al borde derecho.
-- **Botón de carrocería (verde):** igual, con el talón amarillo.
-- **Botón de línea:** blanco con borde tinta de 1,5 px; al pasar el cursor se invierte a tinta.
-- **Campo:** blanco, borde #b5beb8; al enfocarlo aparece el talón amarillo interior y un halo verde suave.
-- **Placa de categoría:** rectangular con el conteo en un ruedo; activa, verde con el ruedo amarillo.
-- **Tarjeta de producto:** panel blanco con la franja de tapa, foto contenida sobre gris, ruedo con la existencia montado en la esquina de la foto, código grande, precio en USD y Bs.
-- **Pizarra:** celdas rectas con reglas de 1 px y números grandes; la tasa del día en el campo verde claro.
-- **Riel del personal:** verde, con el ítem activo en amarillo y los pendientes en ruedos.
+- **Botones:** `.btn-sol` (amarillo, acción principal), `.btn-tierra` (azul), `.btn-linea` (borde azul) y `.btn-linea-clara` (borde blanco sobre azul). Al pasar el cursor suben 2 px.
+- **Tarjeta de producto:**
+  - foto sobre fondo claro con el círculo de existencias;
+  - código de fábrica en azul, grande;
+  - precio en USD con su equivalente en bolívares;
+  - botón amarillo «Agregar».
+- **Portada (`portada`, Alpine):**
+  - cinco fotos que se relevan cada 6 s con zoom lento;
+  - puntos con barra de avance;
+  - se pausa cuando la pestaña está oculta.
+- **Revelado (`data-revelar`):** el bloque entra subiendo 32 px, escalonado con `--orden`.
+- **Contadores (`data-contar`):** cuentan hasta su valor al aparecer.
+- **Tasa del día:** la tasa va junto a «Los más pedidos», con el IVA y la fecha.
 
 ## Do's and Don'ts
 
-- **Do** usar la franja solo como banda completa (barra superior, tapa de panel, talón de botón, franja vertical).
-- **Do** mostrar la existencia como número grande en un ruedo y el estado con su placa de color.
-- **Do** escribir precios y códigos con cifras tabulares.
-- **Don't** volver a las costas onduladas, las manchas de fondo ni las cápsulas redondeadas.
-- **Don't** usar sombras, degradados decorativos ni vidrio esmerilado.
-- **Don't** poner etiquetas pequeñas en mayúsculas encima de los títulos: el título habla solo.
+- **Sí:** fotos reales de la sede y del equipo; fotos de campo con crédito en `public/img/portada/CREDITOS.txt`.
+- **Sí:** respetar «reducir movimiento». Sin animaciones, todo se muestra de una vez y la portada no rota.
+- **Sí:** el texto mínimo de 4.5:1 de contraste; el amarillo solo lleva texto azul profundo o tinta.
+- **No:** texto con degradado, rótulos encima de los titulares, iconos hechos con caracteres ni sombras duras.
+- **No:** usar el verde Rialto como color de interfaz.

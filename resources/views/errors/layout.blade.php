@@ -8,7 +8,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
-    <meta name="theme-color" content="#0b4a3b">
+    <meta name="theme-color" content="#0d5192">
     <title>@yield('titulo') · Inversiones Rialto 7</title>
     <link rel="icon" type="image/png" href="{{ asset('img/favicon.png') }}">
     @if(is_file(public_path('build/manifest.json')))@vite(['resources/css/app.css'])@endif

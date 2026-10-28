@@ -36,7 +36,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#0b4a3b">
+    <meta name="theme-color" content="#0d5192">
+    {{-- Con JavaScript, las secciones entran animadas; sin él, todo se ve desde el principio --}}
+    <script>document.documentElement.classList.add('js')</script>
     <title>@yield('titulo', 'Catálogo') · Inversiones Rialto 7</title>
     @include('partials.meta')
     {{-- El logo del sitio es blanco sobre transparente; la pestaña usa la versión con fondo verde --}}
@@ -47,14 +49,14 @@
 <a href="#contenido" class="btn btn-sol sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[70]">Saltar al contenido</a>
 
 @if($personal)
-    {{-- ======== Personal: riel verde a la izquierda, con la franja de la librea en su borde ======== --}}
+    {{-- ======== Personal: riel azul a la izquierda, con una línea amarilla en su borde ======== --}}
     <div x-data="{ abierto: false }" @keydown.escape.window="abierto = false">
         <header class="sticky top-0 z-40 flex h-16 items-center gap-3 bg-tierra px-4 text-white lg:hidden">
             <button type="button" class="grid size-11 place-items-center hover:bg-white/10" @click="abierto = true" aria-label="Abrir menú" aria-controls="riel" :aria-expanded="abierto">
                 <x-icono nombre="menu" class="size-6" />
             </button>
             <x-logo tamano="size-10" />
-            <span class="font-rotulo text-xl font-extrabold uppercase tracking-wide">Rialto 7 · Gestión</span>
+            <span class="text-lg font-black uppercase">Rialto 7 · Gestión</span>
         </header>
 
         <div x-show="abierto" x-cloak x-transition.opacity class="fixed inset-0 z-40 bg-tinta/50 lg:hidden" @click="abierto = false"></div>
@@ -64,8 +66,8 @@
              :class="abierto && 'translate-x-0'">
             <span class="franja-v pointer-events-none absolute inset-y-0 right-0" aria-hidden="true"></span>
             <div class="relative flex items-center gap-3 px-5 pb-4 pt-5">
-                <x-logo tamano="size-12" />
-                <div class="leading-tight"><div class="font-rotulo text-2xl font-extrabold uppercase">Rialto 7</div><div class="text-sm font-semibold text-white/75">Gestión de ventas</div></div>
+                <span class="grid size-12 place-items-center rounded-[6px] bg-rialto"><x-logo tamano="size-10" /></span>
+                <div class="leading-tight"><div class="text-2xl font-black uppercase">Rialto 7</div><div class="text-sm font-semibold text-white/75">Gestión de ventas</div></div>
                 <button type="button" class="ml-auto mr-3 grid size-10 place-items-center hover:bg-white/10 lg:hidden" @click="abierto = false" aria-label="Cerrar menú"><x-icono nombre="x" /></button>
             </div>
             <div class="relative flex-1 overflow-y-auto pb-4 pl-3 pr-6">
@@ -81,7 +83,7 @@
                     @endforeach
                 </ul>
                 @if($usuario->esAdministrador())
-                    <p class="mb-1.5 mt-6 px-3.5 font-rotulo text-sm font-bold uppercase tracking-[0.14em] text-sol">Administración</p>
+                    <p class="mb-1.5 mt-6 px-3.5 text-xs font-extrabold uppercase tracking-[0.14em] text-sol">Administración</p>
                     <ul class="space-y-0.5">
                         @foreach($menuAdmin as [$ruta, $patron, $icono, $texto])
                             @php($activo = request()->routeIs($patron))
@@ -101,21 +103,22 @@
         </nav>
     </div>
 @else
-    {{-- ======== Cliente: barra blanca de taller; la franja de la librea la cierra ======== --}}
+    {{-- ======== Cliente: barra blanca fija; el logo conserva su verde ======== --}}
     @php($enlacesPublicos = [['inicio', 'inicio', 'Inicio'], ['catalogo.index', 'catalogo.*', 'Catálogo'], ['nosotros', 'nosotros', 'Nuestra historia'], ['contacto', 'contacto', 'Contacto']])
-    <header x-data="{ menu: false }" @keydown.escape.window="menu = false" class="sticky top-0 z-40 bg-white">
+    <header x-data="{ menu: false, bajo: false }" @keydown.escape.window="menu = false" @scroll.window.throttle.100ms="bajo = window.scrollY > 8"
+            class="sticky top-0 z-40 bg-white transition-shadow duration-300" :class="bajo && 'shadow-[0_8px_24px_-16px_rgb(5_43_112/0.45)]'">
         <div class="mx-auto flex h-16 max-w-[1320px] items-center gap-3 px-4 sm:px-6 lg:h-[4.5rem] lg:gap-8 lg:px-8">
             <a href="{{ route('inicio') }}" class="flex items-center gap-2.5 no-underline" aria-label="Inversiones Rialto 7, ir al inicio">
-                <span class="grid size-11 place-items-center bg-tierra lg:size-12"><x-logo tamano="size-9 lg:size-10" /></span>
+                <span class="grid size-11 place-items-center rounded-[6px] bg-rialto lg:size-12"><x-logo tamano="size-9 lg:size-10" /></span>
                 <span class="leading-none">
-                    <span class="block font-rotulo text-[1.375rem] font-extrabold uppercase tracking-[0.02em] text-tinta lg:text-2xl">Rialto 7</span>
-                    <span class="hidden text-[0.8125rem] font-semibold text-tinta-suave sm:block">Repuestos y maquinaria agrícola</span>
+                    <span class="block text-[1.375rem] font-black uppercase leading-none text-tierra-oscura lg:text-2xl">Rialto 7</span>
+                    <span class="hidden whitespace-nowrap text-[0.8125rem] font-semibold text-tinta-suave xl:block">Repuestos y maquinaria agrícola</span>
                 </span>
             </a>
             <nav class="hidden items-stretch self-stretch md:flex" aria-label="Principal">
                 @foreach($enlacesPublicos as [$ruta, $patron, $texto])
                     <a href="{{ route($ruta) }}" @if(request()->routeIs($patron)) aria-current="page" @endif
-                       class="flex items-center border-b-4 border-transparent px-3.5 pt-1 font-rotulo text-[1.0625rem] font-bold uppercase tracking-[0.04em] text-tinta-suave hover:text-tinta aria-[current]:border-sol aria-[current]:text-tinta lg:px-4">{{ $texto }}</a>
+                       class="flex items-center whitespace-nowrap border-b-4 border-transparent px-3 pt-1 text-[0.875rem] font-extrabold uppercase tracking-[0.04em] text-tierra-oscura/75 transition-colors hover:text-tierra aria-[current]:border-sol aria-[current]:text-tierra-oscura lg:px-4">{{ $texto }}</a>
                 @endforeach
             </nav>
             <div class="ml-auto flex items-center gap-2">
@@ -153,13 +156,13 @@
                 </button>
             </div>
         </div>
-        <div class="franja" aria-hidden="true"></div>
+        <div class="h-px bg-linea" aria-hidden="true"></div>
 
         {{-- Menú del celular: cae bajo la barra como una persiana --}}
         <nav id="menu-movil" x-show="menu" x-cloak x-transition.origin.top class="absolute inset-x-0 top-full border-b border-linea bg-white md:hidden" aria-label="Principal">
             <ul class="px-4 py-2">
                 @foreach($enlacesPublicos as [$ruta, $patron, $texto])
-                    <li><a href="{{ route($ruta) }}" @if(request()->routeIs($patron)) aria-current="page" @endif class="flex min-h-12 items-center border-b border-linea font-rotulo text-lg font-bold uppercase tracking-[0.04em] aria-[current]:text-tierra">{{ $texto }}</a></li>
+                    <li><a href="{{ route($ruta) }}" @if(request()->routeIs($patron)) aria-current="page" @endif class="flex min-h-12 items-center border-b border-linea text-base font-extrabold uppercase tracking-[0.04em] aria-[current]:text-tierra">{{ $texto }}</a></li>
                 @endforeach
                 @auth
                     @if($usuario->rol === 'cliente')
@@ -174,10 +177,11 @@
         </nav>
     </header>
 
-    {{-- Cabecera de página: un panel de carrocería verde, recto, cerrado por la franja --}}
+    {{-- Cabecera de página: banda azul con los arcos de las marcas y la línea amarilla abajo --}}
     @hasSection('cabecera')
-        <div class="relative bg-tierra text-white">
-            <div class="mx-auto max-w-[1320px] px-4 pb-10 pt-8 sm:px-6 lg:px-8 lg:pb-12 lg:pt-10">@yield('cabecera')</div>
+        <div class="sobre-azul relative overflow-hidden bg-tierra-oscura text-white">
+            <x-arcos class="absolute inset-y-0 right-0 h-full w-[42rem] max-w-[70%]" />
+            <div class="relative mx-auto max-w-[1320px] px-4 pb-10 pt-9 sm:px-6 lg:px-8 lg:pb-14 lg:pt-12" data-entrar>@yield('cabecera')</div>
             <div class="franja franja-fina" aria-hidden="true"></div>
         </div>
     @endif
@@ -215,21 +219,21 @@
 </div>
 
 @unless($personal)
-    <footer class="mt-6 bg-tierra-oscura text-white/85">
+    <footer class="mt-6 bg-noche text-white/85">
         <div class="franja" aria-hidden="true"></div>
         <div class="mx-auto grid max-w-[1320px] gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr] lg:px-8">
             <div>
                 <div class="flex items-center gap-3">
-                    <x-logo tamano="size-16" />
+                    <span class="grid size-16 shrink-0 place-items-center rounded-[8px] bg-rialto"><x-logo tamano="size-14" /></span>
                     <div>
-                        <p class="font-rotulo text-2xl font-extrabold uppercase text-white">Inversiones Rialto 7 C.A.</p>
+                        <p class="text-xl font-black uppercase text-white">Inversiones Rialto 7 C.A.</p>
                         <p class="text-sm">RIF J-50668510-8 · Valle de la Pascua desde 1963</p>
                     </div>
                 </div>
                 <p class="mt-5 max-w-md text-[0.9375rem]">Agente autorizado exclusivo en Venezuela de Marchesan Tatu, Colombo Aemco, Vicon y Lumagi. Precios en USD más IVA; en bolívares a la tasa oficial del día.</p>
             </div>
             <nav aria-label="Pie de página">
-                <p class="font-rotulo text-sm font-bold uppercase tracking-[0.14em] text-sol">El portal</p>
+                <p class="text-xs font-extrabold uppercase tracking-[0.14em] text-sol">El portal</p>
                 <ul class="mt-3 space-y-2 text-[0.9375rem]">
                     <li><a href="{{ route('catalogo.index') }}" class="hover:text-white hover:underline">Catálogo</a></li>
                     <li><a href="{{ route('nosotros') }}" class="hover:text-white hover:underline">Nuestra historia</a></li>
@@ -239,7 +243,7 @@
                 </ul>
             </nav>
             <div>
-                <p class="font-rotulo text-sm font-bold uppercase tracking-[0.14em] text-sol">Dónde estamos</p>
+                <p class="text-xs font-extrabold uppercase tracking-[0.14em] text-sol">Dónde estamos</p>
                 <p class="mt-3 flex items-start gap-2 text-[0.9375rem]"><x-icono nombre="ubicacion" class="mt-0.5 size-5" /> Av. Las Industrias, Edificio Campagna, Valle de la Pascua, Guárico</p>
                 @if($telefono = \App\Support\Contacto::telefonoVisible())
                     <div class="mt-4 flex flex-wrap gap-2">

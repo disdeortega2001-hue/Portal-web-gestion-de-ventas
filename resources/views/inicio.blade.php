@@ -3,172 +3,247 @@
 @section('ancho_completo', true)
 
 @php
-    $mensaje = \App\Support\Contacto::whatsapp('Hola, quiero consultar un repuesto.');
-    // El logo de Tatu es un cuadro azul completo; los demás traen margen blanco y se recortan a su banda
-    $marcaLogo = fn ($m) => $m['nombre'] === 'Marchesan Tatu' ? 'bg-[#173C8A] object-contain' : 'bg-white object-cover';
+    $whatsapp = \App\Support\Contacto::whatsapp('Hola, quiero consultar un repuesto.');
+    // Portada: primero la sede real; después fotos de campo libres (Unsplash) hasta tener más fotos propias
+    $diapositivas = [
+        ['img/portada/sede-fachada.jpg', 'img/portada/sede-fachada-movil.jpg', 'Nuestra sede: Edificio Campagna, Valle de la Pascua'],
+        ['img/portada/campo-1.webp', 'img/portada/campo-1-movil.webp', null],
+        ['img/portada/campo-2.webp', 'img/portada/campo-2-movil.webp', null],
+        ['img/portada/campo-3.webp', 'img/portada/campo-3-movil.webp', null],
+        ['img/portada/campo-4.webp', 'img/portada/campo-4-movil.webp', null],
+    ];
+    $cifras = [[$anios, '+', 'años de trayectoria'], [count($marcas), '', 'marcas exclusivas'], [$totalProductos, '', 'productos en línea'], [null, '24/7', 'catálogo abierto']];
+    $logoMarca = fn ($m) => $m['nombre'] === 'Marchesan Tatu' ? 'bg-[#173C8A] object-contain' : 'bg-white object-cover';
 @endphp
 
 @section('contenido')
-{{-- ======== Portada: la librea de Rialto recorre el borde; el buscador trabaja desde el primer vistazo ======== --}}
-<section aria-labelledby="t-portada" class="relative bg-white">
-    {{-- Franja vertical de la librea con el círculo del 7, como en la carrocería --}}
-    <div class="absolute inset-y-0 left-0 hidden w-24 bg-tierra-clara lg:block xl:w-28" aria-hidden="true">
-        <div class="calcar absolute inset-y-0 left-1/2 w-10 -translate-x-1/2"
-             style="background: linear-gradient(to right, #fff 0 14%, var(--color-sol) 14% 86%, #fff 86% 100%)"></div>
-        <span class="ruedo absolute left-1/2 top-10 size-20 -translate-x-1/2 text-5xl xl:size-24 xl:text-6xl">7</span>
-        <div class="absolute inset-x-0 bottom-16 space-y-1.5" >
-            <div class="h-3 bg-tierra"></div><div class="h-1.5 bg-white"></div><div class="h-3 bg-sol"></div><div class="h-1.5 bg-white"></div><div class="h-3 bg-tierra"></div>
-        </div>
+{{-- ======== Portada: fotos a sangre que se relevan con zoom lento; el texto entra escalonado ======== --}}
+<section id="portada" aria-labelledby="t-portada" class="sobre-azul relative isolate flex min-h-[calc(100svh-4rem)] items-center overflow-hidden bg-noche text-white lg:min-h-[calc(100svh-4.5rem)]"
+         x-data="portada({{ count($diapositivas) }})">
+    <div class="absolute inset-0 -z-10" aria-hidden="true">
+        @foreach($diapositivas as $i => [$grande, $movil, $leyenda])
+            <picture class="diapositiva absolute inset-0" :class="actual === {{ $i }} && 'activa'" @if($i === 0) data-primera @endif>
+                <source media="(max-width: 767px)" srcset="{{ asset($movil) }}">
+                <img src="{{ asset($grande) }}" alt="" class="size-full object-cover" @if($i === 0) fetchpriority="high" @else loading="lazy" @endif decoding="async">
+            </picture>
+        @endforeach
+        <div class="absolute inset-0 bg-gradient-to-r from-noche/95 via-tierra-oscura/80 to-tierra-oscura/40"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-noche/90 via-transparent to-transparent"></div>
+        <x-arcos class="absolute inset-y-0 right-0 hidden h-full w-[48rem] lg:block" />
     </div>
+    {{-- Sin JavaScript se ve la primera foto --}}
+    <noscript><style>[data-primera]{opacity:1;transform:none}</style></noscript>
 
-    <div class="mx-auto grid max-w-[1320px] gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:pl-32 lg:pr-8 lg:py-14 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.95fr)_minmax(0,0.7fr)] xl:pl-36">
-        <div class="flex flex-col justify-center">
-            <h1 id="t-portada" class="titular text-[3.25rem] sm:text-7xl xl:text-[5.5rem]">El repuesto exacto <span class="text-tierra">desde 1963</span></h1>
-            <div class="franja mt-6 max-w-md" aria-hidden="true"></div>
-            <p class="mt-5 max-w-xl text-lg text-tinta-suave sm:text-xl">Existencia real, precio en dólares y bolívares, y tu cotización en minutos sin salir de la finca.</p>
+    <div class="mx-auto w-full max-w-[1320px] px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+        <div class="max-w-3xl">
+            <p class="inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] backdrop-blur-sm" data-entrar style="--orden:0">
+                <span class="relative flex size-2.5"><span class="latido absolute inset-0 rounded-full bg-[#3ddc84]"></span><span class="relative size-2.5 rounded-full bg-[#3ddc84]"></span></span>
+                Valle de la Pascua desde 1963
+            </p>
+            <h1 id="t-portada" class="titular mt-6 text-[2.6rem] sm:text-6xl lg:text-7xl" data-entrar style="--orden:1">El repuesto exacto, <em>desde 1963</em> junto al productor</h1>
+            <p class="mt-5 max-w-xl text-lg text-white/85 sm:text-xl" data-entrar style="--orden:2">Existencia real, precio en dólares y bolívares, y tu cotización en minutos sin salir de la finca.</p>
 
-            <form method="GET" action="{{ route('catalogo.index') }}" role="search" class="mt-7 flex max-w-xl gap-2">
+            <form method="GET" action="{{ route('catalogo.index') }}" role="search" class="mt-8 flex max-w-xl gap-2" data-entrar style="--orden:3">
                 <label for="q-inicio" class="sr-only">Buscar por código de fábrica, pieza o modelo</label>
                 <input type="search" id="q-inicio" name="q" placeholder="Código de fábrica, pieza o modelo" maxlength="100" enterkeyhint="search" autocomplete="off"
-                       class="campo !min-h-14 flex-1 !text-lg">
-                <button class="btn btn-sol btn-grande !min-h-14" type="submit"><x-icono nombre="buscar" class="sm:hidden" /><span class="sr-only sm:not-sr-only">Buscar</span></button>
+                       class="campo !min-h-14 flex-1 !border-transparent !text-lg">
+                <button class="btn btn-sol btn-grande !min-h-14" type="submit"><x-icono nombre="buscar" class="size-5" /><span class="sr-only sm:not-sr-only">Buscar</span></button>
             </form>
-            <div class="mt-4 flex flex-wrap gap-2">
-                @foreach($categorias->take(4) as $categoria)
-                    <a href="{{ route('catalogo.index', ['categoria' => $categoria->id]) }}" class="capsula !min-h-10 !text-[0.9375rem]">{{ $categoria->nombre }} <span class="conteo !size-7">{{ $categoria->productos_count }}</span></a>
-                @endforeach
+            <div class="mt-4 flex flex-wrap gap-3" data-entrar style="--orden:4">
+                <a href="{{ route('catalogo.index') }}" class="btn btn-linea-clara">Ver el catálogo <span class="chip"><x-icono nombre="flecha" class="size-4" /></span></a>
+                @if($whatsapp)<a href="{{ $whatsapp }}" target="_blank" rel="noopener" class="btn btn-linea-clara"><x-icono nombre="whatsapp" class="size-5" /> Escríbenos</a>@endif
             </div>
-        </div>
 
-        {{-- El equipo estrella, en su box --}}
-        @if($estrella)
-            <a href="{{ route('catalogo.show', $estrella) }}" class="group relative block overflow-hidden bg-agua no-underline" aria-label="{{ $estrella->nombre }}, {{ $estrella->codigo_fabrica }}">
-                <div class="franja franja-fina" aria-hidden="true"></div>
-                <img src="{{ $estrella->urlImagen() }}" alt="" class="aspect-[4/3] w-full object-contain p-6 mix-blend-multiply transition-transform duration-700 ease-[var(--ease-salida)] group-hover:scale-[1.03] lg:aspect-auto lg:h-[26rem]" fetchpriority="high">
-                <span class="ruedo absolute right-5 top-8 size-20 text-3xl">{{ $estrella->stock }}</span>
-                <div class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 bg-tierra px-5 py-4 text-white">
-                    <div class="min-w-0">
-                        <p class="font-rotulo text-2xl font-extrabold uppercase leading-none">{{ $estrella->nombre }}</p>
-                        <p class="mt-1 text-sm text-white/80">{{ $estrella->marca }} · <span class="cifra">{{ $estrella->codigo_fabrica }}</span></p>
+            <dl class="mt-12 grid max-w-2xl grid-cols-2 gap-x-6 gap-y-6 border-t border-white/15 pt-8 sm:grid-cols-4" data-entrar style="--orden:5">
+                @foreach($cifras as [$numero, $extra, $etiqueta])
+                    <div>
+                        <dt class="sr-only">{{ $etiqueta }}</dt>
+                        <dd class="text-4xl font-black text-sol cifra">@if($numero !== null)<span data-contar="{{ $numero }}">{{ $numero }}</span>@endif{{ $extra }}</dd>
+                        <dd class="mt-1 text-xs font-bold uppercase tracking-[0.1em] text-white/70">{{ $etiqueta }}</dd>
                     </div>
-                    <p class="shrink-0 font-rotulo text-2xl font-extrabold text-sol cifra">@usd($estrella->precio)</p>
-                </div>
-            </a>
-        @endif
-
-        {{-- Pizarra del día: los números de hoy, tal como los calcula el sistema --}}
-        <aside aria-labelledby="t-pizarra" class="lobulo panel-tapa self-start lg:col-span-2 xl:col-span-1">
-            <div class="flex items-center justify-between gap-2 px-5 pb-3 pt-6">
-                <h2 id="t-pizarra" class="font-rotulo text-xl font-extrabold uppercase">Pizarra del día</h2>
-                <span class="cifra text-sm font-semibold text-tinta-suave">{{ now()->format('d/m/Y') }}</span>
-            </div>
-            <dl class="grid grid-cols-2 border-t border-linea xl:grid-cols-1">
-                <div class="border-b border-linea bg-tierra-clara px-5 py-4 xl:col-span-1">
-                    <dt class="text-sm font-semibold text-tierra">Tasa oficial</dt>
-                    <dd class="font-rotulo text-3xl font-extrabold text-tierra cifra">Bs. {{ number_format($tasa, 2, ',', '.') }}</dd>
-                    @if($tasaActualizada)<dd class="text-xs text-tinta-suave">por dólar · actualizada {{ $tasaActualizada->format('d/m h:i a') }}</dd>@endif
-                </div>
-                <div class="border-b border-l border-linea px-5 py-4 xl:border-l-0">
-                    <dt class="text-sm font-semibold text-tinta-suave">Con existencia</dt>
-                    <dd class="font-rotulo text-3xl font-extrabold cifra">{{ $disponibles }} <span class="text-lg text-tinta-suave">de {{ $totalProductos }}</span></dd>
-                </div>
-                <div class="border-b border-linea px-5 py-4">
-                    <dt class="text-sm font-semibold text-tinta-suave">Trayectoria</dt>
-                    <dd class="font-rotulo text-3xl font-extrabold cifra">{{ $anios }} años</dd>
-                </div>
-                <div class="border-b border-l border-linea px-5 py-4 xl:border-l-0">
-                    <dt class="text-sm font-semibold text-tinta-suave">Precios</dt>
-                    <dd class="font-rotulo text-3xl font-extrabold cifra">USD <span class="text-lg text-tinta-suave">+ IVA {{ rtrim(rtrim(number_format($iva, 2, ',', ''), '0'), ',') }} %</span></dd>
-                </div>
-            </dl>
-            @if($mensaje)
-                <div class="p-5"><a href="{{ $mensaje }}" class="btn btn-tierra w-full" target="_blank" rel="noopener"><x-icono nombre="whatsapp" /> Escríbenos por WhatsApp</a></div>
-            @endif
-        </aside>
-    </div>
-
-    {{-- Fila de las marcas exclusivas, como la fila de patrocinadores de la carrocería --}}
-    <div class="border-y border-linea bg-agua">
-        <div class="mx-auto flex max-w-[1320px] flex-col gap-4 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:gap-8 lg:pl-32 lg:pr-8 xl:pl-36">
-            <p class="shrink-0 font-rotulo text-lg font-bold uppercase leading-tight">Agente exclusivo<br class="hidden lg:block"> en Venezuela</p>
-            <ul class="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-4">
-                @foreach($marcas as $marca)
-                    <li><a href="{{ route('catalogo.index', ['marca' => $marca['nombre']]) }}" class="block border border-linea bg-white p-1 transition-colors hover:border-tierra" title="Ver productos de {{ $marca['nombre'] }}">
-                        <img src="{{ asset($marca['logo']) }}" alt="{{ $marca['nombre'] }}" class="h-16 w-full {{ $marcaLogo($marca) }}" loading="lazy">
-                    </a></li>
                 @endforeach
-            </ul>
+            </dl>
         </div>
     </div>
+
+    {{-- Leyenda de la foto actual (solo la de la sede la tiene) --}}
+    @foreach($diapositivas as $i => [, , $leyenda])
+        @if($leyenda)<p x-show="actual === {{ $i }}" x-transition.opacity class="absolute bottom-7 left-4 hidden max-w-sm items-center gap-2 text-sm font-semibold text-white/80 sm:flex lg:left-8"><x-icono nombre="ubicacion" class="size-4 text-sol" /> {{ $leyenda }}</p>@endif
+    @endforeach
+
+    {{-- Puntos con barra de avance --}}
+    <div class="absolute bottom-8 left-1/2 flex -translate-x-1/2 gap-2" x-cloak>
+        @foreach($diapositivas as $i => $d)
+            <button type="button" class="relative h-2 overflow-hidden rounded-full transition-all duration-500" :class="actual === {{ $i }} ? 'w-10' : 'w-2'"
+                    @click="ir({{ $i }})" aria-label="Ver foto {{ $i + 1 }}" :aria-current="actual === {{ $i }}">
+                <span class="absolute inset-0 rounded-full bg-white/35"></span>
+                <template x-if="actual === {{ $i }}"><span class="punto-progreso absolute inset-0 rounded-full bg-sol" :style="`--duracion:${duracion}ms`"></span></template>
+            </button>
+        @endforeach
+    </div>
+    {{-- Indicador para bajar --}}
+    <a href="#marcas" class="absolute bottom-8 right-8 hidden flex-col items-center gap-2 text-white/60 lg:flex" aria-label="Bajar a las marcas">
+        <span class="text-[0.6875rem] font-bold uppercase tracking-[0.2em] [writing-mode:vertical-lr]">Desliza</span>
+        <span class="flex h-9 w-6 justify-center rounded-full border-2 border-white/40 pt-1.5"><span class="rueda-scroll h-2 w-1 rounded-full bg-sol"></span></span>
+    </a>
 </section>
 
-<div class="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
-    {{-- ======== Categorías: paneles de carrocería ======== --}}
-    <section aria-labelledby="t-categorias" class="pt-14 lg:pt-20">
-        <div class="flex flex-wrap items-end justify-between gap-4">
-            <h2 id="t-categorias" class="titular text-4xl sm:text-5xl">Busca por tipo de repuesto</h2>
-            <a href="{{ route('catalogo.index') }}" class="btn btn-linea">Ver todo el catálogo <span class="chip"><x-icono nombre="flecha" class="size-4" /></span></a>
+{{-- ======== Marcas exclusivas ======== --}}
+<section id="marcas" aria-labelledby="t-marcas" class="border-b border-linea bg-white">
+    <div class="mx-auto grid max-w-[1320px] items-center gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,2fr)] lg:px-8">
+        <div data-revelar>
+            <h2 id="t-marcas" class="titular subrayado text-3xl text-tierra-oscura">Agente exclusivo en Venezuela</h2>
+            <p class="mt-4 inline-flex items-center gap-2 rounded-full bg-rialto-claro px-3 py-1 text-xs font-extrabold uppercase tracking-[0.1em] text-rialto"><x-icono nombre="check-circulo" class="size-4" /> Distribuidor oficial de las cuatro marcas</p>
         </div>
-        <ul class="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
-            @foreach($categorias as $categoria)
-                <li>
-                    <a href="{{ route('catalogo.index', ['categoria' => $categoria->id]) }}" class="lobulo panel-tapa group flex h-full flex-col no-underline transition-colors hover:border-tierra">
-                        <div class="relative mt-1.5 grid aspect-[4/3] place-items-center bg-agua">
-                            @if($categoria->muestra)
-                                <img src="{{ $categoria->muestra->urlImagen('mini') }}" alt="" class="size-full object-contain p-4 mix-blend-multiply transition-transform duration-500 group-hover:scale-105" loading="lazy">
-                            @endif
-                            <span class="ruedo absolute -bottom-4 right-3 size-11 text-lg">{{ $categoria->productos_count }}</span>
-                        </div>
-                        <p class="p-4 pt-5 font-rotulo text-lg font-extrabold uppercase leading-tight">{{ $categoria->nombre }}</p>
+        <ul class="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+            @foreach($marcas as $k => $marca)
+                <li data-revelar style="--orden:{{ $k }}">
+                    <a href="{{ route('catalogo.index', ['marca' => $marca['nombre']]) }}" class="lobulo tarjeta-viva block overflow-hidden p-1.5" title="Ver productos de {{ $marca['nombre'] }}">
+                        <img src="{{ asset($marca['logo']) }}" alt="{{ $marca['nombre'] }}" class="h-20 w-full rounded-[5px] {{ $logoMarca($marca) }}" loading="lazy">
+                        <span class="block px-2 py-2 text-center text-xs font-bold uppercase tracking-[0.06em] text-tinta-suave">{{ $marca['productos'] }} {{ $marca['productos'] === 1 ? 'producto' : 'productos' }}</span>
                     </a>
                 </li>
             @endforeach
         </ul>
-    </section>
+    </div>
+</section>
 
-    {{-- ======== Los más pedidos ======== --}}
-    @if($destacados->isNotEmpty())
-        <section aria-labelledby="t-destacados" class="pt-14 lg:pt-20">
-            <h2 id="t-destacados" class="titular text-4xl sm:text-5xl">Los más pedidos</h2>
-            <p class="mt-2 text-tinta-suave">Con existencia hoy. Agrégalos a tu cotización con un toque.</p>
-            <ul class="mt-8 grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
-                @foreach($destacados as $producto)
-                    <li>@include('partials.producto-card', ['producto' => $producto])</li>
+{{-- ======== Equipo estrella, al estilo de las fichas de línea de los fabricantes ======== --}}
+@if($estrella)
+    <section aria-labelledby="t-estrella" class="relative overflow-hidden bg-agua">
+        <div class="mx-auto grid max-w-[1320px] items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-24">
+            <div data-revelar>
+                <h2 id="t-estrella" class="titular text-4xl text-tierra-oscura sm:text-5xl">{{ $estrella->nombre }}</h2>
+                <p class="mt-2 text-lg font-extrabold uppercase tracking-[0.04em] text-tierra">{{ $estrella->categoria->nombre }} · {{ $estrella->marca }}</p>
+                <p class="mt-5 max-w-lg text-lg text-tinta-suave">{{ $estrella->descripcion ?: 'Equipo original con el respaldo directo del fabricante.' }}</p>
+                <dl class="mt-6 flex flex-wrap gap-x-10 gap-y-4">
+                    <div><dt class="text-sm font-semibold text-tinta-suave">Código de fábrica</dt><dd class="text-xl font-black text-tierra cifra">{{ $estrella->codigo_fabrica }}</dd></div>
+                    <div><dt class="text-sm font-semibold text-tinta-suave">Precio</dt><dd class="text-xl font-black cifra">@usd($estrella->precio) <span class="text-sm font-semibold text-tinta-suave">+ IVA</span></dd></div>
+                    <div><dt class="text-sm font-semibold text-tinta-suave">Disponibles</dt><dd class="text-xl font-black cifra">{{ $estrella->stock }}</dd></div>
+                </dl>
+                <a href="{{ route('catalogo.show', $estrella) }}" class="btn btn-tierra mt-8">Saber más <span class="chip"><x-icono nombre="flecha" class="size-4" /></span></a>
+            </div>
+            <div class="relative" data-revelar style="--orden:1">
+                <div class="relative overflow-hidden rounded-[10px] bg-white">
+                    <p class="relative z-10 bg-tierra px-6 py-3 text-right text-lg font-black uppercase tracking-[0.04em] text-sol">{{ $estrella->categoria->nombre }}</p>
+                    <x-arcos tono="oscuro" class="absolute inset-0 h-full w-full" />
+                    <img src="{{ $estrella->urlImagen() }}" alt="{{ $estrella->nombre }}" class="relative aspect-[4/3] w-full object-contain p-8 mix-blend-multiply" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </section>
+@endif
+
+{{-- ======== Por tipo de repuesto: carrusel de tarjetas con pestaña azul ======== --}}
+<section aria-labelledby="t-categorias" class="bg-white py-16 lg:py-24" x-data="{ mover(d) { const p = this.$refs.pista; p.scrollBy({ left: d * p.clientWidth * 0.8, behavior: 'smooth' }); } }">
+    <div class="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-wrap items-end justify-between gap-4" data-revelar>
+            <h2 id="t-categorias" class="titular subrayado text-4xl text-tierra-oscura sm:text-5xl">Por tipo de repuesto</h2>
+            <div class="flex gap-2">
+                <button type="button" class="grid size-12 place-items-center rounded-full border-2 border-tierra text-tierra hover:bg-tierra hover:text-white" @click="mover(-1)" aria-label="Anteriores"><x-icono nombre="flecha-izq" /></button>
+                <button type="button" class="grid size-12 place-items-center rounded-full bg-tierra text-white hover:bg-tierra-oscura" @click="mover(1)" aria-label="Siguientes"><x-icono nombre="flecha" /></button>
+            </div>
+        </div>
+        <ul x-ref="pista" class="-mx-4 mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-px-4 px-4 pb-4 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
+            @foreach($categorias as $k => $categoria)
+                <li class="w-[72%] shrink-0 snap-start sm:w-[42%] lg:w-[calc((100%-3.75rem)/4)]" data-revelar style="--orden:{{ $k }}">
+                    <a href="{{ route('catalogo.index', ['categoria' => $categoria->id]) }}" class="lobulo tarjeta-viva group block overflow-hidden">
+                        <p class="flex items-center justify-between gap-2 bg-tierra px-4 py-3 text-sm font-black uppercase tracking-[0.04em] text-white">
+                            {{ $categoria->nombre }} <span class="rounded-[4px] bg-sol px-2 py-0.5 text-tierra-oscura cifra">{{ $categoria->productos_count }}</span>
+                        </p>
+                        <div class="aspect-[4/5] bg-agua">
+                            @if($categoria->muestra)
+                                <img src="{{ $categoria->muestra->urlImagen() }}" alt="" class="size-full object-contain p-6 mix-blend-multiply grayscale transition duration-500 group-hover:scale-105 group-hover:grayscale-0" loading="lazy">
+                            @endif
+                        </div>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </div>
+</section>
+
+{{-- ======== Los más pedidos ======== --}}
+@if($destacados->isNotEmpty())
+    <section aria-labelledby="t-destacados" class="bg-agua py-16 lg:py-24">
+        <div class="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-wrap items-end justify-between gap-4" data-revelar>
+                <div>
+                    <h2 id="t-destacados" class="titular subrayado text-4xl text-tierra-oscura sm:text-5xl">Los más pedidos</h2>
+                    <p class="mt-3 text-tinta-suave">Con existencia hoy. Agrégalos a tu cotización con un toque.</p>
+                    @if($tasa > 0)
+                        {{-- Los precios en bolívares salen de esta tasa: se muestra con su fecha --}}
+                        <p class="mt-3 inline-flex flex-wrap items-center gap-x-2 rounded-[6px] bg-white px-3 py-1.5 text-sm ring-1 ring-linea">
+                            <span class="font-extrabold uppercase tracking-[0.06em] text-tierra">Tasa del día</span>
+                            <span class="cifra font-black">@bs($tasa)</span>
+                            <span class="text-tinta-suave">por dólar · IVA {{ rtrim(rtrim(number_format($iva, 2, ',', ''), '0'), ',') }} %@if($tasaActualizada) · {{ $tasaActualizada->format('d/m/Y') }}@endif</span>
+                        </p>
+                    @endif
+                </div>
+                <a href="{{ route('catalogo.index') }}" class="btn btn-linea">Ver todo el catálogo <span class="chip"><x-icono nombre="flecha" class="size-4" /></span></a>
+            </div>
+            <ul class="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                @foreach($destacados as $k => $producto)
+                    <li data-revelar style="--orden:{{ $k }}">@include('partials.producto-card', ['producto' => $producto])</li>
                 @endforeach
             </ul>
-        </section>
-    @endif
-
-    {{-- ======== Cómo cotizar: tres pasos que sí importan en orden ======== --}}
-    <section aria-labelledby="t-pasos" class="mt-14 grid gap-8 bg-tierra p-7 text-white lg:mt-20 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,2fr)] lg:p-10">
-        <div>
-            <h2 id="t-pasos" class="titular text-4xl">Tu cotización en tres pasos</h2>
-            <p class="mt-3 text-white/80">Sin crear cuenta. Un vendedor confirma la existencia y te escribe.</p>
         </div>
-        <ol class="grid gap-6 sm:grid-cols-3">
+    </section>
+@endif
+
+{{-- ======== Nuestra historia en corto, con la foto del equipo ======== --}}
+<section aria-labelledby="t-historia" class="bg-white py-16 lg:py-24">
+    <div class="mx-auto grid max-w-[1320px] items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+        <div class="relative" data-revelar>
+            <img src="{{ asset('img/portada/sede-equipo.jpg') }}" alt="El equipo de Inversiones Rialto 7 celebrando el 63 aniversario en la tienda" class="w-full rounded-[10px] object-cover" loading="lazy">
+            <div class="absolute -bottom-6 left-6 rounded-[8px] bg-sol px-6 py-4 text-tierra-oscura shadow-[0_18px_40px_-20px_rgb(5_43_112/0.6)] sm:left-auto sm:right-6">
+                <p class="text-4xl font-black leading-none cifra"><span data-contar="{{ $anios }}">{{ $anios }}</span></p>
+                <p class="text-xs font-extrabold uppercase tracking-[0.08em]">años de trayectoria</p>
+            </div>
+        </div>
+        <div data-revelar style="--orden:1">
+            <h2 id="t-historia" class="titular subrayado text-4xl text-tierra-oscura sm:text-5xl">Una empresa <em>familiar</em> del llano guariqueño</h2>
+            <p class="mt-6 text-lg text-tinta-suave">Empezamos en 1963 como Inversiones Campagna. Hoy, como Inversiones Rialto 7 C.A., seguimos en manos de la familia fundadora, atendemos desde el Edificio Campagna en Valle de la Pascua y somos el único agente autorizado en Venezuela de cuatro marcas de maquinaria y repuestos.</p>
+            <ul class="mt-6 space-y-3">
+                @foreach(['Repuestos originales con el respaldo del fabricante', 'Atención de gente del llano que conoce tu trabajo', 'Existencias y precios reales, a la vista'] as $punto)
+                    <li class="flex items-start gap-3 font-semibold"><span class="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-sol text-tierra-oscura"><x-icono nombre="check" class="size-4" /></span>{{ $punto }}</li>
+                @endforeach
+            </ul>
+            <a href="{{ route('nosotros') }}" class="btn btn-tierra mt-8">Nuestra historia <span class="chip"><x-icono nombre="flecha" class="size-4" /></span></a>
+        </div>
+    </div>
+</section>
+
+{{-- ======== Cómo cotizar ======== --}}
+<section aria-labelledby="t-pasos" class="sobre-azul relative overflow-hidden bg-tierra-oscura py-16 text-white lg:py-24">
+    <x-arcos class="absolute inset-y-0 right-0 h-full w-[40rem]" />
+    <div class="relative mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
+        <h2 id="t-pasos" class="titular subrayado text-4xl sm:text-5xl" data-revelar>Tu cotización en <em>tres pasos</em></h2>
+        <ol class="mt-12 grid gap-8 sm:grid-cols-3">
             @foreach([['Elige', 'Busca por código o modelo y agrega los repuestos.'], ['Revisa', 'Ves el subtotal, el IVA y el total en dólares y bolívares.'], ['Envía', 'Recibes tu cotización en PDF y te contactamos por WhatsApp.']] as $i => [$paso, $texto])
-                <li class="flex gap-4 sm:block">
-                    <span class="ruedo size-14 text-2xl">{{ $i + 1 }}</span>
-                    <div><p class="mt-0 font-rotulo text-2xl font-extrabold uppercase sm:mt-4">{{ $paso }}</p><p class="mt-1 text-white/80">{{ $texto }}</p></div>
+                <li class="rounded-[10px] border border-white/15 bg-white/5 p-7 backdrop-blur-sm" data-revelar style="--orden:{{ $i }}">
+                    <span class="text-6xl font-black text-sol cifra">0{{ $i + 1 }}</span>
+                    <p class="mt-3 text-2xl font-black uppercase">{{ $paso }}</p>
+                    <p class="mt-2 text-white/80">{{ $texto }}</p>
                 </li>
             @endforeach
         </ol>
-    </section>
+    </div>
+</section>
 
-    {{-- ======== La historia, en corto ======== --}}
-    <section aria-labelledby="t-historia" class="mt-14 grid items-center gap-8 lg:mt-20 lg:grid-cols-2">
-        <div>
-            <h2 id="t-historia" class="titular text-4xl sm:text-5xl">{{ $anios }} años junto al productor llanero</h2>
-            <p class="mt-4 max-w-xl text-lg text-tinta-suave">Empezamos en 1963 como Inversiones Campagna. Hoy, como Inversiones Rialto 7 C.A., seguimos en manos de la familia fundadora y somos el único agente autorizado en Venezuela de cuatro marcas de maquinaria y repuestos.</p>
-            <div class="mt-6 flex flex-wrap gap-2">
-                <a href="{{ route('nosotros') }}" class="btn btn-tierra">Nuestra historia <span class="chip"><x-icono nombre="flecha" class="size-4" /></span></a>
-                <a href="{{ route('contacto') }}" class="btn btn-linea">Cómo llegar</a>
-            </div>
+{{-- ======== Visítanos: la fachada de la sede ======== --}}
+<section aria-labelledby="t-visita" class="sobre-azul relative isolate overflow-hidden text-white">
+    <img src="{{ asset('img/portada/sede-fachada.jpg') }}" alt="" class="absolute inset-0 -z-10 size-full object-cover" loading="lazy">
+    <div class="absolute inset-0 -z-10 bg-gradient-to-r from-noche/95 via-tierra-oscura/85 to-tierra-oscura/50"></div>
+    <div class="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-20 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-28" data-revelar>
+        <div class="max-w-2xl">
+            <h2 id="t-visita" class="titular text-4xl sm:text-5xl">Visítanos en el <em>Edificio Campagna</em></h2>
+            <p class="mt-4 flex items-start gap-2 text-lg text-white/85"><x-icono nombre="ubicacion" class="mt-1 size-5 shrink-0" /> Av. Las Industrias, Valle de la Pascua, Guárico · RIF J-50668510-8</p>
         </div>
-        <div class="lobulo panel-tapa grid grid-cols-[auto_1fr] items-center gap-5 p-6 pt-8">
-            <span class="ruedo size-16 text-2xl">63</span>
-            <p class="text-tinta-suave"><strong class="text-tinta">Valle de la Pascua, Guárico.</strong> Av. Las Industrias, Edificio Campagna. RIF J-50668510-8.</p>
+        <div class="flex flex-wrap gap-3">
+            <a href="{{ route('contacto') }}" class="btn btn-sol btn-grande">Cómo llegar <span class="chip"><x-icono nombre="flecha" class="size-4" /></span></a>
+            @if($whatsapp)<a href="{{ $whatsapp }}" target="_blank" rel="noopener" class="btn btn-linea-clara btn-grande"><x-icono nombre="whatsapp" class="size-5" /> WhatsApp</a>@endif
         </div>
-    </section>
-</div>
+    </div>
+</section>
 @endsection

@@ -135,20 +135,20 @@ document.addEventListener('DOMContentLoaded', function () {
     if (window.Chart) {
         graficoVentas = new Chart(document.getElementById('grafico-ventas'), {
             type: 'bar',
-            data: { labels: [], datasets: [{ label: 'Ventas USD', data: [], backgroundColor: '#0b4a3b', hoverBackgroundColor: '#ffd23f', borderRadius: 999, borderSkipped: false, maxBarThickness: 22 }] },
+            data: { labels: [], datasets: [{ label: 'Ventas USD', data: [], backgroundColor: '#0d5192', hoverBackgroundColor: '#ffd300', borderRadius: 999, borderSkipped: false, maxBarThickness: 22 }] },
             options: {
                 maintainAspectRatio: false, animation: false,
-                plugins: { legend: { display: false }, tooltip: { backgroundColor: '#2c2e2a', padding: 10, cornerRadius: 12, callbacks: { label: c => 'USD ' + usd.format(c.parsed.y) } } },
-                scales: { y: { beginAtZero: true, border: { display: false }, ticks: { callback: v => usd.format(v) } }, x: { grid: { display: false }, border: { color: '#2c2e2a' }, ticks: { maxTicksLimit: 8 } } }
+                plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f1b2d', padding: 10, cornerRadius: 12, callbacks: { label: c => 'USD ' + usd.format(c.parsed.y) } } },
+                scales: { y: { beginAtZero: true, border: { display: false }, ticks: { callback: v => usd.format(v) } }, x: { grid: { display: false }, border: { color: '#0f1b2d' }, ticks: { maxTicksLimit: 8 } } }
             }
         });
         graficoTop = new Chart(document.getElementById('grafico-top'), {
             type: 'bar',
-            data: { labels: [], datasets: [{ label: 'Unidades', data: [], backgroundColor: '#ffd23f', hoverBackgroundColor: '#0b4a3b', borderRadius: 999, borderSkipped: false, maxBarThickness: 26 }] },
+            data: { labels: [], datasets: [{ label: 'Unidades', data: [], backgroundColor: '#ffd300', hoverBackgroundColor: '#0d5192', borderRadius: 999, borderSkipped: false, maxBarThickness: 26 }] },
             options: {
                 indexAxis: 'y', maintainAspectRatio: false, animation: false,
-                plugins: { legend: { display: false }, tooltip: { backgroundColor: '#2c2e2a', padding: 10, cornerRadius: 12 } },
-                scales: { x: { beginAtZero: true, border: { display: false }, ticks: { precision: 0 } }, y: { grid: { display: false }, border: { color: '#2c2e2a' }, ticks: { font: { weight: 700 } } } }
+                plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f1b2d', padding: 10, cornerRadius: 12 } },
+                scales: { x: { beginAtZero: true, border: { display: false }, ticks: { precision: 0 } }, y: { grid: { display: false }, border: { color: '#0f1b2d' }, ticks: { font: { weight: 700 } } } }
             }
         });
     } else {
