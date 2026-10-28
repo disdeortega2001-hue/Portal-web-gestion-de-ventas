@@ -9,6 +9,8 @@ colors:
   amarillo: "#ffd300"
   amarillo-claro: "#fff4b3"
   verde-rialto: "#0b4a3b"
+  verde-rialto-oscuro: "#062a21"
+  verde-rialto-vivo: "#2a9d6f"
   verde-rialto-claro: "#dcebe4"
   fondo: "#f4f6f9"
   fondo-hondo: "#e7ecf2"
@@ -71,7 +73,7 @@ rounded:
 
 ## Overview
 
-**Azul de campo.** El portal viste los colores de las marcas que Rialto 7 representa en Venezuela: el azul profundo y el amarillo de Marchesan Tatu. El verde del logo Rialto queda como acento de marca. La portada abre con fotos de campo y de la sede a sangre, que se relevan solas con un zoom lento. Encima van arcos azules translúcidos y titulares en mayúsculas con una palabra resaltada en amarillo. Al bajar, cada bloque entra subiendo con suavidad y las cifras cuentan hasta su valor, en la línea de cicmelinst.com.
+**Azul de campo.** El portal viste los colores de las marcas que Rialto 7 representa en Venezuela: el azul profundo y el amarillo de Marchesan Tatu. El verde del logo Rialto es el tercer color: pie de página, degradados sobre las fotos, subrayados y secciones de apoyo. La portada abre con fotos de campo y de la sede a sangre, que se relevan solas con un zoom lento. Encima van arcos azules translúcidos y titulares en mayúsculas con una palabra resaltada en amarillo. Al bajar, cada bloque entra subiendo con suavidad y las cifras cuentan hasta su valor, en la línea de cicmelinst.com.
 
 Hay dos mundos que comparten tokens. El público (portada, catálogo, historia, contacto) es expresivo: fotos, arcos y movimiento. El de gestión (tablero, pedidos, inventario, reportes) es sobrio: el mismo azul y amarillo, sin fotos ni animaciones de entrada, pensado para escanear.
 
@@ -84,7 +86,12 @@ Hay dos mundos que comparten tokens. El público (portada, catálogo, historia, 
 
 ### Secondary
 - **Amarillo** `#ffd300`: la acción principal (Agregar, Mi cotización), la palabra resaltada en titulares sobre azul, el subrayado de 5 px bajo los títulos y el foco del teclado.
-- **Verde Rialto** `#0b4a3b`: solo en el fondo del logo y en el sello «Valle de la Pascua desde 1963». No compite con el azul.
+- **Verde Rialto** `#0b4a3b` (profundo `#062a21`, vivo `#2a9d6f`):
+  - fondo del logo y sello «desde 1963»;
+  - degradados azul→verde sobre las fotos de las cabeceras;
+  - remate verde del subrayado y de la línea amarilla;
+  - pie de página (azul noche a verde profundo) y sección «Tres pasos»;
+  - el segundo arco decorativo.
 
 ### Tertiary (señales)
 - Verde disponible `#2e9b5f`, rojo señal `#d63a2c`, azul info `#2f6fb0` y lila pendiente: estados de existencia y de pedido. Siempre con su versión clara de fondo.
@@ -95,7 +102,7 @@ Hay dos mundos que comparten tokens. El público (portada, catálogo, historia, 
 
 ### Named Rules
 - **Un amarillo por vista.** El amarillo marca la acción principal; si todo es amarillo, nada lo es.
-- **El verde es firma, no interfaz.** Nunca en botones, enlaces ni gráficos.
+- **El verde acompaña, no manda.** Va en fondos, degradados y detalles; los botones siguen siendo amarillo (acción) y azul (secundario).
 
 ## Typography
 
@@ -151,7 +158,8 @@ Raleway variable en todo el portal, con números de forma «lining» (Raleway tr
 ## Do's and Don'ts
 
 - **Sí:** fotos reales de la sede y del equipo; fotos de campo con crédito en `public/img/portada/CREDITOS.txt`.
+- **Sí:** toda cabecera de página pública lleva una foto de fondo (campo o sede) con el degradado azul y verde encima.
 - **Sí:** respetar «reducir movimiento». Sin animaciones, todo se muestra de una vez y la portada no rota.
 - **Sí:** el texto mínimo de 4.5:1 de contraste; el amarillo solo lleva texto azul profundo o tinta.
 - **No:** texto con degradado, rótulos encima de los titulares, iconos hechos con caracteres ni sombras duras.
-- **No:** usar el verde Rialto como color de interfaz.
+- **No:** botones o enlaces en verde; el verde vive en fondos y detalles.

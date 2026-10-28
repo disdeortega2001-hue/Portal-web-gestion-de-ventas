@@ -6,6 +6,15 @@
     $usuario = auth()->user();
     $personal = $usuario?->esPersonal() ?? false;
 
+    // Foto de fondo de la cabecera de cada página pública: [foto grande, foto para celular]
+    $fotoCabecera = match (true) {
+        request()->routeIs('catalogo.*') => ['campo-2.webp', 'campo-2-movil.webp'],
+        request()->routeIs('nosotros', 'contacto') => ['sede-fachada.jpg', 'sede-fachada-movil.jpg'],
+        request()->routeIs('carrito.*', 'compra.*', 'cotizaciones.*') => ['campo-3.webp', 'campo-3-movil.webp'],
+        request()->routeIs('cuenta.*') => ['campo-4.webp', 'campo-4-movil.webp'],
+        default => ['campo-1.webp', 'campo-1-movil.webp'],
+    };
+
     // Menú del personal: [ruta, patrón activo, ícono, texto, solo administrativo y directivo]
     $menuPersonal = [
         ['gestion.tablero', 'gestion.tablero', 'grafico', 'Tablero', false],
@@ -184,7 +193,13 @@
 
     {{-- Cabecera de página: banda azul con los arcos de las marcas y la línea amarilla abajo --}}
     @hasSection('cabecera')
-        <div class="sobre-azul relative overflow-hidden bg-tierra-oscura text-white">
+        <div class="sobre-azul relative isolate overflow-hidden bg-tierra-oscura text-white">
+            {{-- Siempre una foto de fondo (campo o sede), con el degradado azul y verde encima para leer el texto --}}
+            <picture class="absolute inset-0 -z-10" aria-hidden="true">
+                <source media="(max-width: 767px)" srcset="{{ asset('img/portada/' . $fotoCabecera[1]) }}">
+                <img src="{{ asset('img/portada/' . $fotoCabecera[0]) }}" alt="" class="size-full object-cover" fetchpriority="high">
+            </picture>
+            <div class="absolute inset-0 -z-10 bg-gradient-to-r from-noche/95 via-tierra-oscura/85 to-rialto/70" aria-hidden="true"></div>
             <x-arcos class="absolute inset-y-0 right-0 h-full w-[42rem] max-w-[70%]" />
             <div class="relative mx-auto max-w-[1320px] px-4 pb-10 pt-9 sm:px-6 lg:px-8 lg:pb-14 lg:pt-12" data-entrar>@yield('cabecera')</div>
             <div class="franja franja-fina" aria-hidden="true"></div>
@@ -224,7 +239,7 @@
 </div>
 
 @unless($personal)
-    <footer class="mt-6 bg-noche text-white/85">
+    <footer class="mt-6 bg-gradient-to-br from-noche via-rialto-oscuro to-rialto-oscuro text-white/85">
         <div class="franja" aria-hidden="true"></div>
         <div class="mx-auto grid max-w-[1320px] gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr] lg:px-8">
             <div>

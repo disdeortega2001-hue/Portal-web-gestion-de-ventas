@@ -582,4 +582,8 @@ Total al 28/10/2026: **127 pruebas, 556 verificaciones**, todas aprobadas.
 - el pie de todas las páginas públicas y el menú del celular tienen el enlace «Acceso del personal»;
 - las direcciones `/panel`, `/gestion` y `/admin` llevan al ingreso, con un aviso para el personal, y luego directo al tablero.
 
+**Verde del logo y fotos de fondo:**
+- el verde Rialto es el tercer color del portal: degradados azul→verde sobre las fotos, subrayados y línea amarilla con remate verde, pie de página en azul noche a verde y sección «Tres pasos» en verde;
+- toda cabecera de página pública lleva una foto de fondo: catálogo, campo; historia y contacto, sede; cotización y compra, campo; el resto, campo.
+
 Total al 28/10/2026: **129 pruebas, 564 verificaciones**, todas aprobadas.

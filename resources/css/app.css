@@ -6,8 +6,8 @@
 
 /*
  * Rialto 7 — azul de campo.
- * Azul y amarillo de las marcas que representa (como Marchesan Tatu), con el verde Rialto de acento
- * en el logo y en el sello de agente exclusivo. Fotos de campo a sangre, titulares en mayúsculas
+ * Azul y amarillo de las marcas que representa (como Marchesan Tatu) y el verde del logo Rialto como
+ * tercer color: pie de página, degradados sobre las fotos, subrayados y secciones de apoyo. Fotos de campo a sangre, titulares en mayúsculas
  * con palabras resaltadas en amarillo, arcos azules sobre las imágenes y entradas suaves al desplazarse.
  * Los nombres de los colores se conservan de versiones anteriores para no tocar la lógica de las vistas:
  * «tierra» es el azul principal, «sol» el amarillo y «agua» el fondo.
@@ -20,7 +20,9 @@
     --color-tierra-oscura: #052b70;   /* azul profundo */
     --color-noche: #031c46;           /* azul noche: secciones oscuras y pie */
     --color-tierra-clara: #dce8f5;    /* azul claro de apoyo */
-    --color-rialto: #0b4a3b;          /* verde del logo: acento de marca */
+    --color-rialto: #0b4a3b;          /* verde del logo */
+    --color-rialto-oscuro: #062a21;   /* verde profundo: pie de página y secciones */
+    --color-rialto-vivo: #2a9d6f;     /* verde luminoso: detalles sobre fondos oscuros */
     --color-rialto-claro: #dcebe4;
     --color-sabana: #2e9b5f;          /* disponible */
     --color-sabana-clara: #dcf1e3;
@@ -86,11 +88,12 @@
 
     /* Barra amarilla bajo los títulos de sección, como en las páginas de las marcas */
     .subrayado { @apply relative pb-4; }
-    .subrayado::after { content: ""; position: absolute; left: 0; bottom: 0; width: 4.5rem; height: 5px; background: var(--color-sol); border-radius: 3px; }
+    .subrayado::after { content: ""; position: absolute; left: 0; bottom: 0; width: 5.5rem; height: 5px; border-radius: 3px;
+        background: linear-gradient(90deg, var(--color-sol) 0 64%, transparent 64% 70%, var(--color-rialto-vivo) 70% 100%); }
     .subrayado-centro::after { left: 50%; transform: translateX(-50%); }
 
     /* Compatibilidad con la versión anterior: la franja ahora es una línea amarilla fina */
-    .franja { height: 4px; background: var(--color-sol); }
+    .franja { height: 4px; background: linear-gradient(90deg, var(--color-sol) 0 72%, var(--color-rialto-vivo) 72% 100%); }
     .franja-fina { height: 3px; }
     .franja-v { width: 4px; background: var(--color-sol); }
     .franja-clara { background: var(--color-sol); }

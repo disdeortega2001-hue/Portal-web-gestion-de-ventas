@@ -27,7 +27,7 @@
                 <img src="{{ asset($grande) }}" alt="" class="size-full object-cover" @if($i === 0) fetchpriority="high" @else loading="lazy" @endif decoding="async">
             </picture>
         @endforeach
-        <div class="absolute inset-0 bg-gradient-to-r from-noche/95 via-tierra-oscura/80 to-tierra-oscura/40"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-noche/95 via-tierra-oscura/75 to-rialto/45"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-noche/90 via-transparent to-transparent"></div>
         <x-arcos class="absolute inset-y-0 right-0 hidden h-full w-[48rem] lg:block" />
     </div>
@@ -215,7 +215,10 @@
 </section>
 
 {{-- ======== Cómo cotizar ======== --}}
-<section aria-labelledby="t-pasos" class="sobre-azul relative overflow-hidden bg-tierra-oscura py-16 text-white lg:py-24">
+<section aria-labelledby="t-pasos" class="sobre-azul relative isolate overflow-hidden bg-rialto-oscuro py-16 text-white lg:py-24">
+    {{-- Foto de fondo con el verde Rialto encima --}}
+    <img src="{{ asset('img/portada/campo-3.webp') }}" alt="" class="absolute inset-0 -z-10 size-full object-cover" loading="lazy">
+    <div class="absolute inset-0 -z-10 bg-gradient-to-br from-rialto-oscuro/95 via-rialto/85 to-tierra-oscura/80" aria-hidden="true"></div>
     <x-arcos class="absolute inset-y-0 right-0 h-full w-[40rem]" />
     <div class="relative mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
         <h2 id="t-pasos" class="titular subrayado text-4xl sm:text-5xl" data-revelar>Tu cotización en <em>tres pasos</em></h2>
@@ -234,7 +237,7 @@
 {{-- ======== Visítanos: la fachada de la sede ======== --}}
 <section aria-labelledby="t-visita" class="sobre-azul relative isolate overflow-hidden text-white">
     <img src="{{ asset('img/portada/sede-fachada.jpg') }}" alt="" class="absolute inset-0 -z-10 size-full object-cover" loading="lazy">
-    <div class="absolute inset-0 -z-10 bg-gradient-to-r from-noche/95 via-tierra-oscura/85 to-tierra-oscura/50"></div>
+    <div class="absolute inset-0 -z-10 bg-gradient-to-r from-noche/95 via-tierra-oscura/80 to-rialto/60"></div>
     <div class="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-20 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-28" data-revelar>
         <div class="max-w-2xl">
             <h2 id="t-visita" class="titular text-4xl sm:text-5xl">Visítanos en el <em>Edificio Campagna</em></h2>
