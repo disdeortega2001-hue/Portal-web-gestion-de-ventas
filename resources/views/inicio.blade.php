@@ -89,7 +89,7 @@
 </section>
 
 {{-- ======== Marcas exclusivas ======== --}}
-<section id="marcas" aria-labelledby="t-marcas" class="border-b border-linea bg-white">
+<section id="marcas" aria-labelledby="t-marcas" class="fondo-foto border-b border-linea" style="--foto: url('{{ asset('img/portada/campo-2.webp') }}')">
     <div class="mx-auto grid max-w-[1320px] items-center gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,2fr)] lg:px-8">
         <div data-revelar>
             <h2 id="t-marcas" class="titular subrayado text-3xl text-tierra-oscura">Agente exclusivo en Venezuela</h2>
@@ -110,7 +110,7 @@
 
 {{-- ======== Equipo estrella, al estilo de las fichas de línea de los fabricantes ======== --}}
 @if($estrella)
-    <section aria-labelledby="t-estrella" class="relative overflow-hidden bg-agua">
+    <section aria-labelledby="t-estrella" class="fondo-foto fondo-foto-fijo overflow-hidden" style="--foto: url('{{ asset('img/portada/campo-1.webp') }}')">
         <div class="mx-auto grid max-w-[1320px] items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-24">
             <div data-revelar>
                 <h2 id="t-estrella" class="titular text-4xl text-tierra-oscura sm:text-5xl">{{ $estrella->nombre }}</h2>
@@ -135,7 +135,7 @@
 @endif
 
 {{-- ======== Por tipo de repuesto: carrusel de tarjetas con pestaña azul ======== --}}
-<section aria-labelledby="t-categorias" class="bg-white py-16 lg:py-24" x-data="{ mover(d) { const p = this.$refs.pista; p.scrollBy({ left: d * p.clientWidth * 0.8, behavior: 'smooth' }); } }">
+<section aria-labelledby="t-categorias" class="fondo-foto fondo-foto-verde py-16 lg:py-24" style="--foto: url('{{ asset('img/portada/campo-4.webp') }}')" x-data="{ mover(d) { const p = this.$refs.pista; p.scrollBy({ left: d * p.clientWidth * 0.8, behavior: 'smooth' }); } }">
     <div class="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
         <div class="flex flex-wrap items-end justify-between gap-4" data-revelar>
             <h2 id="t-categorias" class="titular subrayado text-4xl text-tierra-oscura sm:text-5xl">Por tipo de repuesto</h2>
@@ -165,7 +165,7 @@
 
 {{-- ======== Los más pedidos ======== --}}
 @if($destacados->isNotEmpty())
-    <section aria-labelledby="t-destacados" class="bg-agua py-16 lg:py-24">
+    <section aria-labelledby="t-destacados" class="fondo-foto fondo-foto-fijo py-16 lg:py-24" style="--foto: url('{{ asset('img/portada/campo-3.webp') }}')">
         <div class="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
             <div class="flex flex-wrap items-end justify-between gap-4" data-revelar>
                 <div>
@@ -192,7 +192,7 @@
 @endif
 
 {{-- ======== Nuestra historia en corto, con la foto del equipo ======== --}}
-<section aria-labelledby="t-historia" class="bg-white py-16 lg:py-24">
+<section aria-labelledby="t-historia" class="fondo-foto fondo-foto-verde py-16 lg:py-24" style="--foto: url('{{ asset('img/portada/sede-fachada.jpg') }}')">
     <div class="mx-auto grid max-w-[1320px] items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
         <div class="relative" data-revelar>
             <img src="{{ asset('img/portada/sede-equipo.jpg') }}" alt="El equipo de Inversiones Rialto 7 celebrando el 63 aniversario en la tienda" class="w-full rounded-[10px] object-cover" loading="lazy">

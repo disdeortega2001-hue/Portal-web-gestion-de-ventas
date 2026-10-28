@@ -586,4 +586,6 @@ Total al 28/10/2026: **127 pruebas, 556 verificaciones**, todas aprobadas.
 - el verde Rialto es el tercer color del portal: degradados azul→verde sobre las fotos, subrayados y línea amarilla con remate verde, pie de página en azul noche a verde y sección «Tres pasos» en verde;
 - toda cabecera de página pública lleva una foto de fondo: catálogo, campo; historia y contacto, sede; cotización y compra, campo; el resto, campo.
 
+**Fondos con fotos en lugar de blanco:** el área de contenido de cada página pública y las secciones claras de la portada usan una foto de campo o de la sede con un velo claro (clase `.fondo-foto` en `resources/css/app.css`; la foto se elige con `--foto`). En computadora la foto queda fija al desplazarse.
+
 Total al 28/10/2026: **129 pruebas, 564 verificaciones**, todas aprobadas.

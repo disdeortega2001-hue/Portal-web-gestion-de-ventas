@@ -159,6 +159,7 @@ Raleway variable en todo el portal, con números de forma «lining» (Raleway tr
 
 - **Sí:** fotos reales de la sede y del equipo; fotos de campo con crédito en `public/img/portada/CREDITOS.txt`.
 - **Sí:** toda cabecera de página pública lleva una foto de fondo (campo o sede) con el degradado azul y verde encima.
+- **Sí:** en lugar del fondo blanco o gris liso, el contenido de las páginas públicas y las secciones claras de la portada van sobre una foto de campo o de la sede con un velo claro (`.fondo-foto`, al estilo de Tatu). En computadora la foto queda fija y el contenido se desliza encima. Las tarjetas y formularios siguen en blanco para leerse bien.
 - **Sí:** respetar «reducir movimiento». Sin animaciones, todo se muestra de una vez y la portada no rota.
 - **Sí:** el texto mínimo de 4.5:1 de contraste; el amarillo solo lleva texto azul profundo o tinta.
 - **No:** texto con degradado, rótulos encima de los titulares, iconos hechos con caracteres ni sombras duras.

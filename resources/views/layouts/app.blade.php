@@ -6,6 +6,14 @@
     $usuario = auth()->user();
     $personal = $usuario?->esPersonal() ?? false;
 
+    // Foto tenue detrás del contenido de las páginas públicas (distinta de la de la cabecera)
+    $fotoContenido = match (true) {
+        request()->routeIs('catalogo.*') => 'campo-4.webp',
+        request()->routeIs('nosotros', 'contacto') => 'campo-2.webp',
+        request()->routeIs('carrito.*', 'compra.*', 'cotizaciones.*') => 'campo-1.webp',
+        default => 'campo-3.webp',
+    };
+
     // Foto de fondo de la cabecera de cada página pública: [foto grande, foto para celular]
     $fotoCabecera = match (true) {
         request()->routeIs('catalogo.*') => ['campo-2.webp', 'campo-2-movil.webp'],
@@ -207,7 +215,9 @@
     @endif
 @endif
 
-<div class="flex-1 overflow-x-clip">
+{{-- Páginas públicas: el contenido va sobre una foto de campo tenue en lugar del gris liso --}}
+<div @class(['flex-1 overflow-x-clip', 'fondo-foto fondo-foto-fijo' => ! $personal && ! $__env->hasSection('ancho_completo')])
+     @if(! $personal && ! $__env->hasSection('ancho_completo')) style="--foto: url('{{ asset('img/portada/' . $fotoContenido) }}')" @endif>
 <main id="contenido" tabindex="-1" @class([
     'outline-none',
     'mx-auto px-4 sm:px-6 lg:px-8' => $personal || ! $__env->hasSection('ancho_completo'),

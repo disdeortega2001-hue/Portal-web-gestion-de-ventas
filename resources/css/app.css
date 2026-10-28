@@ -92,6 +92,16 @@
         background: linear-gradient(90deg, var(--color-sol) 0 64%, transparent 64% 70%, var(--color-rialto-vivo) 70% 100%); }
     .subrayado-centro::after { left: 50%; transform: translateX(-50%); }
 
+    /*
+     * Fondo fotográfico claro: la foto del campo o de la sede con un velo claro encima
+     * para que el texto y las tarjetas blancas se lean igual que sobre el fondo liso.
+     * Uso: class="fondo-foto" style="--foto: url(...)"; con «fondo-foto-verde» el velo tira al verde Rialto.
+     */
+    .fondo-foto { background: linear-gradient(180deg, rgb(244 246 249 / 0.80), rgb(231 236 242 / 0.74)), var(--foto) center / cover no-repeat, var(--color-agua); }
+    .fondo-foto-verde { background-image: linear-gradient(180deg, rgb(244 246 249 / 0.80), rgb(220 235 228 / 0.76)), var(--foto); }
+    /* En computadora la foto queda fija y el contenido se desliza encima; en el celular se desplaza con la página */
+    @media (min-width: 1024px) { .fondo-foto-fijo { background-attachment: fixed; } }
+
     /* Compatibilidad con la versión anterior: la franja ahora es una línea amarilla fina */
     .franja { height: 4px; background: linear-gradient(90deg, var(--color-sol) 0 72%, var(--color-rialto-vivo) 72% 100%); }
     .franja-fina { height: 3px; }
