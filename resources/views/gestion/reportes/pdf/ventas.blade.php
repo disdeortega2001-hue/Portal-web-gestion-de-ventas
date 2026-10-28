@@ -9,13 +9,13 @@
     <tr>
         <td>Pedidos confirmados<span class="cifra">{{ $resumen['pedidos'] }}</span></td>
         <td>Unidades vendidas<span class="cifra">{{ number_format($resumen['unidades'], 0, ',', '.') }}</span></td>
-        <td>Subtotal (sin IVA)<span class="cifra">USD {{ number_format($f['subtotal'], 2, ',', '.') }}</span></td>
-        <td>IVA<span class="cifra">USD {{ number_format($f['impuesto'], 2, ',', '.') }}</span></td>
+        <td>Subtotal (sin impuestos)<span class="cifra">USD {{ number_format($f['subtotal'], 2, ',', '.') }}</span></td>
+        <td>Impuestos<span class="cifra">USD {{ number_format($f['impuesto'], 2, ',', '.') }}</span><span class="muted">IVA {{ number_format($f['iva'], 2, ',', '.') }} · IGTF {{ number_format($f['igtf'], 2, ',', '.') }}</span></td>
         <td>Total facturado<span class="cifra">USD {{ number_format($f['total'], 2, ',', '.') }}</span><span class="muted">Bs. {{ number_format($f['total_bs'], 2, ',', '.') }}</span></td>
     </tr>
 </table>
 @if($resumen['filtrado_por_producto'])
-    <p class="muted">Filtrado por producto: el monto del producto es USD {{ number_format($resumen['monto_lineas'], 2, ',', '.') }} (sin IVA). Los totales facturados corresponden a los pedidos completos que lo incluyen.</p>
+    <p class="muted">Filtrado por producto: el monto del producto es USD {{ number_format($resumen['monto_lineas'], 2, ',', '.') }} (sin impuestos). Los totales facturados corresponden a los pedidos completos que lo incluyen.</p>
 @endif
 
 @if($resumen['mas_vendidos']->isNotEmpty())

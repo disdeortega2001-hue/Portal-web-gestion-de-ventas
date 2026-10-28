@@ -1,6 +1,6 @@
 {{--
-    Tarjeta del catálogo: panel en verde Rialto claro y semitransparente que se eleva al pasar el cursor. El círculo azul lleva la existencia,
-    a la vista de un vistazo. Celular: horizontal (foto a la izquierda). Desde 640 px: vertical, en rejilla.
+    Tarjeta del catálogo: panel en verde Rialto claro y semitransparente que se eleva al pasar el cursor. La existencia
+    va en la etiqueta «Disponibles»; el impuesto se calcula en la cotización. Celular: horizontal (foto a la izquierda). Desde 640 px: vertical, en rejilla.
 --}}
 @php($agotado = $producto->estaAgotado())
 <article class="tarjeta-producto tarjeta-viva group grid h-full grid-cols-[7rem_1fr] gap-x-4 overflow-hidden p-3 sm:grid-cols-1 sm:gap-x-0 sm:p-0" id="producto-{{ $producto->id }}">
@@ -10,8 +10,6 @@
              @if($srcset = $producto->srcsetImagen()) srcset="{{ $srcset }}" sizes="(max-width: 639px) 112px, (max-width: 1023px) 45vw, 300px" @endif
              alt="" width="240" height="180" loading="lazy" decoding="async"
              @class(['size-full mix-blend-multiply transition-transform duration-500 ease-[var(--ease-salida)] group-hover:scale-[1.04]', 'object-contain p-2 sm:p-5' => $producto->imagen, 'object-contain p-4 sm:p-8 opacity-70' => ! $producto->imagen])>
-        {{-- Cuántas hay, en un círculo sobre la foto --}}
-        <span @class(['ruedo absolute -bottom-3 left-2 size-11 text-lg sm:-bottom-5 sm:left-4 sm:size-12 sm:text-lg', '!border-coral text-coral-tinta' => $agotado])>{{ $producto->stock }}</span>
     </a>
 
     <div class="flex min-w-0 flex-col gap-1 sm:px-4 sm:pt-8">
@@ -25,7 +23,7 @@
 
     <div class="col-start-2 mt-3 flex flex-wrap items-end justify-between gap-x-3 gap-y-2 border-t border-linea pt-3 sm:col-start-1 sm:mx-4 sm:mb-4 sm:mt-auto sm:pt-4">
         <div class="cifra">
-            <div class="text-2xl font-black leading-none text-tierra-oscura">@usd($producto->precio) <small class="font-sans text-sm font-semibold text-tinta-suave">+ IVA</small></div>
+            <div class="text-2xl font-black leading-none text-tierra-oscura">@usd($producto->precio)</div>
             <div class="mt-1 text-sm font-semibold text-tinta-suave">@bs($producto->precioBolivares())</div>
         </div>
 

@@ -74,7 +74,7 @@ class CompraYPagosTest extends TestCase
         [$usuario] = $this->clienteConLista();
 
         $this->actingAs($usuario)->get(route('compra.create'))->assertOk()
-            ->assertSeeInOrder(['Pago Móvil', 'Transferencia bancaria', 'Zelle', 'Efectivo en la tienda', 'Punto de venta en la tienda']);
+            ->assertSeeInOrder(['Pago Móvil', 'Transferencia bancaria', 'Zelle', 'Efectivo en dólares en la tienda', 'Punto de venta en la tienda']);
     }
 
     public function test_la_compra_crea_un_pedido_pendiente_sin_tocar_el_stock(): void

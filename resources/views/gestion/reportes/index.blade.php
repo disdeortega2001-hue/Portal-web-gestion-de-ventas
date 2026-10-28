@@ -83,11 +83,11 @@
     <section aria-label="Resumen de ventas" class="lobulo-tierra mt-6 grid overflow-hidden sm:grid-cols-2 xl:grid-cols-4">
         <div class="border-white/15 p-5 sm:border-r"><p class="text-sm font-bold text-white/75">Pedidos confirmados</p><p class="titular mt-2 text-[2rem] cifra">{{ $r['pedidos'] }}</p></div>
         <div class="border-t border-white/15 p-5 sm:border-t-0 xl:border-r"><p class="text-sm font-bold text-white/75">Unidades vendidas</p><p class="titular mt-2 text-[2rem] cifra">{{ number_format($r['unidades'], 0, ',', '.') }}</p></div>
-        <div class="border-t border-white/15 p-5 sm:border-r xl:border-t-0"><p class="text-sm font-bold text-white/75">IVA</p><p class="titular mt-2 text-[2rem] cifra">@usd($r['facturado']['impuesto'])</p></div>
+        <div class="border-t border-white/15 p-5 sm:border-r xl:border-t-0"><p class="text-sm font-bold text-white/75">Impuestos</p><p class="titular mt-2 text-[2rem] cifra">@usd($r['facturado']['impuesto'])</p><p class="mt-1 text-sm text-white/75 cifra">IVA @usd($r['facturado']['iva']) · IGTF @usd($r['facturado']['igtf'])</p></div>
         <div class="border-t border-white/15 bg-sol p-5 text-tinta xl:border-t-0"><p class="text-sm font-bold">Total facturado</p><p class="titular mt-2 text-[2rem] cifra">@usd($r['facturado']['total'])</p><p class="mt-1 text-sm cifra">@bs($r['facturado']['total_bs'])</p></div>
     </section>
     @if($r['filtrado_por_producto'])
-        <p class="apoyo mt-3 text-sm">Monto del producto filtrado: @usd($r['monto_lineas']) sin IVA. Los totales facturados son de los pedidos completos que lo incluyen.</p>
+        <p class="apoyo mt-3 text-sm">Monto del producto filtrado: @usd($r['monto_lineas']) sin impuestos. Los totales facturados son de los pedidos completos que lo incluyen.</p>
     @endif
 
     @if($r['por_vendedor']->isNotEmpty())

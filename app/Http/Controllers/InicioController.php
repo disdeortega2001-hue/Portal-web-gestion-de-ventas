@@ -59,7 +59,8 @@ class InicioController extends Controller
             'disponibles' => $productos->where('stock', '>', 0)->count(),
             'tasa' => (float) ($tasa?->valor ?? 0),
             'tasaActualizada' => $tasa?->updated_at,
-            'iva' => (float) Configuracion::valor('porcentaje_iva', 16),
+            'iva' => Configuracion::porcentajeIva(),
+            'igtf' => Configuracion::porcentajeIgtf(),
         ]);
     }
 }

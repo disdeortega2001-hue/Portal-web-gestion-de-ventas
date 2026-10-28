@@ -46,6 +46,12 @@ class Configuracion extends Model
         return (float) static::valor('porcentaje_iva', 16);
     }
 
+    /** IGTF: impuesto a los pagos en divisas (dólares). */
+    public static function porcentajeIgtf(): float
+    {
+        return (float) static::valor('porcentaje_igtf', 3);
+    }
+
     public static function umbralStockBajo(): int
     {
         return (int) static::valor('umbral_stock_bajo', 5);

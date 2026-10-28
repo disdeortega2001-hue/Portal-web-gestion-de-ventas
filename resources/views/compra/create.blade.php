@@ -36,8 +36,9 @@
                         <span>
                             <span class="block font-extrabold uppercase">{{ $metodo['nombre'] }}</span>
                             <span class="apoyo block text-sm">{{ $metodo['descripcion'] }}</span>
+                            @php($r = $resumenes[$metodo['moneda']])
                             <span class="mt-2 block text-sm font-bold text-tierra cifra">
-                                {{ $metodo['moneda'] === 'USD' ? 'Pagas USD ' . number_format((float) $resumen['total'], 2, ',', '.') : 'Pagas Bs. ' . number_format((float) $resumen['total_bs'], 2, ',', '.') }}
+                                {{ $metodo['moneda'] === 'USD' ? 'Pagas USD ' . number_format((float) $r['total'], 2, ',', '.') . ' (con IGTF)' : 'Pagas Bs. ' . number_format((float) $r['total_bs'], 2, ',', '.') . ' (con IVA)' }}
                             </span>
                         </span>
                     </label>
@@ -79,7 +80,7 @@
         <section class="lobulo p-4 sm:p-5" aria-labelledby="t-productos">
             <h2 id="t-productos" class="seccion-titulo">Tu pedido</h2>
             <ul class="mt-3 divide-y divide-linea">
-                @foreach($resumen['lineas'] as $linea)
+                @foreach($resumenes['USD']['lineas'] as $linea)
                     <li class="flex justify-between gap-3 py-2 text-sm">
                         <span><span class="font-bold cifra">{{ $linea['cantidad'] }} ×</span> {{ $linea['producto']->nombre }}</span>
                         <span class="whitespace-nowrap font-bold cifra">@usd($linea['subtotal'])</span>
@@ -88,7 +89,10 @@
             </ul>
             <a href="{{ route('carrito.index') }}" class="enlace mt-2 inline-block text-sm">Cambiar cantidades</a>
         </section>
-        @include('partials.resumen', ['r' => $resumen])
+        {{-- El resumen sigue al método elegido: IGTF si paga en dólares, IVA si paga en bolívares --}}
+        @php($monedas = collect($metodos)->map(fn ($m) => $m['moneda']))
+        <div x-show="@js($monedas)[metodo] !== 'VES'">@include('partials.resumen', ['r' => $resumenes['USD']])</div>
+        <div x-show="@js($monedas)[metodo] === 'VES'" x-cloak>@include('partials.resumen', ['r' => $resumenes['VES']])</div>
         <button class="btn btn-sol btn-grande w-full" data-cargando="Registrando tu pedido…">Confirmar compra <span class="chip"><x-icono nombre="check" class="size-4" /></span></button>
         <p class="apoyo text-sm">Al confirmar aceptas los <a href="{{ route('legal.terminos') }}" class="enlace">términos de venta</a>. El precio queda fijo en tu pedido.</p>
     </div>

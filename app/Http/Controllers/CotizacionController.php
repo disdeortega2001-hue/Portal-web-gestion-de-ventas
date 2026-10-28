@@ -56,7 +56,7 @@ class CotizacionController extends Controller
         }
 
         $observaciones = implode("\n", array_filter([$request->input('observaciones'), $notaContacto])) ?: null;
-        $cotizacion = $this->cotizaciones->crear($cliente, $lineas, $observaciones);
+        $cotizacion = $this->cotizaciones->crear($cliente, $lineas, $observaciones, $this->carrito->moneda());
         $this->carrito->vaciar();
 
         // Invitado: recordar sus datos en este teléfono solo si lo pidió; si desmarcó la casilla, se borran

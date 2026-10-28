@@ -7,37 +7,60 @@
     $actualizado = fn ($clave) => isset($configuraciones[$clave]) ? $configuraciones[$clave]->updated_at->format('d/m/Y h:i a') : 'nunca';
 @endphp
 <x-encabezado titulo="Tasa, IVA y pagos">
-    <span class="block max-w-[70ch]">Los cambios se aplican de inmediato en el catálogo y en las cotizaciones. Las cotizaciones y pedidos ya emitidos conservan la tasa y el IVA con que se crearon.</span>
+    <span class="block max-w-[70ch]">Los cambios se aplican de inmediato en el catálogo y en las cotizaciones. Las cotizaciones y pedidos ya emitidos conservan la tasa y el impuesto con que se crearon.</span>
 </x-encabezado>
 
+{{-- Formulario aparte (no se anidan formularios): lo envía el botón «Traer del BCV» --}}
+<form id="form-bcv" method="POST" action="{{ route('admin.configuracion.tasa-bcv') }}">@csrf</form>
+
 <form method="POST" action="{{ route('admin.configuracion.update') }}" class="needs-validation max-w-4xl space-y-5" novalidate
-      x-data="{ tasa: {{ (float) $valor('tasa_cambio', 0) }}, iva: {{ (float) $valor('porcentaje_iva', 16) }}, f: new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }">
+      x-data="{ tasa: {{ (float) $valor('tasa_cambio', 0) }}, iva: {{ (float) $valor('porcentaje_iva', 16) }}, igtf: {{ (float) $valor('porcentaje_igtf', 3) }}, f: new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }">
     @csrf @method('PUT')
 
     <section class="lobulo p-5 lg:p-6" aria-labelledby="t-moneda">
-        <h2 id="t-moneda" class="seccion-titulo">Moneda e impuesto</h2>
-        <div class="mt-4 grid gap-5 sm:grid-cols-2">
-            <div>
-                <label for="tasa_cambio" class="etiqueta">Tasa oficial USD → Bs. *</label>
-                <div class="grupo-campo">
+        <h2 id="t-moneda" class="seccion-titulo">Moneda e impuestos</h2>
+        @php($fuente = $configuraciones['tasa_fuente']->valor ?? 'manual')
+        <div class="mt-4">
+            <label for="tasa_cambio" class="etiqueta">Tasa oficial USD → Bs. *</label>
+            <div class="flex flex-wrap items-start gap-3">
+                <div class="grupo-campo max-w-xs flex-1">
                     <span class="unidad">Bs.</span>
                     <input type="number" id="tasa_cambio" name="tasa_cambio" value="{{ $valor('tasa_cambio') }}" x-model.number="tasa" class="campo cifra @error('tasa_cambio') is-invalid @enderror" required min="0.0001" step="0.0001">
                 </div>
-                <p @class(['error-campo', '!block' => $errors->has('tasa_cambio')])>@error('tasa_cambio'){{ $message }}@else Mayor que cero, hasta 4 decimales. @enderror</p>
-                <p class="ayuda">Por 1 USD. Última actualización: <span class="cifra">{{ $actualizado('tasa_cambio') }}</span>.</p>
+                <button type="submit" form="form-bcv" class="btn btn-tierra" data-cargando="Consultando el BCV…"><x-icono nombre="restaurar" class="size-4" /> Traer del BCV</button>
+            </div>
+            <p @class(['error-campo', '!block' => $errors->has('tasa_cambio')])>@error('tasa_cambio'){{ $message }}@else Mayor que cero, hasta 4 decimales. @enderror</p>
+            <p class="ayuda">Por 1 USD.
+                @if($fuente === 'BCV')
+                    <strong>Tomada del Banco Central de Venezuela</strong>@isset($configuraciones['tasa_fecha_valor']) (fecha valor <span class="cifra">{{ \Illuminate\Support\Carbon::parse($configuraciones['tasa_fecha_valor']->valor)->format('d/m/Y') }}</span>)@endisset.
+                @else
+                    Escrita a mano.
+                @endif
+                Última actualización: <span class="cifra">{{ $actualizado('tasa_cambio') }}</span>. El portal la trae sola del BCV a las 7:00 y a las 17:00; si escribes otra, se usa la tuya hasta la próxima actualización.</p>
+        </div>
+        <div class="mt-5 grid gap-5 sm:grid-cols-2">
+            <div>
+                <label for="porcentaje_igtf" class="etiqueta">IGTF · pagos en dólares *</label>
+                <div class="grupo-campo">
+                    <input type="number" id="porcentaje_igtf" name="porcentaje_igtf" value="{{ $valor('porcentaje_igtf', 3) }}" x-model.number="igtf" class="campo cifra @error('porcentaje_igtf') is-invalid @enderror" required min="0" max="100" step="0.01">
+                    <span class="unidad">%</span>
+                </div>
+                <p @class(['error-campo', '!block' => $errors->has('porcentaje_igtf')])>@error('porcentaje_igtf'){{ $message }}@else Entre 0 y 100. @enderror</p>
+                <p class="ayuda">Zelle y efectivo en dólares.</p>
             </div>
             <div>
-                <label for="porcentaje_iva" class="etiqueta">IVA *</label>
+                <label for="porcentaje_iva" class="etiqueta">IVA · pagos en bolívares *</label>
                 <div class="grupo-campo">
                     <input type="number" id="porcentaje_iva" name="porcentaje_iva" value="{{ $valor('porcentaje_iva', 16) }}" x-model.number="iva" class="campo cifra @error('porcentaje_iva') is-invalid @enderror" required min="0" max="100" step="0.01">
                     <span class="unidad">%</span>
                 </div>
                 <p @class(['error-campo', '!block' => $errors->has('porcentaje_iva')])>@error('porcentaje_iva'){{ $message }}@else Entre 0 y 100. @enderror</p>
+                <p class="ayuda">Pago Móvil, transferencia y punto de venta.</p>
             </div>
         </div>
         {{-- Ejemplo orientativo para revisar los valores antes de guardar (el cálculo oficial lo hace el servidor) --}}
         <p class="mt-4 rounded-[3px] bg-laguna-clara px-4 py-3 text-sm text-laguna-tinta cifra" id="ejemplo" aria-live="polite"
-           x-text="'Ejemplo: un producto de USD 100,00 queda en USD ' + f.format(100 + iva) + ' con IVA, equivalente a Bs. ' + f.format((100 + iva) * (tasa || 0)) + '.'"></p>
+           x-text="'Ejemplo: un producto de USD 100,00 queda en USD ' + f.format(100 + igtf) + ' si paga en dólares (IGTF), o en Bs. ' + f.format((100 + iva) * (tasa || 0)) + ' si paga en bolívares (IVA).'"></p>
     </section>
 
     <section class="lobulo p-5 lg:p-6" aria-labelledby="t-inv">
@@ -49,28 +72,6 @@
         </div>
         <p @class(['error-campo', '!block' => $errors->has('umbral_stock_bajo')])>@error('umbral_stock_bajo'){{ $message }}@else Número entero, 0 o más. @enderror</p>
         <p class="ayuda">Se usa en el tablero, en Inventario y en la insignia «Quedan N» del catálogo.</p>
-    </section>
-
-    <section class="lobulo p-5 lg:p-6" aria-labelledby="t-desc">
-        <h2 id="t-desc" class="seccion-titulo">Descuento por volumen</h2>
-        <div class="mt-4 grid gap-5 sm:grid-cols-2">
-            <div>
-                <label for="descuento_porcentaje" class="etiqueta">Descuento *</label>
-                <div class="grupo-campo">
-                    <input type="number" id="descuento_porcentaje" name="descuento_porcentaje" value="{{ $valor('descuento_porcentaje', 0) }}" class="campo cifra @error('descuento_porcentaje') is-invalid @enderror" required min="0" max="50" step="0.01">
-                    <span class="unidad">%</span>
-                </div>
-                <p @class(['error-campo', '!block' => $errors->has('descuento_porcentaje')])>@error('descuento_porcentaje'){{ $message }}@else Entre 0 y 50. Usa 0 para desactivarlo. @enderror</p>
-            </div>
-            <div>
-                <label for="descuento_monto_minimo" class="etiqueta">Cuando el subtotal alcance *</label>
-                <div class="grupo-campo">
-                    <span class="unidad">USD</span>
-                    <input type="number" id="descuento_monto_minimo" name="descuento_monto_minimo" value="{{ $valor('descuento_monto_minimo', 0) }}" class="campo cifra @error('descuento_monto_minimo') is-invalid @enderror" required min="0" step="0.01">
-                </div>
-                <p @class(['error-campo', '!block' => $errors->has('descuento_monto_minimo')])>@error('descuento_monto_minimo'){{ $message }}@else 0 o más. @enderror</p>
-            </div>
-        </div>
     </section>
 
     <section class="lobulo p-5 lg:p-6" aria-labelledby="t-contacto">

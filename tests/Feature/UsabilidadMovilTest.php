@@ -116,7 +116,7 @@ class UsabilidadMovilTest extends TestCase
         $this->actingAs($this->crearUsuario('directivo'))
             ->put(route('admin.configuracion.update'), [
                 'tasa_cambio' => '36,50', 'porcentaje_iva' => '16', 'umbral_stock_bajo' => '5',
-                'descuento_porcentaje' => '5', 'descuento_monto_minimo' => '500',
+                'porcentaje_igtf' => '3',
                 'telefono_whatsapp' => '+58 414-123 4567',
             ])
             ->assertSessionHasNoErrors();

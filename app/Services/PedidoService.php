@@ -9,6 +9,7 @@ use App\Models\MovimientoInventario;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Usuario;
+use App\Support\MetodosPago;
 use Illuminate\Support\Facades\DB;
 use LogicException;
 
@@ -48,7 +49,8 @@ class PedidoService
                     'cantidad' => $d->cantidad,
                 ]),
                 $cotizacion->id,
-                ['origen' => Pedido::DESDE_COTIZACION]
+                ['origen' => Pedido::DESDE_COTIZACION],
+                $cotizacion->moneda_pago
             );
 
             $cotizacion->update(['estado' => Cotizacion::CONVERTIDA, 'id_usuario' => $vendedor->id]);
@@ -62,9 +64,9 @@ class PedidoService
      *
      * @param  array<int, array{id_producto: int, cantidad: int}>  $items
      */
-    public function crearDirecto(Cliente $cliente, array $items, Usuario $vendedor): Pedido
+    public function crearDirecto(Cliente $cliente, array $items, Usuario $vendedor, string $moneda = CalculadoraComercial::USD): Pedido
     {
-        return DB::transaction(function () use ($cliente, $items, $vendedor) {
+        return DB::transaction(function () use ($cliente, $items, $vendedor, $moneda) {
             $productos = Producto::whereIn('id', array_column($items, 'id_producto'))->get()->keyBy('id');
 
             $lineas = collect($items)->map(fn ($item) => [
@@ -73,7 +75,7 @@ class PedidoService
                 'cantidad' => (int) $item['cantidad'],
             ]);
 
-            return $this->registrarPedido($cliente->id, $vendedor, $lineas);
+            return $this->registrarPedido($cliente->id, $vendedor, $lineas, null, [], $moneda);
         }, self::REINTENTOS);
     }
 
@@ -97,7 +99,7 @@ class PedidoService
                 'metodo_pago' => $metodoPago,
                 'entrega' => $entrega,
                 'observaciones' => $observaciones,
-            ]);
+            ], MetodosPago::moneda($metodoPago));
         }, self::REINTENTOS);
     }
 
@@ -215,9 +217,9 @@ class PedidoService
     }
 
     /** Guarda cabecera y detalle con los totales del motor de cálculo. */
-    private function registrarPedido(int $idCliente, ?Usuario $vendedor, $lineas, ?int $idCotizacion = null, array $extra = []): Pedido
+    private function registrarPedido(int $idCliente, ?Usuario $vendedor, $lineas, ?int $idCotizacion = null, array $extra = [], string $moneda = CalculadoraComercial::USD): Pedido
     {
-        $calculo = $this->calculadora->calcular($lineas);
+        $calculo = $this->calculadora->calcular($lineas, $moneda);
 
         $pedido = Pedido::create($extra + [
             'id_cliente' => $idCliente,
@@ -226,7 +228,9 @@ class PedidoService
             'fecha' => now(),
             'subtotal' => $calculo['subtotal'],
             'descuento' => $calculo['descuento'],
-            'porcentaje_iva' => $calculo['porcentaje_iva'],
+            'moneda_pago' => $calculo['moneda_pago'],
+            'tipo_impuesto' => $calculo['tipo_impuesto'],
+            'porcentaje_impuesto' => $calculo['porcentaje_impuesto'],
             'impuesto' => $calculo['impuesto'],
             'total' => $calculo['total'],
             'tasa_cambio' => $calculo['tasa_cambio'],

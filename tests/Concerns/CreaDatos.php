@@ -17,15 +17,14 @@ use Illuminate\Support\Str;
  */
 trait CreaDatos
 {
-    /** Parámetros de negocio por defecto: tasa 36,50 · IVA 16 % · umbral 5 · 5 % de descuento desde USD 500. */
+    /** Parámetros de negocio por defecto: tasa 36,50 · IVA 16 % (pagos en Bs.) · IGTF 3 % (pagos en $) · umbral 5. */
     protected function configurar(array $valores = []): void
     {
         $base = [
             'tasa_cambio' => '36.50',
             'porcentaje_iva' => '16',
             'umbral_stock_bajo' => '5',
-            'descuento_porcentaje' => '5',
-            'descuento_monto_minimo' => '500',
+            'porcentaje_igtf' => '3',
         ];
 
         foreach (array_merge($base, $valores) as $clave => $valor) {
@@ -71,12 +70,12 @@ trait CreaDatos
     }
 
     /** Crea un pedido de mostrador y, si se pide, confirma la venta (descuenta stock). */
-    protected function venta(Usuario $vendedor, Cliente $cliente, array $lineas, bool $confirmar = true): Pedido
+    protected function venta(Usuario $vendedor, Cliente $cliente, array $lineas, bool $confirmar = true, string $moneda = 'VES'): Pedido
     {
         $servicio = app(PedidoService::class);
         $items = array_map(fn ($l) => ['id_producto' => $l[0]->id, 'cantidad' => $l[1]], $lineas);
 
-        $pedido = $servicio->crearDirecto($cliente, $items, $vendedor);
+        $pedido = $servicio->crearDirecto($cliente, $items, $vendedor, $moneda);
 
         return $confirmar ? $servicio->confirmarVenta($pedido, $vendedor) : $pedido;
     }

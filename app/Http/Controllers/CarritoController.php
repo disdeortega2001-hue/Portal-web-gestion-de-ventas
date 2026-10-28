@@ -34,6 +34,14 @@ class CarritoController extends Controller
         ]);
     }
 
+    /** «Pagaré en dólares / en bolívares»: cambia el impuesto del resumen (IGTF o IVA). */
+    public function moneda(Request $request): RedirectResponse
+    {
+        $this->carrito->elegirMoneda((string) $request->input('moneda'));
+
+        return redirect()->route('carrito.index');
+    }
+
     /**
      * Agrega desde el catálogo. Con JavaScript responde JSON (sin recargar la página);
      * sin JavaScript vuelve a la misma tarjeta del catálogo (#producto-ID) para no perder la posición.

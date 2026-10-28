@@ -32,7 +32,8 @@ class CompraController extends Controller
         }
 
         return view('compra.create', [
-            'resumen' => $this->carrito->resumen(),
+            // Un resumen por moneda: en dólares lleva IGTF y en bolívares IVA; el método elegido decide cuál aplica
+            'resumenes' => ['USD' => $this->carrito->resumen('USD'), 'VES' => $this->carrito->resumen('VES')],
             'cliente' => $request->user()->cliente,
             'metodos' => MetodosPago::disponibles(),
         ]);

@@ -44,9 +44,9 @@ class ReporteService
             ->selectRaw('COUNT(DISTINCT pedidos.id) AS pedidos, COALESCE(SUM(detalle_pedidos.cantidad), 0) AS unidades, COALESCE(SUM(detalle_pedidos.subtotal), 0) AS monto')
             ->first();
 
-        // Totales facturados (con descuento e IVA) de los pedidos del rango
+        // Totales facturados de los pedidos del rango, con el impuesto separado en IVA (pagos en Bs.) e IGTF (pagos en $)
         $pedidos = $this->pedidosConfirmados($f)
-            ->selectRaw('COALESCE(SUM(subtotal),0) AS subtotal, COALESCE(SUM(descuento),0) AS descuento, COALESCE(SUM(impuesto),0) AS impuesto, COALESCE(SUM(total),0) AS total, COALESCE(SUM(total_bs),0) AS total_bs')
+            ->selectRaw('COALESCE(SUM(subtotal),0) AS subtotal, COALESCE(SUM(descuento),0) AS descuento, COALESCE(SUM(impuesto),0) AS impuesto, COALESCE(SUM(CASE WHEN tipo_impuesto = \'IVA\' THEN impuesto ELSE 0 END),0) AS iva, COALESCE(SUM(CASE WHEN tipo_impuesto = \'IGTF\' THEN impuesto ELSE 0 END),0) AS igtf, COALESCE(SUM(total),0) AS total, COALESCE(SUM(total_bs),0) AS total_bs')
             ->first();
 
         $porVendedor = $this->pedidosConfirmados($f)
@@ -70,7 +70,7 @@ class ReporteService
             'pedidos' => (int) $lineas->pedidos,
             'unidades' => (int) $lineas->unidades,
             'monto_lineas' => (float) $lineas->monto,
-            'facturado' => $pedidos->only(['subtotal', 'descuento', 'impuesto', 'total', 'total_bs']),
+            'facturado' => $pedidos->only(['subtotal', 'impuesto', 'iva', 'igtf', 'total', 'total_bs']),
             'por_vendedor' => $porVendedor,
             // Con filtro de producto, los totales facturados incluyen otros productos de esos pedidos
             'filtrado_por_producto' => ! empty($f['id_producto']),

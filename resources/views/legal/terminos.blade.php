@@ -3,9 +3,8 @@
 @section('descripcion', 'Cómo funcionan los precios, las cotizaciones y los pedidos en el portal de Inversiones Rialto 7.')
 
 @php
-    $iva = rtrim(rtrim(number_format((float) \App\Models\Configuracion::valor('porcentaje_iva', 16), 2, ',', ''), '0'), ',');
-    $descuento = (float) \App\Models\Configuracion::valor('descuento_porcentaje', 0);
-    $minimo = (float) \App\Models\Configuracion::valor('descuento_monto_minimo', 0);
+    $iva = rtrim(rtrim(number_format(\App\Models\Configuracion::porcentajeIva(), 2, ',', ''), '0'), ',');
+    $igtf = rtrim(rtrim(number_format(\App\Models\Configuracion::porcentajeIgtf(), 2, ',', ''), '0'), ',');
 @endphp
 
 @section('cabecera')
@@ -25,18 +24,16 @@
 
     <h2 id="precios">Precios</h2>
     <ul>
-        <li>Los precios se publican en dólares estadounidenses (USD) y no incluyen el IVA, que hoy es de {{ $iva }} %.</li>
-        <li>El monto en bolívares se calcula a la tasa oficial del día que registra la empresa.</li>
-        @if($descuento > 0)
-            <li>Las compras con subtotal desde USD {{ number_format($minimo, 2, ',', '.') }} reciben un descuento por volumen de {{ rtrim(rtrim(number_format($descuento, 2, ',', ''), '0'), ',') }} %, que se aplica antes del IVA.</li>
-        @endif
+        <li>Los precios se publican en dólares estadounidenses (USD) sin impuestos.</li>
+        <li>Si pagas en dólares (Zelle o efectivo) se cobra el IGTF, hoy de {{ $igtf }} %. Si pagas en bolívares (Pago Móvil, transferencia o punto de venta) se cobra el IVA, hoy de {{ $iva }} %.</li>
+        <li>El monto en bolívares se calcula a la tasa oficial del Banco Central de Venezuela (BCV) del día.</li>
         <li>Todos los cálculos los hace el sistema; lo que ves en pantalla es lo que figura en el documento.</li>
     </ul>
 
     <h2 id="cotizaciones">Cotizaciones</h2>
     <ul>
         <li>Una cotización es una solicitud: no es una factura ni reserva la mercancía.</li>
-        <li>Cada cotización conserva los precios, el IVA y la tasa con que se emitió, aunque luego cambien.</li>
+        <li>Cada cotización conserva los precios, el impuesto (IVA o IGTF) y la tasa con que se emitió, aunque luego cambien.</li>
         <li>Un vendedor revisa la existencia y te contacta por teléfono o WhatsApp para confirmarla.</li>
     </ul>
 

@@ -46,6 +46,7 @@ Route::get('/productos/{producto}/stock', [CatalogoController::class, 'stock'])
 
 Route::prefix('carrito')->name('carrito.')->controller(CarritoController::class)->group(function () {
     Route::get('/', 'index')->name('index');
+    Route::post('/moneda', 'moneda')->name('moneda');   // Antes de /{producto}, que la tomaría como un producto
     Route::post('/{producto}', 'agregar')->name('agregar');
     Route::patch('/{producto}', 'actualizar')->name('actualizar');
     Route::delete('/{producto}', 'quitar')->name('quitar');
@@ -150,6 +151,7 @@ Route::middleware(['auth', 'rol:administrativo,directivo'])->prefix('admin')->na
 
     Route::get('configuracion', [Admin\ConfiguracionController::class, 'edit'])->name('configuracion.edit');
     Route::put('configuracion', [Admin\ConfiguracionController::class, 'update'])->name('configuracion.update');
+    Route::post('configuracion/tasa-bcv', [Admin\ConfiguracionController::class, 'tasaBcv'])->middleware('throttle:10,1')->name('configuracion.tasa-bcv');
 });
 
 // 6. SOLO DIRECTIVO ---------------------------------------------------------

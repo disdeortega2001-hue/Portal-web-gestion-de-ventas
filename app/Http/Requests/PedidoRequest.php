@@ -29,6 +29,8 @@ class PedidoRequest extends FormRequest
             'items.*' => ['array'],
             'items.*.id_producto' => ['required', 'integer', 'distinct', Rule::exists('productos', 'id')->whereNull('deleted_at')],
             'items.*.cantidad' => ['required', 'integer', 'min:1', 'max:10000'],
+            // En dólares se cobra IGTF; en bolívares, IVA
+            'moneda_pago' => ['required', 'in:USD,VES'],
         ];
     }
 
@@ -38,6 +40,7 @@ class PedidoRequest extends FormRequest
             'id_cliente.required' => 'Selecciona el cliente.',
             'id_cliente.exists' => 'El cliente seleccionado no existe.',
             'items.required' => 'Agrega al menos un producto.',
+            'moneda_pago.required' => 'Indica si el cliente paga en dólares o en bolívares.',
             'items.*.id_producto.distinct' => 'Hay un producto repetido; suma las cantidades en una sola línea.',
             'items.*.id_producto.exists' => 'Uno de los productos no existe.',
             'items.*.cantidad.min' => 'La cantidad mínima es 1.',

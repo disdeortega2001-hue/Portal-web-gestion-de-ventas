@@ -57,9 +57,8 @@ class PedidoController extends Controller
                 ->get(['id', 'codigo_fabrica', 'nombre', 'marca', 'precio', 'stock']),
             'parametros' => [
                 'tasa' => (float) Configuracion::valor('tasa_cambio', 0),
-                'iva' => (float) Configuracion::valor('porcentaje_iva', 16),
-                'descuento' => (float) Configuracion::valor('descuento_porcentaje', 0),
-                'minimo' => (float) Configuracion::valor('descuento_monto_minimo', 0),
+                'iva' => Configuracion::porcentajeIva(),
+                'igtf' => Configuracion::porcentajeIgtf(),
             ],
         ]);
     }
@@ -69,7 +68,8 @@ class PedidoController extends Controller
         $pedido = $this->pedidos->crearDirecto(
             Cliente::findOrFail($request->integer('id_cliente')),
             $request->input('items'),
-            $request->user()
+            $request->user(),
+            $request->input('moneda_pago', 'USD')
         );
 
         return redirect()->route('gestion.pedidos.show', $pedido)->with('exito', "Pedido {$pedido->codigo} creado.");

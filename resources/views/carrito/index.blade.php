@@ -73,6 +73,18 @@
     </div>
 
     <div class="space-y-5 lg:sticky lg:top-6 lg:self-start">
+        {{-- La moneda de pago define el impuesto: IGTF en dólares, IVA en bolívares --}}
+        <form method="POST" action="{{ route('carrito.moneda') }}" class="lobulo p-3" aria-label="Moneda de pago">
+            @csrf
+            <p class="px-1 text-sm font-bold">¿Cómo piensas pagar?</p>
+            <div class="mt-2 grid grid-cols-2 gap-2">
+                @foreach(['USD' => ['En dólares', 'IGTF 3 %'], 'VES' => ['En bolívares', 'IVA 16 %']] as $valor => [$texto, $nota])
+                    <button name="moneda" value="{{ $valor }}" @class(['rounded-[6px] border px-3 py-2 text-left', 'border-tierra bg-tierra text-white' => $resumen['moneda_pago'] === $valor, 'border-linea bg-white hover:border-tierra' => $resumen['moneda_pago'] !== $valor]) @if($resumen['moneda_pago'] === $valor) aria-pressed="true" @endif>
+                        <span class="block font-extrabold">{{ $texto }}</span><span class="block text-xs opacity-80">{{ $nota }}</span>
+                    </button>
+                @endforeach
+            </div>
+        </form>
         @include('partials.resumen', ['r' => $resumen])
 
         {{-- Comprar: pide la cuenta en ese momento (ingresar o registrarse) y vuelve a la compra --}}

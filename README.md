@@ -591,3 +591,25 @@ Total al 28/10/2026: **127 pruebas, 556 verificaciones**, todas aprobadas.
 **Tarjetas de productos en verde Rialto:** las tarjetas del catálogo, de «Los más pedidos» y el recuadro de la foto en la ficha usan el verde del logo claro y semitransparente (`.tarjeta-producto`), sobre las fotos de fondo.
 
 Total al 28/10/2026: **129 pruebas, 564 verificaciones**, todas aprobadas.
+
+## 18. Impuesto según la moneda de pago y tasa del BCV (28/10/2026)
+
+- **IGTF o IVA según cómo paga el cliente:**
+  - pago en dólares (Zelle, efectivo en dólares): **IGTF 3 %**, sin IVA;
+  - pago en bolívares (Pago Móvil, transferencia, punto de venta): **IVA 16 %**;
+  - cada cotización y pedido guarda `moneda_pago`, `tipo_impuesto` y `porcentaje_impuesto` (migración `2026_10_28_000002_impuesto_segun_moneda`).
+- **Dónde se elige la moneda:**
+  - **Cotización:** el cliente elige «en dólares / en bolívares» en Mi cotización.
+  - **Compra:** el método de pago define la moneda.
+  - **Venta de mostrador:** el vendedor elige la moneda en el formulario.
+- **Catálogo:** muestra solo el precio en USD y Bs. El impuesto aparece en la cotización y en la compra.
+- **Descuento por volumen:** se eliminó.
+- **Tasa oficial del BCV (`TasaBcvService`, comando `tasa:bcv`):**
+  - se lee de www.bcv.org.ve con su fecha valor y se actualiza sola a las 7:00 y a las 17:00 (programador);
+  - el botón «Traer del BCV» de la configuración la actualiza en el momento;
+  - si el BCV no responde, queda la tasa anterior; se puede escribir a mano.
+  - **Certificados:** la conexión es segura y nunca desactiva la verificación. `resources/certificados/cacert.pem` reúne los certificados raíz de Mozilla (curl.se/ca) y el intermedio de Sectigo que el servidor del BCV no envía.
+- **Tarjetas y ficha:** se quitó el círculo con la existencia; la cantidad sigue en la etiqueta «Disponibles».
+
+Total al 28/10/2026: **136 pruebas, 588 verificaciones**, todas aprobadas.
+

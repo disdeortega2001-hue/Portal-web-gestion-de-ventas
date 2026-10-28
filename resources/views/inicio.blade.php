@@ -118,7 +118,7 @@
                 <p class="mt-5 max-w-lg text-lg text-tinta-suave">{{ $estrella->descripcion ?: 'Equipo original con el respaldo directo del fabricante.' }}</p>
                 <dl class="mt-6 flex flex-wrap gap-x-10 gap-y-4">
                     <div><dt class="text-sm font-semibold text-tinta-suave">Código de fábrica</dt><dd class="text-xl font-black text-tierra cifra">{{ $estrella->codigo_fabrica }}</dd></div>
-                    <div><dt class="text-sm font-semibold text-tinta-suave">Precio</dt><dd class="text-xl font-black cifra">@usd($estrella->precio) <span class="text-sm font-semibold text-tinta-suave">+ IVA</span></dd></div>
+                    <div><dt class="text-sm font-semibold text-tinta-suave">Precio</dt><dd class="text-xl font-black cifra">@usd($estrella->precio)</dd></div>
                     <div><dt class="text-sm font-semibold text-tinta-suave">Disponibles</dt><dd class="text-xl font-black cifra">{{ $estrella->stock }}</dd></div>
                 </dl>
                 <a href="{{ route('catalogo.show', $estrella) }}" class="btn btn-tierra mt-8">Saber más <span class="chip"><x-icono nombre="flecha" class="size-4" /></span></a>
@@ -174,9 +174,9 @@
                     @if($tasa > 0)
                         {{-- Los precios en bolívares salen de esta tasa: se muestra con su fecha --}}
                         <p class="mt-3 inline-flex flex-wrap items-center gap-x-2 rounded-[6px] bg-white px-3 py-1.5 text-sm ring-1 ring-linea">
-                            <span class="font-extrabold uppercase tracking-[0.06em] text-tierra">Tasa del día</span>
+                            <span class="font-extrabold uppercase tracking-[0.06em] text-tierra">Tasa BCV</span>
                             <span class="cifra font-black">@bs($tasa)</span>
-                            <span class="text-tinta-suave">por dólar · IVA {{ rtrim(rtrim(number_format($iva, 2, ',', ''), '0'), ',') }} %@if($tasaActualizada) · {{ $tasaActualizada->format('d/m/Y') }}@endif</span>
+                            <span class="text-tinta-suave">por dólar @if($tasaActualizada)· {{ $tasaActualizada->format('d/m/Y') }}@endif</span>
                         </p>
                     @endif
                 </div>
@@ -223,7 +223,7 @@
     <div class="relative mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
         <h2 id="t-pasos" class="titular subrayado text-4xl sm:text-5xl" data-revelar>Tu cotización en <em>tres pasos</em></h2>
         <ol class="mt-12 grid gap-8 sm:grid-cols-3">
-            @foreach([['Elige', 'Busca por código o modelo y agrega los repuestos.'], ['Revisa', 'Ves el subtotal, el IVA y el total en dólares y bolívares.'], ['Envía', 'Recibes tu cotización en PDF y te contactamos por WhatsApp.']] as $i => [$paso, $texto])
+            @foreach([['Elige', 'Busca por código o modelo y agrega los repuestos.'], ['Revisa', 'Eliges si pagas en dólares o en bolívares y ves el impuesto y el total al instante.'], ['Envía', 'Recibes tu cotización en PDF y te contactamos por WhatsApp.']] as $i => [$paso, $texto])
                 <li class="rounded-[10px] border border-white/15 bg-white/5 p-7 backdrop-blur-sm" data-revelar style="--orden:{{ $i }}">
                     <span class="text-6xl font-black text-sol cifra">0{{ $i + 1 }}</span>
                     <p class="mt-3 text-2xl font-black uppercase">{{ $paso }}</p>

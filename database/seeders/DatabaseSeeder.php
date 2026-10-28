@@ -50,11 +50,11 @@ class DatabaseSeeder extends Seeder
     private function configuraciones(): void
     {
         $valores = [
+            // Tasa de referencia para los datos de prueba; el portal la actualiza sola desde el BCV (tasa:bcv)
             ['tasa_cambio', '36.50', 'Tasa oficial USD → Bs. (BCV)'],
-            ['porcentaje_iva', '16', 'Porcentaje de IVA aplicado a las ventas'],
+            ['porcentaje_iva', '16', 'IVA de los pagos en bolívares'],
+            ['porcentaje_igtf', '3', 'IGTF de los pagos en dólares'],
             ['umbral_stock_bajo', '5', 'Unidades a partir de las cuales se alerta bajo stock'],
-            ['descuento_porcentaje', '5', 'Descuento por volumen (%)'],
-            ['descuento_monto_minimo', '500', 'Subtotal mínimo en USD para aplicar el descuento'],
             // Número de atención que entregó la empresa; se cambia en Administración → Tasa, IVA y contacto
             ['telefono_whatsapp', '04129477195', 'WhatsApp de atención (0414-1234567); vacío oculta los botones de contacto'],
         ];
@@ -132,7 +132,8 @@ class DatabaseSeeder extends Seeder
 
             $vendedor = $vendedores[$i % 2];
             // Cobrado en la tienda: el pago queda verificado y la venta se confirma en el mismo paso
-            $this->cobrar($pedidos->crearDirecto($clientes[$i % 3], $lineas, $vendedor), $metodos[$i % 5], $vendedor);
+            $metodo = $metodos[$i % 5];
+            $this->cobrar($pedidos->crearDirecto($clientes[$i % 3], $lineas, $vendedor, MetodosPago::moneda($metodo)), $metodo, $vendedor);
         }
     }
 
@@ -149,12 +150,12 @@ class DatabaseSeeder extends Seeder
             $linea('0501047573R', 8),
         ]), 'Necesito retirar el sábado.');
 
-        // 2. Convertida en pedido y venta confirmada (descuenta stock; aplica descuento por volumen)
+        // 2. Convertida en pedido y venta confirmada, pagada en bolívares con IVA (descuenta stock)
         $c2 = $cotizaciones->crear($clientes[0], collect([
             $linea('0602030250R', 6),
             $linea('70632', 1),
             $linea('CC55', 4),
-        ]));
+        ]), null, 'VES');
         $this->cobrar($pedidos->crearDesdeCotizacion($c2, $vendedor), 'transferencia', $vendedor);
 
         // 3. Convertida en pedido pendiente de confirmar

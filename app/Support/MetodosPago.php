@@ -39,10 +39,10 @@ class MetodosPago
             'campos' => ['zelle_correo' => 'Correo', 'zelle_titular' => 'Titular'],
         ],
         'efectivo' => [
-            'nombre' => 'Efectivo en la tienda',
+            'nombre' => 'Efectivo en dólares en la tienda',
             'moneda' => 'USD',
             'en_linea' => false,
-            'descripcion' => 'Dólares o bolívares al retirar en el Edificio Campagna.',
+            'descripcion' => 'En dólares, al retirar en el Edificio Campagna.',
             'campos' => [],
         ],
         'punto_venta' => [

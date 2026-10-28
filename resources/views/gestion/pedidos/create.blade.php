@@ -86,10 +86,20 @@
     <aside class="xl:sticky xl:top-6 xl:self-start">
         <section class="lobulo-tierra panel-tapa p-6 pt-8" aria-labelledby="t-totales">
             <h2 id="t-totales" class="seccion-titulo flex items-center gap-3"><span class="ruedo size-9 text-base">3</span> Total</h2>
+            {{-- La moneda de pago define el impuesto: IGTF en dólares, IVA en bolívares --}}
+            <fieldset class="mt-4">
+                <legend class="text-sm font-bold text-white/80">El cliente paga en</legend>
+                <div class="mt-2 grid grid-cols-2 gap-2">
+                    @foreach(['USD' => 'Dólares', 'VES' => 'Bolívares'] as $valor => $texto)
+                        <label class="flex cursor-pointer items-center justify-center gap-2 rounded-[6px] border border-white/30 px-3 py-2 font-bold has-[:checked]:border-sol has-[:checked]:bg-sol has-[:checked]:text-tinta">
+                            <input type="radio" name="moneda_pago" value="{{ $valor }}" x-model="moneda" class="sr-only" @checked(old('moneda_pago', 'USD') === $valor)> {{ $texto }}
+                        </label>
+                    @endforeach
+                </div>
+            </fieldset>
             <dl class="mt-4 space-y-2 cifra">
                 <div class="flex justify-between"><dt class="text-white/80">Subtotal</dt><dd x-text="usd(t.subtotal)"></dd></div>
-                <div class="flex justify-between text-sol" x-show="t.descuento > 0"><dt>Descuento por volumen</dt><dd x-text="'− ' + usd(t.descuento)"></dd></div>
-                <div class="flex justify-between"><dt class="text-white/80" x-text="'IVA (' + p.iva + ' %)'"></dt><dd x-text="usd(t.iva)"></dd></div>
+                <div class="flex justify-between"><dt class="text-white/80" x-text="(moneda === 'USD' ? 'IGTF (' + p.igtf : 'IVA (' + p.iva) + ' %)'"></dt><dd x-text="usd(t.impuesto)"></dd></div>
                 <div class="flex items-end justify-between border-t border-white/20 pt-3"><dt class="font-bold">Total</dt><dd class="font-rotulo text-4xl font-extrabold" x-text="usd(t.total)"></dd></div>
                 <div class="text-right text-sm text-white/80" x-text="bs(t.total * p.tasa) + ' · tasa ' + p.tasa.toLocaleString('es-VE', {minimumFractionDigits: 2})"></div>
             </dl>
@@ -102,11 +112,11 @@
 
 @push('scripts')
 <script>
-    // Mismo cálculo que CalculadoraComercial (en centavos); el servidor lo vuelve a hacer al guardar
+    // Mismo cálculo que CalculadoraComercial (en centavos; IGTF si paga en dólares, IVA si paga en bolívares); el servidor lo vuelve a hacer al guardar
     function mostrador(catalogo, p, clienteInicial, previas, urlClientes) {
         const formato = (n) => n.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         return {
-            p, cliente: clienteInicial, qCliente: '', clientes: [], buscado: false, qProducto: '',
+            p, cliente: clienteInicial, qCliente: '', clientes: [], buscado: false, qProducto: '', moneda: @js(old('moneda_pago', 'USD')),
             lineas: previas.map((x) => ({ p: catalogo.find((c) => c.id === x.id), cantidad: x.cantidad })).filter((l) => l.p),
             usd: (n) => 'USD ' + formato(n), bs: (n) => 'Bs. ' + formato(n),
             get sugeridos() {
@@ -116,9 +126,8 @@
             },
             get t() {
                 const sub = this.lineas.reduce((s, l) => s + Math.round(l.p.precio * 100) * (parseInt(l.cantidad) || 0), 0);
-                const desc = (p.descuento > 0 && sub >= Math.round(p.minimo * 100)) ? Math.round(sub * p.descuento / 100) : 0;
-                const iva = Math.round((sub - desc) * p.iva / 100);
-                return { subtotal: sub / 100, descuento: desc / 100, iva: iva / 100, total: (sub - desc + iva) / 100 };
+                const impuesto = Math.round(sub * (this.moneda === 'USD' ? p.igtf : p.iva) / 100);
+                return { subtotal: sub / 100, impuesto: impuesto / 100, total: (sub + impuesto) / 100 };
             },
             agregar(prod) {
                 const existente = this.lineas.find((l) => l.p.id === prod.id);

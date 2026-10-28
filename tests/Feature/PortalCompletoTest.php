@@ -36,7 +36,7 @@ class PortalCompletoTest extends TestCase
         $this->crearProducto(['codigo_fabrica' => 'CC55', 'nombre' => 'Cruceta 30 x 106', 'stock' => 8]);
 
         $this->get('/')->assertOk()
-            ->assertSee('Tasa del día')
+            ->assertSee('Tasa BCV')
             ->assertSee('Bs. 36,50')
             ->assertSee('img/portada/sede-fachada.jpg', false)
             ->assertSeeInOrder(['Marchesan Tatu', 'Colombo Aemco', 'Vicon', 'Lumagi'])
@@ -81,7 +81,7 @@ class PortalCompletoTest extends TestCase
     {
         $this->get(route('contacto'))->assertOk()->assertSee('Escríbenos tu consulta')->assertSee('0412-9477195');
         $this->get(route('legal.privacidad'))->assertOk()->assertSee('artículo 28 de la Constitución');
-        $this->get(route('legal.terminos'))->assertOk()->assertSee('IVA, que hoy es de 16 %')->assertSee('Ley sobre Mensajes de Datos');
+        $this->get(route('legal.terminos'))->assertOk()->assertSee('el IVA, hoy de 16 %')->assertSee('el IGTF, hoy de 3 %')->assertSee('Ley sobre Mensajes de Datos');
     }
 
     public function test_el_formulario_de_contacto_abre_whatsapp_con_el_mensaje_listo(): void

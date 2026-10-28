@@ -19,6 +19,7 @@ use Illuminate\Validation\ValidationException;
 class CarritoService
 {
     private const CLAVE_SESION = 'carrito';
+    private const CLAVE_MONEDA = 'carrito_moneda';
     public const COOKIE = 'r7_cotizacion';
     private const DIAS_RESPALDO = 30;
     private const MAX_LINEAS = 50;
@@ -137,10 +138,21 @@ class CarritoService
         ]);
     }
 
-    /** Totales del carrito calculados por el motor del servidor. */
-    public function resumen(): array
+    /** Totales del carrito calculados por el motor del servidor, en la moneda de pago elegida (o la indicada). */
+    public function resumen(?string $moneda = null): array
     {
-        return $this->calculadora->calcular($this->lineas());
+        return $this->calculadora->calcular($this->lineas(), $moneda ?? $this->moneda());
+    }
+
+    /** Moneda en que el cliente piensa pagar: USD (IGTF) o VES (IVA). Por defecto, dólares. */
+    public function moneda(): string
+    {
+        return session(self::CLAVE_MONEDA) === CalculadoraComercial::VES ? CalculadoraComercial::VES : CalculadoraComercial::USD;
+    }
+
+    public function elegirMoneda(string $moneda): void
+    {
+        session([self::CLAVE_MONEDA => $moneda === CalculadoraComercial::VES ? CalculadoraComercial::VES : CalculadoraComercial::USD]);
     }
 
     /** Regla de negocio: no se puede cotizar más de lo que hay en existencia. */

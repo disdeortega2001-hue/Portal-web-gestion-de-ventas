@@ -30,7 +30,7 @@ class Pedido extends Model
 
     protected $fillable = [
         'codigo', 'id_cliente', 'id_usuario', 'id_cotizacion', 'fecha', 'subtotal', 'descuento',
-        'porcentaje_iva', 'impuesto', 'total', 'tasa_cambio', 'total_bs', 'estado', 'fecha_confirmacion',
+        'moneda_pago', 'tipo_impuesto', 'porcentaje_impuesto', 'impuesto', 'total', 'tasa_cambio', 'total_bs', 'estado', 'fecha_confirmacion',
         'origen', 'metodo_pago', 'estado_pago', 'entrega', 'observaciones',
     ];
 
@@ -39,7 +39,7 @@ class Pedido extends Model
         'fecha_confirmacion' => 'datetime',
         'subtotal' => 'decimal:2',
         'descuento' => 'decimal:2',
-        'porcentaje_iva' => 'decimal:2',
+        'porcentaje_impuesto' => 'decimal:2',
         'impuesto' => 'decimal:2',
         'total' => 'decimal:2',
         'tasa_cambio' => 'decimal:4',

@@ -19,17 +19,19 @@ class CotizacionService
     /**
      * @param  Collection<int, array{producto: \App\Models\Producto, precio: string, cantidad: int}>  $lineas
      */
-    public function crear(Cliente $cliente, Collection $lineas, ?string $observaciones = null): Cotizacion
+    public function crear(Cliente $cliente, Collection $lineas, ?string $observaciones = null, string $moneda = CalculadoraComercial::USD): Cotizacion
     {
-        return DB::transaction(function () use ($cliente, $lineas, $observaciones) {
-            $calculo = $this->calculadora->calcular($lineas);
+        return DB::transaction(function () use ($cliente, $lineas, $observaciones, $moneda) {
+            $calculo = $this->calculadora->calcular($lineas, $moneda);
 
             $cotizacion = Cotizacion::create([
                 'id_cliente' => $cliente->id,
                 'fecha' => now(),
                 'subtotal' => $calculo['subtotal'],
                 'descuento' => $calculo['descuento'],
-                'porcentaje_iva' => $calculo['porcentaje_iva'],
+                'moneda_pago' => $calculo['moneda_pago'],
+                'tipo_impuesto' => $calculo['tipo_impuesto'],
+                'porcentaje_impuesto' => $calculo['porcentaje_impuesto'],
                 'impuesto' => $calculo['impuesto'],
                 'total' => $calculo['total'],
                 'tasa_cambio' => $calculo['tasa_cambio'],

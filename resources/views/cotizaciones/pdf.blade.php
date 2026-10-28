@@ -50,12 +50,9 @@
 
 <table class="totales">
     <tr><td>Subtotal</td><td class="der">USD {{ number_format($cotizacion->subtotal, 2, ',', '.') }}</td></tr>
-    @if((float) $cotizacion->descuento > 0)
-        <tr><td>Descuento</td><td class="der">− USD {{ number_format($cotizacion->descuento, 2, ',', '.') }}</td></tr>
-    @endif
-    <tr><td>IVA ({{ (float) $cotizacion->porcentaje_iva }}%)</td><td class="der">USD {{ number_format($cotizacion->impuesto, 2, ',', '.') }}</td></tr>
+    <tr><td>{{ $cotizacion->tipo_impuesto }} ({{ (float) $cotizacion->porcentaje_impuesto }}%) · {{ $cotizacion->tipo_impuesto === 'IGTF' ? 'pago en dólares' : 'pago en bolívares' }}</td><td class="der">USD {{ number_format($cotizacion->impuesto, 2, ',', '.') }}</td></tr>
     <tr><td class="total">Total</td><td class="der total">USD {{ number_format($cotizacion->total, 2, ',', '.') }}</td></tr>
-    <tr><td class="muted">Total en Bs. (tasa {{ number_format($cotizacion->tasa_cambio, 2, ',', '.') }})</td><td class="der muted">Bs. {{ number_format($cotizacion->total_bs, 2, ',', '.') }}</td></tr>
+    <tr><td class="muted">Total en Bs. (tasa BCV {{ number_format($cotizacion->tasa_cambio, 2, ',', '.') }})</td><td class="der muted">Bs. {{ number_format($cotizacion->total_bs, 2, ',', '.') }}</td></tr>
 </table>
 
 <p class="muted" style="margin-top:24px">Cotización referencial sujeta a disponibilidad de inventario al momento de la confirmación. Válida por 5 días.</p>

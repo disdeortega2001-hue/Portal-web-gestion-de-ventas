@@ -6,21 +6,29 @@ use App\Models\Configuracion;
 
 /**
  * Motor de cálculo comercial. Es el ÚNICO lugar donde se calculan subtotal,
- * descuento, IVA, total y conversión a Bs.
+ * impuesto, total y conversión a Bs.
+ *
+ * El impuesto depende de la moneda en que paga el cliente:
+ * - en dólares (USD): IGTF, 3 % por defecto, sin IVA;
+ * - en bolívares (VES): IVA, 16 % por defecto.
  *
  * Trabaja en centavos (enteros) para evitar errores de redondeo de punto
  * flotante: 0.1 + 0.2 no da 0.3 en float, pero 10 + 20 sí da 30 en enteros.
  */
 class CalculadoraComercial
 {
+    public const USD = 'USD';
+    public const VES = 'VES';
+
     /**
      * @param  iterable<array{precio: string|float, cantidad: int}>  $lineas
-     * @return array{lineas: array, subtotal: string, porcentaje_descuento: float, descuento: string,
-     *               porcentaje_iva: float, impuesto: string, total: string, tasa_cambio: float, total_bs: string}
+     * @param  string  $moneda  moneda de pago: USD (IGTF) o VES (IVA)
+     * @return array{lineas: array, subtotal: string, descuento: string, moneda_pago: string, tipo_impuesto: string,
+     *               porcentaje_impuesto: float, impuesto: string, total: string, tasa_cambio: float, total_bs: string}
      */
-    public function calcular(iterable $lineas): array
+    public function calcular(iterable $lineas, string $moneda = self::USD): array
     {
-        $porcentajeIva = Configuracion::porcentajeIva();
+        [$tipo, $porcentaje] = self::impuesto($moneda);
         $tasa = Configuracion::tasaCambio();
 
         $lineasCalculadas = [];
@@ -38,19 +46,17 @@ class CalculadoraComercial
             ];
         }
 
-        $porcentajeDescuento = $this->porcentajeDescuento($subtotal);
-        $descuento = (int) round($subtotal * $porcentajeDescuento / 100);
-        $base = $subtotal - $descuento;
-        $impuesto = (int) round($base * $porcentajeIva / 100);
-        $total = $base + $impuesto;
+        $impuesto = (int) round($subtotal * $porcentaje / 100);
+        $total = $subtotal + $impuesto;
         $totalBs = (int) round($total * $tasa);
 
         return [
             'lineas' => $lineasCalculadas,
             'subtotal' => $this->aDecimal($subtotal),
-            'porcentaje_descuento' => $porcentajeDescuento,
-            'descuento' => $this->aDecimal($descuento),
-            'porcentaje_iva' => $porcentajeIva,
+            'descuento' => '0.00',
+            'moneda_pago' => $moneda === self::VES ? self::VES : self::USD,
+            'tipo_impuesto' => $tipo,
+            'porcentaje_impuesto' => $porcentaje,
             'impuesto' => $this->aDecimal($impuesto),
             'total' => $this->aDecimal($total),
             'tasa_cambio' => $tasa,
@@ -58,13 +64,12 @@ class CalculadoraComercial
         ];
     }
 
-    /** Descuento por volumen: aplica si el subtotal alcanza el monto mínimo configurado. */
-    private function porcentajeDescuento(int $subtotalCentavos): float
+    /** @return array{0: string, 1: float} [tipo de impuesto, porcentaje] según la moneda de pago */
+    public static function impuesto(string $moneda): array
     {
-        $porcentaje = (float) Configuracion::valor('descuento_porcentaje', 0);
-        $minimo = $this->aCentavos(Configuracion::valor('descuento_monto_minimo', 0));
-
-        return ($porcentaje > 0 && $subtotalCentavos >= $minimo) ? $porcentaje : 0.0;
+        return $moneda === self::VES
+            ? ['IVA', Configuracion::porcentajeIva()]
+            : ['IGTF', Configuracion::porcentajeIgtf()];
     }
 
     private function aCentavos(string|float|int $monto): int
