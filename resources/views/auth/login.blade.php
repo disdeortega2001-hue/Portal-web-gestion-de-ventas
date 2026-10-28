@@ -12,7 +12,7 @@
     @if(str_contains((string) session('url.intended'), '/gestion') || str_contains((string) session('url.intended'), '/admin'))
         <div class="aviso aviso-info mb-5" role="status">
             <x-icono nombre="usuario-check" class="size-5 shrink-0" />
-            <p><strong>Acceso del personal.</strong> Ingresa con el correo y la contraseña que te asignó la empresa; entrarás directo al panel de gestión.</p>
+            <p><strong>Acceso del personal.</strong> Ingresa con tu correo de la empresa y tu contraseña; entrarás directo al panel de gestión.</p>
         </div>
     @endif
     {{-- Viene de «Comprar ahora»: la cuenta se pide recién en la compra --}}
@@ -26,9 +26,10 @@
     <form method="POST" action="{{ route('login') }}" class="lobulo needs-validation space-y-5 p-6 sm:p-8" novalidate>
         @csrf
         <div>
-            <label for="correo" class="etiqueta">Correo electrónico</label>
-            <input type="email" id="correo" name="correo" value="{{ old('correo') }}" class="campo @error('correo') is-invalid @enderror" required autofocus autocomplete="username">
-            <p class="error-campo">@error('correo'){{ $message }}@else Escribe tu correo. @enderror</p>
+            <label for="usuario" class="etiqueta">Cédula o RIF</label>
+            <input type="text" id="usuario" name="usuario" value="{{ old('usuario') }}" class="campo @error('usuario') is-invalid @enderror" required autofocus autocomplete="username" autocapitalize="characters" placeholder="Ej. V-12345678">
+            <p class="error-campo">@error('usuario'){{ $message }}@else Escribe tu cédula o RIF. @enderror</p>
+            <p class="ayuda">Personal de Rialto 7: escribe tu correo.</p>
         </div>
         <div>
             <div class="flex items-baseline justify-between gap-3">

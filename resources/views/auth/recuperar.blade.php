@@ -17,6 +17,11 @@
         </div>
         <button class="btn btn-tierra btn-grande w-full">Enviar enlace</button>
     </form>
+    {{-- Clientes que no registraron correo: el personal verifica por teléfono y les da una contraseña temporal --}}
+    <div class="aviso aviso-info mt-5" role="note"><x-icono nombre="info" class="size-5 shrink-0" />
+        <p><strong>¿No registraste correo?</strong> Escríbenos por WhatsApp desde el teléfono de tu cuenta: verificamos que eres tú y te damos una contraseña temporal.
+        @if($wa = \App\Support\Contacto::whatsapp('Hola, olvidé la contraseña de mi cuenta en el portal de Rialto 7.'))<a href="{{ $wa }}" target="_blank" rel="noopener" class="enlace">Escribir por WhatsApp</a>@endif</p>
+    </div>
     <p class="mt-5 text-center"><a href="{{ route('login') }}" class="enlace">Volver a ingresar</a></p>
 </div>
 @endsection

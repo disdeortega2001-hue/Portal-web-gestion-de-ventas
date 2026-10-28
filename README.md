@@ -648,3 +648,14 @@ Total al 28/10/2026: **139 pruebas, 608 verificaciones**, todas aprobadas.
 
 Total al 28/10/2026: **140 pruebas, 614 verificaciones**, todas aprobadas.
 
+## 21. El cliente entra con su cédula o RIF (28/10/2026)
+
+- **Ingreso:** el campo «Cédula o RIF» acepta `V-12345678`, `v12345678` o `12.345.678` (sin letra se asume V). El personal escribe su correo en el mismo campo. El mensaje de error es el mismo para cédula o clave equivocada.
+- **Registro básico:** cédula o RIF, nombre, teléfono, dirección y contraseña (mínimo 8, con letras y números). El correo es opcional; la migración `2026_10_28_000004_correo_opcional_clientes` permite `correo` nulo.
+- **Recuperar la contraseña:**
+  - con correo, por enlace como antes;
+  - sin correo, por WhatsApp: el personal verifica por teléfono y crea una contraseña temporal desde la ficha del cliente (`gestion.clientes.contrasena`).
+- **Cliente de prueba:** entra con `J-40123456-7` y `Rialto7*2024`.
+
+Total al 28/10/2026: **145 pruebas, 645 verificaciones**, todas aprobadas.
+

@@ -118,6 +118,8 @@ Route::middleware(['auth', 'rol:vendedor,administrativo,directivo'])->prefix('ge
 
     Route::get('/clientes/buscar', [Gestion\ClienteController::class, 'buscar'])->middleware('throttle:120,1')->name('clientes.buscar');
     Route::resource('clientes', Gestion\ClienteController::class)->except('destroy');
+    Route::post('/clientes/{cliente}/contrasena-temporal', [Gestion\ClienteController::class, 'contrasenaTemporal'])
+        ->middleware('throttle:10,1')->name('clientes.contrasena');
 
     Route::get('/verificaciones', [Gestion\VerificacionController::class, 'index'])->name('verificaciones.index');
     Route::post('/verificaciones/{cliente}/aprobar', [Gestion\VerificacionController::class, 'aprobar'])->name('verificaciones.aprobar');

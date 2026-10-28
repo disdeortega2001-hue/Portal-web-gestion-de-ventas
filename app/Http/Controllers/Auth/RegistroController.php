@@ -28,7 +28,7 @@ class RegistroController extends Controller
         [$usuario, $enVerificacion] = DB::transaction(function () use ($request) {
             $usuario = Usuario::create([
                 'nombre' => $request->input('nombre'),
-                'correo' => $request->input('correo'),
+                'correo' => $request->filled('correo') ? mb_strtolower($request->input('correo')) : null,
                 'contrasena' => $request->input('contrasena'),   // El cast "hashed" aplica bcrypt
                 'rol' => Usuario::ROL_CLIENTE,
                 'estado' => 'activo',

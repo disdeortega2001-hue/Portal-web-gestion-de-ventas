@@ -18,7 +18,8 @@ class RegistroRequest extends ClienteRequest
         // o si otra persona ya pidió asociarla y está en verificación.
         $reglas['identificacion'][] = Rule::unique('clientes', 'identificacion')
             ->where(fn (Builder $q) => $q->whereNotNull('id_usuario')->orWhereNotNull('id_usuario_solicitante'));
-        $reglas['correo'] = ['required', 'email', 'max:150', 'unique:usuarios,correo'];
+        // Opcional: solo sirve para recuperar la contraseña por correo
+        $reglas['correo'] = ['nullable', 'email', 'max:150', 'unique:usuarios,correo'];
         $reglas['contrasena'] = ['required', 'confirmed', Password::min(8)->letters()->numbers()];
 
         return $reglas;
@@ -29,7 +30,6 @@ class RegistroRequest extends ClienteRequest
         // Los mensajes propios van primero: con "+" gana el arreglo de la izquierda
         return [
             'identificacion.unique' => 'Esa cédula o RIF ya tiene una cuenta o una solicitud en verificación. Si es tuya, inicia sesión o llámanos.',
-            'correo.required' => 'Escribe tu correo: lo usarás para iniciar sesión.',
             'correo.unique' => 'Ese correo ya está registrado.',
             'contrasena.required' => 'Crea una contraseña.',
             'contrasena.confirmed' => 'Las contraseñas no coinciden.',

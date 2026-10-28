@@ -4,7 +4,7 @@
 @section('contenido')
 <x-encabezado :titulo="$cliente->nombre" :volver="route('gestion.clientes.index')" volver-texto="Clientes">
     <span class="cifra">{{ $cliente->identificacion }}</span>
-    @if($cliente->usuario) · tiene cuenta en el portal ({{ $cliente->usuario->correo }}) @else · sin cuenta en el portal @endif
+    @if($cliente->usuario) · tiene cuenta en el portal (entra con su cédula) @else · sin cuenta en el portal @endif
     <x-slot:acciones>
         @if($wa = \App\Support\Contacto::whatsappA($cliente->telefono, 'Hola ' . strtok($cliente->nombre, ' ') . ', te escribimos de Inversiones Rialto 7.'))
             <a href="{{ $wa }}" target="_blank" rel="noopener" class="btn btn-tierra"><x-icono nombre="whatsapp" class="size-4" /> WhatsApp</a>
@@ -25,6 +25,14 @@
                 <div><dt class="apoyo text-sm">Cliente desde</dt><dd class="cifra font-semibold">{{ $cliente->created_at->format('d/m/Y') }}</dd></div>
             </dl>
             <a href="{{ route('gestion.clientes.edit', $cliente) }}" class="btn btn-linea btn-mini mt-5"><x-icono nombre="lapiz" class="size-4" /> Corregir datos</a>
+            @if($cliente->usuario)
+                {{-- Para quien olvidó su contraseña y no tiene correo: verificar antes por teléfono que es la persona --}}
+                <form method="POST" action="{{ route('gestion.clientes.contrasena', $cliente) }}" class="mt-3"
+                      data-confirmar="¿Ya verificaste por teléfono que hablas con {{ $cliente->nombre }}? Se creará una contraseña temporal nueva.">
+                    @csrf
+                    <button class="enlace text-sm">Crear contraseña temporal</button>
+                </form>
+            @endif
         </div>
         <dl class="grid grid-cols-2 gap-px border border-linea bg-linea">
             @foreach([['Compras', $resumen['compras']], ['Cotizaciones', $resumen['cotizaciones']], ['Pendientes', $resumen['pendientes']]] as [$etiqueta, $valor])

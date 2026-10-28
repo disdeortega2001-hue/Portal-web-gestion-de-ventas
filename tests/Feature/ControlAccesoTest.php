@@ -91,8 +91,8 @@ class ControlAccesoTest extends TestCase
     {
         $this->crearUsuario('vendedor', ['correo' => 'inactivo@prueba.test', 'estado' => 'inactivo']);
 
-        $this->post(route('login'), ['correo' => 'inactivo@prueba.test', 'contrasena' => 'Clave1234'])
-            ->assertSessionHasErrors('correo');
+        $this->post(route('login'), ['usuario' => 'inactivo@prueba.test', 'contrasena' => 'Clave1234'])
+            ->assertSessionHasErrors('usuario');
         $this->assertGuest();
     }
 
@@ -101,13 +101,13 @@ class ControlAccesoTest extends TestCase
         $this->crearUsuario('vendedor', ['correo' => 'vendedor@prueba.test']);
 
         for ($i = 0; $i < 5; $i++) {
-            $this->post(route('login'), ['correo' => 'vendedor@prueba.test', 'contrasena' => 'equivocada1']);
+            $this->post(route('login'), ['usuario' => 'vendedor@prueba.test', 'contrasena' => 'equivocada1']);
         }
 
         // Ni siquiera la contraseña correcta entra mientras dura el bloqueo
-        $this->post(route('login'), ['correo' => 'vendedor@prueba.test', 'contrasena' => 'Clave1234'])
-            ->assertSessionHasErrors('correo');
-        $this->assertStringStartsWith('Demasiados intentos', session('errors')->first('correo'));
+        $this->post(route('login'), ['usuario' => 'vendedor@prueba.test', 'contrasena' => 'Clave1234'])
+            ->assertSessionHasErrors('usuario');
+        $this->assertStringStartsWith('Demasiados intentos', session('errors')->first('usuario'));
         $this->assertGuest();
     }
 
@@ -193,7 +193,7 @@ class ControlAccesoTest extends TestCase
         // /panel lleva al ingreso con el aviso del personal y, al entrar, directo al tablero
         $this->followingRedirects()->get('/panel')->assertSee('Acceso del personal.');
         $vendedor = $this->crearUsuario('vendedor');
-        $this->post(route('login'), ['correo' => $vendedor->correo, 'contrasena' => 'Clave1234'])
+        $this->post(route('login'), ['usuario' => $vendedor->correo, 'contrasena' => 'Clave1234'])
             ->assertRedirect(route('gestion.tablero'));
     }
 }

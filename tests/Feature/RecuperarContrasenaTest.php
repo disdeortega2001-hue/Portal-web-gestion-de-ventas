@@ -90,7 +90,7 @@ class RecuperarContrasenaTest extends TestCase
 
         $this->assertTrue(Hash::check('NuevaClave2024', $this->usuario->fresh()->contrasena));
 
-        $this->post(route('login'), ['correo' => 'productor@prueba.test', 'contrasena' => 'NuevaClave2024']);
+        $this->post(route('login'), ['usuario' => 'productor@prueba.test', 'contrasena' => 'NuevaClave2024']);
         $this->assertAuthenticatedAs($this->usuario->fresh());
     }
 

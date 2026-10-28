@@ -9,6 +9,7 @@ use App\Models\Pedido;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
@@ -91,5 +92,20 @@ class ClienteController extends Controller
         $cliente->update($request->safe()->only(['identificacion', 'nombre', 'telefono', 'correo', 'direccion']));
 
         return redirect()->route('gestion.clientes.show', $cliente)->with('exito', 'Datos del cliente actualizados.');
+    }
+
+    /**
+     * Contraseña temporal para un cliente que olvidó la suya y no registró correo. El personal
+     * verifica antes por teléfono que es la misma persona; la clave se muestra una sola vez para
+     * dictársela y el cliente puede cambiarla luego por WhatsApp con el personal.
+     */
+    public function contrasenaTemporal(Cliente $cliente): RedirectResponse
+    {
+        abort_unless($cliente->usuario, 404);
+
+        $clave = Str::upper(Str::random(3)) . random_int(100, 999) . Str::lower(Str::random(3));
+        $cliente->usuario->update(['contrasena' => $clave]);
+
+        return back()->with('exito', "Contraseña temporal de {$cliente->nombre}: {$clave} · Dísela por teléfono o WhatsApp; entra con su cédula ({$cliente->identificacion}).");
     }
 }

@@ -14,7 +14,8 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'correo' => ['required', 'email', 'max:150'],
+            // Cédula o RIF (clientes) o correo (personal)
+            'usuario' => ['required', 'string', 'max:150'],
             'contrasena' => ['required', 'string'],
         ];
     }
@@ -22,8 +23,7 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'correo.required' => 'Escribe tu correo electrónico.',
-            'correo.email' => 'El correo no tiene un formato válido.',
+            'usuario.required' => 'Escribe tu cédula o RIF (o tu correo si eres del personal).',
             'contrasena.required' => 'Escribe tu contraseña.',
         ];
     }

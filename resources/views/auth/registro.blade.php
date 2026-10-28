@@ -3,14 +3,15 @@
 
 @section('cabecera')
     <h1 class="titular text-4xl sm:text-5xl">Crear cuenta de cliente</h1>
-    <p class="mt-2 text-white/80">Con tu cuenta guardas tus datos y ves el estado de tus pedidos.</p>
+    <p class="mt-2 text-white/80">Solo lo necesario para comprar: tus datos, una contraseña y listo.</p>
 @endsection
 
 @section('contenido')
 <div class="mx-auto max-w-3xl">
     <form method="POST" action="{{ route('registro') }}" class="lobulo needs-validation space-y-5 p-6 sm:p-8" novalidate>
         @csrf
-        @include('partials.campos-cliente', ['correoObligatorio' => true])
+        @include('partials.campos-cliente', ['correoObligatorio' => false])
+        <p class="ayuda -mt-2">Entrarás con tu <strong>cédula o RIF</strong> y tu contraseña. El correo es opcional: solo sirve para recuperar la contraseña.</p>
         <div class="grid gap-4 sm:grid-cols-2">
             <div>
                 <label for="contrasena" class="etiqueta">Contraseña *</label>
