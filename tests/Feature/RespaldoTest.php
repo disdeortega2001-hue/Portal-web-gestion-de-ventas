@@ -23,6 +23,7 @@ class RespaldoTest extends TestCase
         parent::setUp();
         $this->configurar();
         Storage::fake('public');
+        Storage::fake('local');
 
         // Carpeta propia de la prueba: nunca se tocan los respaldos reales de storage/app/respaldos
         $this->carpeta = storage_path('framework/testing/respaldos-' . uniqid());
@@ -92,7 +93,7 @@ class RespaldoTest extends TestCase
         }
     }
 
-    public function test_solo_el_administrador_ve_crea_y_descarga_respaldos(): void
+    public function test_solo_el_directivo_ve_crea_y_descarga_respaldos(): void
     {
         $this->actingAs($this->crearUsuario('vendedor'))->get(route('admin.respaldos.index'))->assertForbidden();
 
@@ -117,5 +118,23 @@ class RespaldoTest extends TestCase
         $lista = app(RespaldoService::class)->listar();
         $this->assertCount(RespaldoService::CONSERVAR, $lista);
         $this->assertStringStartsWith('rialto7-' . now()->format('Y'), $lista[0]['nombre']);
+    }
+
+    public function test_el_respaldo_guarda_y_restaura_los_comprobantes_de_pago(): void
+    {
+        Storage::disk('local')->put('comprobantes/pago-movil.jpg', 'captura del banco');
+        $servicio = app(RespaldoService::class);
+        $nombre = $servicio->crear();
+
+        $zip = new ZipArchive();
+        $this->assertTrue($zip->open("{$this->carpeta}/{$nombre}"));
+        $this->assertSame('captura del banco', $zip->getFromName('comprobantes/pago-movil.jpg'));
+        $zip->close();
+
+        Storage::disk('local')->delete('comprobantes/pago-movil.jpg');
+        $resultado = $servicio->restaurar("{$this->carpeta}/{$nombre}");
+
+        $this->assertSame(1, $resultado['comprobantes']);
+        $this->assertSame('captura del banco', Storage::disk('local')->get('comprobantes/pago-movil.jpg'));
     }
 }

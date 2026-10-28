@@ -559,6 +559,6 @@ A pedido de la usuaria, el portal toma el estilo y las animaciones de cicmelinst
 - `tests/Feature/CompraYPagosTest.php`: 11 casos;
 - matriz de acceso de `ControlAccesoTest` con cuatro perfiles.
 
-Total al 28/10/2026: **126 pruebas, 552 verificaciones**, todas aprobadas.
+**Respaldos:** cada .zip incluye además la carpeta `comprobantes/` (copiada desde `storage/app/comprobantes`). Al restaurar, los comprobantes vuelven a su sitio; un respaldo anterior, que no tiene esa carpeta, se restaura igual.
 
-**Pendiente:** los respaldos todavía no incluyen los comprobantes de pago (solo la base de datos y las fotos).
+Total al 28/10/2026: **127 pruebas, 556 verificaciones**, todas aprobadas.

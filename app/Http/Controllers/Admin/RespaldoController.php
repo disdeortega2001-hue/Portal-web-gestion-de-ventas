@@ -54,6 +54,6 @@ class RespaldoController extends Controller
         }
 
         return redirect()->route('admin.respaldos.index')->with('exito',
-            "Restaurado {$nombre}: {$r['filas']} registros y {$r['fotos']} fotos. El estado anterior quedó guardado como {$previo}.");
+            "Restaurado {$nombre}: {$r['filas']} registros, {$r['fotos']} fotos y {$r['comprobantes']} comprobantes de pago. El estado anterior quedó guardado como {$previo}.");
     }
 }

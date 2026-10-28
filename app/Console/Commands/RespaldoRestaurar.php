@@ -17,7 +17,7 @@ class RespaldoRestaurar extends Command
         {archivo : Nombre del respaldo en storage/app/respaldos o ruta completa al .zip}
         {--force : No pedir confirmación}';
 
-    protected $description = 'Restaura la base de datos y las fotos desde un respaldo';
+    protected $description = 'Restaura la base de datos, las fotos y los comprobantes de pago desde un respaldo';
 
     public function handle(RespaldoService $respaldos): int
     {
@@ -40,7 +40,7 @@ class RespaldoRestaurar extends Command
         $this->line("Estado actual guardado antes de restaurar: {$previo}");
 
         $r = $respaldos->restaurar($ruta);
-        $this->info("Restaurado: {$r['tablas']} tablas, {$r['filas']} registros y {$r['fotos']} fotos.");
+        $this->info("Restaurado: {$r['tablas']} tablas, {$r['filas']} registros, {$r['fotos']} fotos y {$r['comprobantes']} comprobantes de pago.");
 
         return self::SUCCESS;
     }

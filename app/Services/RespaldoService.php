@@ -12,7 +12,8 @@ use ZipArchive;
 
 /**
  * Respaldo y recuperación (Cuadro 28: disponibilidad con mecanismos de respaldo).
- * Cada respaldo es un .zip con la base de datos completa en SQL y las fotos de los productos.
+ * Cada respaldo es un .zip con la base de datos completa en SQL, las fotos de los productos y los
+ * comprobantes de pago que suben los clientes (estos viven en el disco privado, nunca en public).
  * El SQL se genera con PHP, sin depender de mysqldump, para que funcione en un hosting compartido,
  * y también se puede importar a mano desde phpMyAdmin.
  */
@@ -44,6 +45,9 @@ class RespaldoService
             $zip->addFile($sql, 'base-de-datos.sql');
             foreach (Storage::disk('public')->files(self::CARPETA_FOTOS) as $foto) {
                 $zip->addFile(Storage::disk('public')->path($foto), 'fotos/' . basename($foto));
+            }
+            foreach (Storage::disk('local')->files(PagoService::CARPETA) as $comprobante) {
+                $zip->addFile(Storage::disk('local')->path($comprobante), 'comprobantes/' . basename($comprobante));
             }
             $zip->close();
         } finally {
@@ -84,10 +88,11 @@ class RespaldoService
     }
 
     /**
-     * Restaura la base de datos y las fotos desde un respaldo.
+     * Restaura la base de datos, las fotos y los comprobantes de pago desde un respaldo.
      * Los datos se reemplazan dentro de una transacción: si algo falla, la base queda como estaba.
+     * Un respaldo anterior a los pagos (sin carpeta comprobantes/) se restaura igual.
      *
-     * @return array{tablas: int, filas: int, fotos: int}
+     * @return array{tablas: int, filas: int, fotos: int, comprobantes: int}
      */
     public function restaurar(string $zipRuta): array
     {
@@ -123,13 +128,14 @@ class RespaldoService
             Schema::enableForeignKeyConstraints();
         }
 
-        $fotos = $this->restaurarFotos($zip);
+        $fotos = $this->restaurarArchivos($zip, '#^fotos/([\w.-]+\.(?:webp|jpe?g|png))$#i', 'public', self::CARPETA_FOTOS);
+        $comprobantes = $this->restaurarArchivos($zip, '#^comprobantes/([\w.-]+\.(?:webp|jpe?g|png|pdf))$#i', 'local', PagoService::CARPETA);
         $zip->close();
 
         // Las listas del catálogo y los parámetros pueden haber cambiado
         cache()->flush();
 
-        return compact('tablas', 'filas', 'fotos');
+        return compact('tablas', 'filas', 'fotos', 'comprobantes');
     }
 
     private function volcarBaseDeDatos(string $destino): void
@@ -198,20 +204,22 @@ class RespaldoService
         return $sentencias;
     }
 
-    private function restaurarFotos(ZipArchive $zip): int
+    /**
+     * Copia al disco los archivos del zip cuya ruta cumple el patrón. Solo archivos planos de una
+     * carpeta conocida y con extensión permitida: nunca rutas con «..» ni subcarpetas.
+     */
+    private function restaurarArchivos(ZipArchive $zip, string $patron, string $disco, string $carpeta): int
     {
-        $disco = Storage::disk('public');
-        $fotos = 0;
+        $almacen = Storage::disk($disco);
+        $copiados = 0;
         for ($i = 0; $i < $zip->numFiles; $i++) {
-            $entrada = $zip->getNameIndex($i);
-            // Solo archivos planos de fotos/: nunca rutas con «..» ni subcarpetas
-            if (preg_match('#^fotos/([\w.-]+\.(?:webp|jpe?g|png))$#i', $entrada, $m)) {
-                $disco->put(self::CARPETA_FOTOS . '/' . $m[1], $zip->getFromIndex($i));
-                $fotos++;
+            if (preg_match($patron, $zip->getNameIndex($i), $m)) {
+                $almacen->put("{$carpeta}/{$m[1]}", $zip->getFromIndex($i));
+                $copiados++;
             }
         }
 
-        return $fotos;
+        return $copiados;
     }
 
     private function podar(): void

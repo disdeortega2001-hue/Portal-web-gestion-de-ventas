@@ -3,7 +3,7 @@
 
 @section('contenido')
 <x-encabezado titulo="Respaldos">
-    <span class="block max-w-[70ch]">Cada respaldo guarda la base de datos completa y las fotos de los productos. El sistema crea uno solo cada noche y conserva los {{ \App\Services\RespaldoService::CONSERVAR }} más recientes.</span>
+    <span class="block max-w-[70ch]">Cada respaldo guarda la base de datos completa, las fotos de los productos y los comprobantes de pago. El sistema crea uno solo cada noche y conserva los {{ \App\Services\RespaldoService::CONSERVAR }} más recientes.</span>
     <x-slot:acciones>
         <form method="POST" action="{{ route('admin.respaldos.store') }}">
             @csrf
