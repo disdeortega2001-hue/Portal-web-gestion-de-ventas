@@ -629,16 +629,16 @@ Total al 28/10/2026: **139 pruebas, 608 verificaciones**, todas aprobadas.
 
 ## 20. Revisión de seguridad y fotos de la historia (28/10/2026)
 
-- **Dependencias:** \`composer audit\` y \`npm audit\` sin vulnerabilidades conocidas.
-- **Cabeceras** (\`CabecerasSeguridad\`):
+- **Dependencias:** `composer audit` y `npm audit` sin vulnerabilidades conocidas.
+- **Cabeceras** (`CabecerasSeguridad`):
   - política de contenido (CSP) con nonce por petición: solo se ejecutan los scripts del portal;
-  - formularios hacia el propio portal o WhatsApp; \`object-src 'none'\`;
-  - se quitó \`X-Powered-By\`; siguen HSTS, nosniff, X-Frame-Options, Referrer-Policy y Permissions-Policy;
-  - los manejadores en línea (\`onclick\`, \`onchange\`) pasaron a Alpine.
-- **Entorno público:** \`APP_ENV=production\`, \`APP_DEBUG=false\`, \`LOG_LEVEL=warning\`.
-- **Archivos sensibles:** \`.env\`, \`.git\`, \`vendor\`, \`storage\` y logs no son accesibles (404). Las cookies son \`secure\`, \`httponly\` y \`samesite=lax\`.
+  - formularios hacia el propio portal o WhatsApp; `object-src 'none'`;
+  - se quitó `X-Powered-By`; siguen HSTS, nosniff, X-Frame-Options, Referrer-Policy y Permissions-Policy;
+  - los manejadores en línea (`onclick`, `onchange`) pasaron a Alpine.
+- **Entorno público:** `APP_ENV=production`, `APP_DEBUG=false`, `LOG_LEVEL=warning`.
+- **Archivos sensibles:** `.env`, `.git`, `vendor`, `storage` y logs no son accesibles (404). Las cookies son `secure`, `httponly` y `samesite=lax`.
 - **Código revisado:**
-  - las salidas sin escapar llevan \`e()\` o \`JSON_HEX_TAG\`;
+  - las salidas sin escapar llevan `e()` o `JSON_HEX_TAG`;
   - las consultas crudas usan parámetros;
   - las subidas validan tipo y tamaño; los comprobantes se guardan en el disco privado.
 - **/panel:** un cliente con sesión va a sus pedidos; el enlace «Acceso del personal» se muestra solo a visitantes.
