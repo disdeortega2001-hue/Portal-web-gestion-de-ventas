@@ -14,6 +14,20 @@
     </tr>
 </table>
 
+<h2>Baja rotación: con existencia y sin ventas en el período</h2>
+@if($resumen['baja_rotacion']->isEmpty())
+    <p class="muted">Todos los productos con existencia tuvieron ventas en el período.</p>
+@else
+    <table style="width:70%">
+        <thead><tr><th>Código</th><th>Producto</th><th class="der">Existencia</th><th class="der">Valor inmovilizado USD</th></tr></thead>
+        <tbody>
+        @foreach($resumen['baja_rotacion'] as $p)
+            <tr><td>{{ $p->codigo_fabrica }}</td><td>{{ $p->nombre }}</td><td class="der">{{ $p->stock }}</td><td class="der">{{ number_format($p->stock * $p->precio, 2, ',', '.') }}</td></tr>
+        @endforeach
+        </tbody>
+    </table>
+@endif
+
 <h2>Existencias actuales</h2>
 <table>
     <thead><tr><th>Código</th><th>Producto</th><th>Marca</th><th>Categoría</th><th>Estado</th><th class="der">Stock</th><th class="der">Precio USD</th><th class="der">Valor USD</th></tr></thead>

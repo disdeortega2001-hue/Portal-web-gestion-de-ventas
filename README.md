@@ -562,3 +562,20 @@ A pedido de la usuaria, el portal toma el estilo y las animaciones de cicmelinst
 **Respaldos:** cada .zip incluye además la carpeta `comprobantes/` (copiada desde `storage/app/comprobantes`). Al restaurar, los comprobantes vuelven a su sitio; un respaldo anterior, que no tiene esa carpeta, se restaura igual.
 
 Total al 28/10/2026: **127 pruebas, 556 verificaciones**, todas aprobadas.
+
+## 17. Revisión integral y descripciones (28/10/2026)
+
+- **Recorrido automático** (`herramientas/recorrido.mjs`): entra con los cinco perfiles (visitante, cliente, vendedor, administrativo y directivo), sigue todos los enlaces y reporta errores. Resultado: unas 800 páginas revisadas y ningún error.
+- **Flujos probados en el navegador:**
+  - compra completa como visitante: registro, regreso a la compra, Pago Móvil y reporte del pago;
+  - verificación del pago por el administrativo: la venta se confirma y la existencia baja;
+  - venta de mostrador con totales en vivo;
+  - los seis reportes (ventas e inventario, en pantalla, PDF y Excel).
+- **Reportes:** se agregan los más vendidos del período (ventas) y los productos de baja rotación (inventario: con existencia y sin ventas), en pantalla, PDF y Excel.
+- **Pagos:**
+  - al registrar un cobro, el monto se llena con el total en la moneda del método;
+  - el cliente ve «Estamos verificando tu pago» mientras se revisa.
+- **Productos:** cada uno tiene una descripción breve de para qué sirve. Se ve en la tarjeta del catálogo y completa en la ficha; está en `database/seeders/catalogo/productos.xlsx`.
+- **Datos de prueba:** incluyen los cuatro reportes del mes (ventas e inventario, en PDF y Excel).
+
+Total al 28/10/2026: **128 pruebas, 559 verificaciones**, todas aprobadas.

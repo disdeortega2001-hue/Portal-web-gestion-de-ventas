@@ -101,6 +101,17 @@
         </section>
     @endif
 
+    @if($r['mas_vendidos']->isNotEmpty())
+        <section class="mt-8" aria-labelledby="t-top">
+            <h2 id="t-top" class="seccion-titulo">Los más vendidos del período</h2>
+            <div class="lobulo mt-3 max-w-3xl overflow-x-auto">
+                <table class="tabla"><thead><tr><th>Código</th><th>Producto</th><th class="!text-right">Unidades</th><th class="!text-right">Monto</th></tr></thead>
+                    <tbody>@foreach($r['mas_vendidos'] as $m)<tr><td><span class="codigo">{{ $m->codigo_fabrica }}</span></td><td>{{ $m->nombre }}</td><td class="num font-bold">{{ $m->unidades }}</td><td class="num">@usd($m->monto)</td></tr>@endforeach</tbody>
+                </table>
+            </div>
+        </section>
+    @endif
+
     <section class="mt-8" aria-labelledby="t-det">
         <h2 id="t-det" class="seccion-titulo">Detalle (<span class="cifra">{{ $resultado['filas']->total() }}</span> líneas)</h2>
         <div class="lobulo mt-3 overflow-x-auto">
@@ -131,6 +142,19 @@
         <div class="border-t border-white/15 p-5 sm:border-t-0 xl:border-r"><p class="text-sm font-bold text-white/75">Valor a precio de venta</p><p class="titular mt-2 text-[2rem] cifra">@usd($r['valor_venta'])</p></div>
         <div class="border-t border-white/15 p-5 sm:border-r xl:border-t-0"><p class="text-sm font-bold text-white/75">Bajo stock / agotados</p><p class="titular mt-2 text-[2rem] cifra">{{ $r['bajo'] }} / <span class="text-coral">{{ $r['agotados'] }}</span></p><p class="mt-1 text-sm text-white/75">Umbral: {{ $resultado['umbral'] }}</p></div>
         <div class="border-t border-white/15 p-5 xl:border-t-0"><p class="text-sm font-bold text-white/75">Movimientos del período</p><p class="titular mt-2 text-[2rem] cifra">{{ $r['movimientos'] }}</p><p class="mt-1 text-sm text-white/75 cifra">+{{ $r['entradas'] }} / −{{ $r['salidas'] }} · ajuste {{ $r['ajuste_neto'] }}</p></div>
+    </section>
+
+    <section class="mt-8" aria-labelledby="t-rot">
+        <h2 id="t-rot" class="seccion-titulo">Baja rotación: con existencia y sin ventas en el período</h2>
+        @if($r['baja_rotacion']->isEmpty())
+            <p class="apoyo mt-2">Todos los productos con existencia tuvieron ventas en el período.</p>
+        @else
+            <div class="lobulo mt-3 max-w-3xl overflow-x-auto">
+                <table class="tabla text-sm"><thead><tr><th>Código</th><th>Producto</th><th class="!text-right">Existencia</th><th class="!text-right">Valor inmovilizado</th></tr></thead>
+                    <tbody>@foreach($r['baja_rotacion'] as $p)<tr><td><span class="codigo">{{ $p->codigo_fabrica }}</span></td><td>{{ $p->nombre }}</td><td class="num">{{ $p->stock }}</td><td class="num font-bold">@usd($p->stock * $p->precio)</td></tr>@endforeach</tbody>
+                </table>
+            </div>
+        @endif
     </section>
 
     <section class="mt-8" aria-labelledby="t-exist">

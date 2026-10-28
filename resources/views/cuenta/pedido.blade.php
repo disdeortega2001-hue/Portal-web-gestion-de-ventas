@@ -14,8 +14,17 @@
 @section('contenido')
 <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-10">
     <div class="space-y-8">
+        {{-- Pago reportado: ya no hace falta repetir las instrucciones --}}
+        @if($pedido->estado_pago === 'por_verificar')
+            <section aria-labelledby="t-verificando" class="sobre-azul relative overflow-hidden rounded-[10px] bg-tierra-oscura p-6 text-white sm:p-8">
+                <x-arcos class="absolute inset-y-0 right-0 h-full w-80" />
+                <div class="relative">
+                    <h2 id="t-verificando" class="titular text-3xl">Estamos verificando <em>tu pago</em></h2>
+                    <p class="mt-3 max-w-[55ch] text-white/85">Revisamos la referencia en el banco. Cuando quede verificado, confirmamos tu pedido y te escribimos al {{ $pedido->cliente->telefono }} para coordinar {{ $pedido->entrega === 'envio' ? 'el envío' : 'el retiro en la tienda' }}.</p>
+                </div>
+            </section>
         {{-- Cómo pagar: lo primero que necesita quien acaba de comprar --}}
-        @if($pedido->estado !== 'anulado' && ! $pedido->estaPagado())
+        @elseif($pedido->estado !== 'anulado' && ! $pedido->estaPagado())
             <section aria-labelledby="t-pagar" class="sobre-azul relative overflow-hidden rounded-[10px] bg-tierra-oscura p-6 text-white sm:p-8">
                 <x-arcos class="absolute inset-y-0 right-0 h-full w-80" />
                 <div class="relative">

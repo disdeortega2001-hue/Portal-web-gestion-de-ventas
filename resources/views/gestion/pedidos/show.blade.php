@@ -50,19 +50,22 @@
             @endforelse
 
             @if(auth()->user()->puedeAdministrar() && $pedido->estado !== 'anulado' && ! $pedido->estaPagado())
-                <form method="POST" action="{{ route('gestion.pedidos.pagos.store', $pedido) }}" class="needs-validation lobulo mt-4 grid gap-4 p-4 sm:grid-cols-2 sm:items-end" novalidate>
+                <form method="POST" action="{{ route('gestion.pedidos.pagos.store', $pedido) }}" class="needs-validation lobulo mt-4 grid gap-4 p-4 sm:grid-cols-2 sm:items-end" novalidate
+                      x-data="{ metodo: @js(old('metodo', $pedido->metodo_pago ?? 'efectivo')), monedas: @js(collect(\App\Support\MetodosPago::METODOS)->map(fn ($m) => $m['moneda'])), usd: @js(number_format((float) $pedido->total, 2, '.', '')), bs: @js(number_format((float) $pedido->total_bs, 2, '.', '')) }">
                     @csrf
                     <div>
                         <label for="metodo" class="etiqueta">Cobrado con</label>
-                        <select id="metodo" name="metodo" class="campo" required>
+                        <select id="metodo" name="metodo" class="campo" required x-model="metodo" @change="$refs.monto.value = monedas[$event.target.value] === 'USD' ? usd : bs">
                             @foreach(\App\Support\MetodosPago::METODOS as $clave => $metodo)
                                 <option value="{{ $clave }}" @selected(old('metodo', $pedido->metodo_pago ?? 'efectivo') === $clave)>{{ $metodo['nombre'] }} ({{ $metodo['moneda'] === 'USD' ? 'USD' : 'Bs.' }})</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
-                        <label for="monto" class="etiqueta">Monto</label>
-                        <input type="number" id="monto" name="monto" value="{{ old('monto') }}" class="campo cifra @error('monto') is-invalid @enderror" required min="0.01" step="0.01">
+                        <label for="monto" class="etiqueta">Monto (<span x-text="monedas[metodo] === 'USD' ? 'USD' : 'Bs.'">USD</span>)</label>
+                        {{-- El monto se llena con el total del pedido en la moneda del método (USD o Bs.); se puede cambiar --}}
+                        <input type="number" id="monto" name="monto" value="{{ old('monto') }}" class="campo cifra @error('monto') is-invalid @enderror" required min="0.01" step="0.01"
+                               x-ref="monto" x-init="$el.value ||= (monedas[metodo] === 'USD' ? usd : bs)">
                         <p class="error-campo">@error('monto'){{ $message }}@else Indica el monto. @enderror</p>
                     </div>
                     <div>

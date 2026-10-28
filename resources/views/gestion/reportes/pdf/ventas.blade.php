@@ -18,6 +18,18 @@
     <p class="muted">Filtrado por producto: el monto del producto es USD {{ number_format($resumen['monto_lineas'], 2, ',', '.') }} (sin IVA). Los totales facturados corresponden a los pedidos completos que lo incluyen.</p>
 @endif
 
+@if($resumen['mas_vendidos']->isNotEmpty())
+    <h2>Los más vendidos del período</h2>
+    <table style="width:70%">
+        <thead><tr><th>Código</th><th>Producto</th><th class="der">Unidades</th><th class="der">Monto USD</th></tr></thead>
+        <tbody>
+        @foreach($resumen['mas_vendidos'] as $m)
+            <tr><td>{{ $m->codigo_fabrica }}</td><td>{{ $m->nombre }}</td><td class="der">{{ $m->unidades }}</td><td class="der">{{ number_format($m->monto, 2, ',', '.') }}</td></tr>
+        @endforeach
+        </tbody>
+    </table>
+@endif
+
 @if($resumen['por_vendedor']->count() > 1)
     <h2>Ventas por vendedor</h2>
     <table style="width:50%">

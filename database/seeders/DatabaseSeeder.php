@@ -10,6 +10,7 @@ use App\Models\Usuario;
 use App\Services\CotizacionService;
 use App\Services\ImportadorCatalogo;
 use App\Services\PagoService;
+use App\Services\ReporteService;
 use App\Services\PedidoService;
 use App\Support\MetodosPago;
 use Illuminate\Database\Seeder;
@@ -43,6 +44,7 @@ class DatabaseSeeder extends Seeder
 
         Carbon::setTestNow();
         $this->cotizacionesYPedidos($clientes, $productos, $vendedor);
+        $this->reportesDelMes($directivo);
     }
 
     private function configuraciones(): void
@@ -176,6 +178,17 @@ class DatabaseSeeder extends Seeder
 
         // 6. Compra en el portal para pagar en efectivo al retirar
         $pedidos->crearEnLinea($clientes[0], [$linea('CC55', 2)], 'efectivo', 'retiro', null);
+    }
+
+    /** Los cuatro reportes que pide la gerencia (ventas e inventario, en PDF y Excel), generados este mes. */
+    private function reportesDelMes(Usuario $directivo): void
+    {
+        $reportes = app(ReporteService::class);
+        foreach (['ventas', 'inventario'] as $tipo) {
+            foreach (['pdf', 'excel'] as $formato) {
+                $reportes->registrar($directivo, ['tipo' => $tipo, 'desde' => now()->startOfMonth()->toDateString(), 'hasta' => now()->toDateString()], $formato, 0);
+            }
+        }
     }
 
     /** Registra el pago completo en la moneda del método (lo usa el historial de ventas). */

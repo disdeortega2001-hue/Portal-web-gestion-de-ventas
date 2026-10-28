@@ -18,6 +18,8 @@
         <span class="text-lg font-black uppercase leading-none tracking-[0.02em] text-tierra cifra sm:text-xl">{{ $producto->codigo_fabrica }}</span>
         <h3 class="text-[1.0625rem] font-semibold leading-snug"><a href="{{ route('catalogo.show', $producto) }}" class="hover:underline">{{ $producto->nombre }}</a></h3>
         <span class="apoyo text-sm">{{ $producto->marca }} · {{ $producto->categoria->nombre }}</span>
+        {{-- Para qué sirve, en dos líneas (completo en la ficha) --}}
+        @if($producto->descripcion)<p class="line-clamp-2 text-sm text-tinta-suave" title="{{ $producto->descripcion }}">{{ $producto->descripcion }}</p>@endif
         <div class="mt-1">@include('partials.stock', ['producto' => $producto])</div>
     </div>
 

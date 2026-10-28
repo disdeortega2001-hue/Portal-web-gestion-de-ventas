@@ -71,7 +71,7 @@ class ReporteController extends Controller
         $this->reportes->registrar($request->user(), $filtros, $formato, $existencias->count() + $movimientos->count());
 
         if ($formato === 'excel') {
-            return Excel::download(new InventarioExport($existencias, $movimientos), "{$nombre}.xlsx");
+            return Excel::download(new InventarioExport($existencias, $movimientos, $this->reportes->bajaRotacion($filtros)), "{$nombre}.xlsx");
         }
 
         return Pdf::loadView('gestion.reportes.pdf.inventario', [

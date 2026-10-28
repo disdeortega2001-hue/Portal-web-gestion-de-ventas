@@ -67,6 +67,6 @@ class MovimientosHoja extends DefaultValueBinder implements FromCollection, With
         $hoja->freezePane('A2');
         $hoja->setAutoFilter($hoja->calculateWorksheetDimension());
 
-        return [1 => ['font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']], 'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '0B4A3B']]]];
+        return [1 => ['font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']], 'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '0D5192']]]];
     }
 }

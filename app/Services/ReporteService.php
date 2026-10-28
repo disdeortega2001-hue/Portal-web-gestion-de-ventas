@@ -56,7 +56,17 @@ class ReporteService
             ->orderByDesc('total_vendido')
             ->get();
 
+        // Los más vendidos del período, por unidades (los productos de mayor rotación)
+        $masVendidos = $this->baseVentas($f)
+            ->join('productos', 'productos.id', '=', 'detalle_pedidos.id_producto')
+            ->groupBy('productos.id', 'productos.codigo_fabrica', 'productos.nombre')
+            ->selectRaw('productos.codigo_fabrica, productos.nombre, SUM(detalle_pedidos.cantidad) AS unidades, SUM(detalle_pedidos.subtotal) AS monto')
+            ->orderByDesc('unidades')
+            ->limit(5)
+            ->get();
+
         return [
+            'mas_vendidos' => $masVendidos,
             'pedidos' => (int) $lineas->pedidos,
             'unidades' => (int) $lineas->unidades,
             'monto_lineas' => (float) $lineas->monto,
@@ -129,6 +139,7 @@ class ReporteService
             ->first();
 
         return [
+            'baja_rotacion' => $this->bajaRotacion($f),
             'productos' => (int) $existencias->productos,
             'unidades' => (int) $existencias->unidades,
             'valor_venta' => (float) $existencias->valor,   // Valorizado a precio de venta, nunca a costo
@@ -139,6 +150,23 @@ class ReporteService
             'salidas' => (int) $movimientos->salidas,
             'ajuste_neto' => (int) $movimientos->ajuste_neto,
         ];
+    }
+
+    /**
+     * Baja rotación: productos visibles con existencia que no tuvieron ninguna venta confirmada en el
+     * período. Es la mercancía inmovilizada que conviene promocionar o no volver a pedir.
+     */
+    public function bajaRotacion(array $f): \Illuminate\Support\Collection
+    {
+        $vendidos = $this->baseVentas(['id_producto' => null, 'id_vendedor' => null] + $f)
+            ->distinct()->pluck('detalle_pedidos.id_producto');
+
+        return Producto::activos()
+            ->where('stock', '>', 0)
+            ->whereNotIn('id', $vendidos)
+            ->when($f['id_categoria'] ?? null, fn ($q, $id) => $q->where('id_categoria', $id))
+            ->orderByDesc('stock')
+            ->get(['id', 'codigo_fabrica', 'nombre', 'stock', 'precio']);
     }
 
     /* ===================== AUDITORÍA ===================== */

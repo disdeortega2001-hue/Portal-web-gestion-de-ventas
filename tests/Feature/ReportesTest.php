@@ -77,6 +77,19 @@ class ReportesTest extends TestCase
         $this->assertFalse($r['filtrado_por_producto']);
     }
 
+    public function test_los_mas_vendidos_y_la_baja_rotacion_del_periodo(): void
+    {
+        $sinVentas = $this->crearProducto(['codigo_fabrica' => 'ROT-001', 'stock' => 7]);
+        $this->crearProducto(['codigo_fabrica' => 'AGO-001', 'stock' => 0]);   // Agotado: no inmoviliza mercancía
+
+        $top = $this->reportes->resumenVentas($this->filtros)['mas_vendidos'];
+        $this->assertSame(['CUC-001', 'KIT-001'], $top->pluck('codigo_fabrica')->all());
+        $this->assertSame(2, (int) $top->first()->unidades);   // Solo lo confirmado dentro del rango
+
+        $lenta = $this->reportes->bajaRotacion(['tipo' => 'inventario'] + $this->filtros)->pluck('codigo_fabrica')->all();
+        $this->assertSame(['ROT-001'], $lenta);
+    }
+
     public function test_el_detalle_tiene_una_fila_por_producto_vendido(): void
     {
         $filas = $this->reportes->consultaVentas($this->filtros)->get();
@@ -164,7 +177,7 @@ class ReportesTest extends TestCase
         $this->assertSame($admin->id, $auditoria->id_usuario);
     }
 
-    public function test_exportar_inventario_a_excel_genera_dos_hojas(): void
+    public function test_exportar_inventario_a_excel_genera_tres_hojas_con_baja_rotacion(): void
     {
         Excel::fake();
 
@@ -174,7 +187,7 @@ class ReportesTest extends TestCase
 
         Excel::assertDownloaded(
             "reporte-inventario-{$this->filtros['desde']}-al-{$this->filtros['hasta']}.xlsx",
-            fn (InventarioExport $export) => count($export->sheets()) === 2
+            fn (InventarioExport $export) => count($export->sheets()) === 3
         );
     }
 
