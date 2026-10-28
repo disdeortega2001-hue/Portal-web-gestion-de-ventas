@@ -8,6 +8,13 @@
 
 @section('contenido')
 <div class="mx-auto max-w-md">
+    {{-- Viene del acceso del personal (/panel o una página del panel) --}}
+    @if(str_contains((string) session('url.intended'), '/gestion') || str_contains((string) session('url.intended'), '/admin'))
+        <div class="aviso aviso-info mb-5" role="status">
+            <x-icono nombre="usuario-check" class="size-5 shrink-0" />
+            <p><strong>Acceso del personal.</strong> Ingresa con el correo y la contraseña que te asignó la empresa; entrarás directo al panel de gestión.</p>
+        </div>
+    @endif
     {{-- Viene de «Comprar ahora»: la cuenta se pide recién en la compra --}}
     @if(str_contains((string) session('url.intended'), '/comprar'))
         <div class="aviso aviso-atencion mb-5 flex-col sm:flex-row sm:items-center" role="status">

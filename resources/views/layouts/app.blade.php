@@ -148,7 +148,7 @@
                         </div>
                     </div>
                 @else
-                    <a href="{{ route('login') }}" class="btn btn-linea btn-mini !min-h-11 hidden sm:inline-flex">Ingresar</a>
+                    <a href="{{ route('login') }}" class="btn btn-linea btn-mini !min-h-11 hidden sm:inline-flex" title="Clientes y personal de Rialto 7">Ingresar</a>
                 @endauth
                 <a href="{{ route('carrito.index') }}" data-carrito-enlace aria-label="Mi cotización, {{ $itemsCarrito }} {{ $itemsCarrito === 1 ? 'producto' : 'productos' }}"
                    class="btn btn-sol !min-h-11 !pr-2 sm:!pr-2.5">
@@ -175,7 +175,8 @@
                     @endif
                     <li><form method="POST" action="{{ route('logout') }}" data-sin-bloqueo>@csrf<button class="flex min-h-12 w-full items-center gap-2 font-semibold"><x-icono nombre="salir" class="size-4" /> Salir</button></form></li>
                 @else
-                    <li><a href="{{ route('login') }}" class="flex min-h-12 items-center font-semibold">Ingresar o crear cuenta</a></li>
+                    <li><a href="{{ route('login') }}" class="flex min-h-12 items-center border-b border-linea font-semibold">Ingresar o crear cuenta</a></li>
+                    <li><a href="{{ route('panel') }}" class="flex min-h-12 items-center gap-2 font-semibold text-tierra"><x-icono nombre="usuario-check" class="size-4" /> Acceso del personal</a></li>
                 @endauth
             </ul>
         </nav>
@@ -244,6 +245,7 @@
                     <li><a href="{{ route('contacto') }}" class="hover:text-white hover:underline">Contacto</a></li>
                     <li><a href="{{ route('legal.privacidad') }}" class="hover:text-white hover:underline">Privacidad</a></li>
                     <li><a href="{{ route('legal.terminos') }}" class="hover:text-white hover:underline">Términos de venta</a></li>
+                    <li class="pt-2"><a href="{{ route('panel') }}" class="inline-flex items-center gap-2 font-bold text-sol hover:underline"><x-icono nombre="usuario-check" class="size-4" /> Acceso del personal</a></li>
                 </ul>
             </nav>
             <div>

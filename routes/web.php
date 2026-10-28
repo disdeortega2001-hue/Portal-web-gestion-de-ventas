@@ -77,6 +77,11 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/salir', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
 
+// Acceso del personal: direcciones fáciles de recordar que llevan al panel de gestión
+Route::redirect('/panel', '/gestion/tablero')->name('panel');
+Route::redirect('/gestion', '/gestion/tablero');
+Route::redirect('/admin', '/gestion/tablero');
+
 // 3. CLIENTE ----------------------------------------------------------------
 Route::middleware(['auth', 'rol:cliente'])->prefix('mi-cuenta')->name('cuenta.')->group(function () {
     Route::get('/cotizaciones', [CuentaController::class, 'cotizaciones'])->name('cotizaciones');

@@ -185,4 +185,15 @@ class ControlAccesoTest extends TestCase
         $this->actingAs($directivo)->get(route('admin.usuarios.index'))->assertDontSee('Cliente Escondido');
         $this->actingAs($directivo)->get(route('admin.usuarios.edit', $cliente))->assertNotFound();
     }
+
+    public function test_el_personal_tiene_un_acceso_visible_y_una_direccion_facil(): void
+    {
+        $this->get(route('inicio'))->assertSee('Acceso del personal')->assertSee(route('panel'), false);
+
+        // /panel lleva al ingreso con el aviso del personal y, al entrar, directo al tablero
+        $this->followingRedirects()->get('/panel')->assertSee('Acceso del personal.');
+        $vendedor = $this->crearUsuario('vendedor');
+        $this->post(route('login'), ['correo' => $vendedor->correo, 'contrasena' => 'Clave1234'])
+            ->assertRedirect(route('gestion.tablero'));
+    }
 }

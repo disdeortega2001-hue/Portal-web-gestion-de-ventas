@@ -578,4 +578,8 @@ Total al 28/10/2026: **127 pruebas, 556 verificaciones**, todas aprobadas.
 - **Productos:** cada uno tiene una descripción breve de para qué sirve. Se ve en la tarjeta del catálogo y completa en la ficha; está en `database/seeders/catalogo/productos.xlsx`.
 - **Datos de prueba:** incluyen los cuatro reportes del mes (ventas e inventario, en PDF y Excel).
 
-Total al 28/10/2026: **128 pruebas, 559 verificaciones**, todas aprobadas.
+**Acceso del personal:**
+- el pie de todas las páginas públicas y el menú del celular tienen el enlace «Acceso del personal»;
+- las direcciones `/panel`, `/gestion` y `/admin` llevan al ingreso, con un aviso para el personal, y luego directo al tablero.
+
+Total al 28/10/2026: **129 pruebas, 564 verificaciones**, todas aprobadas.
