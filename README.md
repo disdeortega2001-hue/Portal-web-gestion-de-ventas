@@ -659,3 +659,11 @@ Total al 28/10/2026: **140 pruebas, 614 verificaciones**, todas aprobadas.
 
 Total al 28/10/2026: **145 pruebas, 645 verificaciones**, todas aprobadas.
 
+## 22. Compra sin cuenta y logo sin fondo (28/10/2026)
+
+- **Crear cuenta es opcional.** En «Comprar ahora», quien no tiene cuenta escribe solo cédula o RIF, nombre, teléfono y dirección (sin correo ni contraseña).
+- Al confirmar recibe un **enlace firmado** de su pedido, válido 90 días: con él ve el estado, reporta el pago o cancela. Sin ese enlace nadie puede abrir el pedido.
+- Si la cédula ya existe, la ficha del cliente no se modifica: los datos distintos quedan anotados en el pedido para que el personal los verifique (igual que en la cotización).
+- Quien tiene cuenta compra con sus datos guardados y ve el pedido en «Mis pedidos».
+- **Logo:** el engranaje verde sin el cuadro de fondo (public/img/logo.png). En el pie de página va la versión con el RIF en blanco (logo-rif.png). También se renovaron el ícono de la pestaña, los íconos del teléfono y la imagen para compartir.
+- Pruebas: 147 aprobadas (666 verificaciones). Se agregaron las de compra sin cuenta, enlace firmado, cancelación sin cuenta y ficha protegida.

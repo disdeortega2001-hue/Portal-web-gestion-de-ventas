@@ -2,22 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CompraRequest;
 use App\Models\Pedido;
 use App\Services\CarritoService;
 use App\Services\PagoService;
 use App\Services\PedidoService;
+use App\Support\ClienteInvitado;
+use App\Support\ClienteRecordado;
 use App\Support\MetodosPago;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use LogicException;
 
 /**
- * Compra en el portal. El catálogo y la cotización son libres; para comprar, el cliente entra
- * con su cuenta (o la crea en ese momento: el registro lo devuelve aquí). Elige cómo pagar y
- * cómo recibir; el pedido queda pendiente hasta que el personal verifica el pago.
+ * Compra en el portal. Crear cuenta es opcional: quien no la tiene escribe sus datos básicos
+ * (cédula o RIF, nombre, teléfono y dirección) y sigue su pedido por un enlace firmado que
+ * nadie más puede adivinar. Quien tiene cuenta compra con sus datos guardados y ve el pedido
+ * en «Mis pedidos». El pedido queda pendiente hasta que el personal verifica el pago.
  */
 class CompraController extends Controller
 {
@@ -34,26 +38,19 @@ class CompraController extends Controller
         return view('compra.create', [
             // Un resumen por moneda: en dólares lleva IGTF y en bolívares IVA; el método elegido decide cuál aplica
             'resumenes' => ['USD' => $this->carrito->resumen('USD'), 'VES' => $this->carrito->resumen('VES')],
-            'cliente' => $request->user()->cliente,
+            'cliente' => $request->user()?->cliente,
+            'recordado' => $request->user() ? [] : ClienteRecordado::leer(),
             'metodos' => MetodosPago::disponibles(),
         ]);
     }
 
-    public function store(Request $request, PedidoService $pedidos): RedirectResponse
+    public function store(CompraRequest $request, PedidoService $pedidos): RedirectResponse
     {
         if ($redireccion = $this->sinCompraPosible($request)) {
             return $redireccion;
         }
 
-        $datos = $request->validate([
-            'metodo_pago' => ['required', Rule::in(array_keys(MetodosPago::disponibles()))],
-            'entrega' => ['required', 'in:retiro,envio'],
-            'observaciones' => ['nullable', 'string', 'max:500'],
-        ], [
-            'metodo_pago.required' => 'Elige cómo vas a pagar.',
-            'metodo_pago.in' => 'Ese método de pago no está disponible.',
-            'entrega.required' => 'Elige cómo recibes tu pedido.',
-        ]);
+        $datos = $request->validated();
 
         // Revalida la existencia al momento de comprar (pudo cambiar desde que se agregó)
         $lineas = $this->carrito->lineas();
@@ -65,22 +62,47 @@ class CompraController extends Controller
             }
         }
 
-        $pedido = $pedidos->crearEnLinea(
-            $request->user()->cliente, $lineas, $datos['metodo_pago'], $datos['entrega'], $datos['observaciones'] ?? null
-        );
+        $conCuenta = (bool) $request->user()?->cliente;
+        [$cliente, $notaContacto] = $conCuenta ? [$request->user()->cliente, null] : ClienteInvitado::resolver($request);
+        $observaciones = implode("\n", array_filter([$datos['observaciones'] ?? null, $notaContacto])) ?: null;
+
+        $pedido = $pedidos->crearEnLinea($cliente, $lineas, $datos['metodo_pago'], $datos['entrega'], $observaciones);
         $this->carrito->vaciar();
+
+        if (! $conCuenta) {
+            $request->boolean('recordar')
+                ? ClienteRecordado::guardar($request->only(ClienteRecordado::CAMPOS))
+                : ClienteRecordado::olvidar();
+        }
 
         $siguiente = MetodosPago::enLinea($pedido->metodo_pago)
             ? 'Paga y repórtalo aquí mismo con la referencia.'
             : 'Pagas al retirar en la tienda.';
 
-        return redirect()->route('cuenta.pedidos.show', $pedido)->with('exito', "Recibimos tu pedido {$pedido->codigo}. {$siguiente}");
+        $destino = $conCuenta ? route('cuenta.pedidos.show', $pedido) : self::enlaceSeguimiento($pedido);
+
+        return redirect($destino)->with('exito', "Recibimos tu pedido {$pedido->codigo}. {$siguiente}");
+    }
+
+    /** Pedido hecho sin cuenta: se consulta con el enlace firmado que recibió al comprar. */
+    public function seguimiento(Pedido $pedido): View
+    {
+        return CuentaController::vistaPedido($pedido, sinCuenta: true);
+    }
+
+    /**
+     * Enlace firmado del pedido sin cuenta, válido 90 días: lo guarda o lo comparte por WhatsApp.
+     * Los formularios de pago y de cancelación usan enlaces firmados del mismo pedido.
+     */
+    public static function enlaceSeguimiento(Pedido $pedido, string $ruta = 'pedidos.seguimiento'): string
+    {
+        return URL::temporarySignedRoute($ruta, $pedido->fecha->copy()->addDays(90), ['pedido' => $pedido->id]);
     }
 
     /** El cliente reporta su pago a distancia con la referencia y el comprobante. */
     public function reportarPago(Request $request, Pedido $pedido, PagoService $pagos): RedirectResponse
     {
-        abort_unless($pedido->id_cliente === $request->user()->cliente?->id, 403);
+        $this->autorizar($request, $pedido);
 
         $datos = $request->validate([
             'referencia' => ['required', 'string', 'min:4', 'max:60'],
@@ -115,7 +137,7 @@ class CompraController extends Controller
      */
     public function solicitarDevolucion(Request $request, Pedido $pedido, PedidoService $pedidos): RedirectResponse
     {
-        abort_unless($pedido->id_cliente === $request->user()->cliente?->id, 403);
+        $this->autorizar($request, $pedido);
 
         $datos = $request->validate(['motivo' => ['required', 'string', 'min:5', 'max:500']], [
             'motivo.required' => 'Cuéntanos por qué quieres cancelar o devolver el pedido.',
@@ -137,14 +159,25 @@ class CompraController extends Controller
         return back()->with('exito', 'Recibimos tu solicitud. Te contactaremos para coordinar la devolución de los productos y de tu dinero.');
     }
 
-    /** Carrito vacío o cuenta aún en verificación: no hay compra posible todavía. */
+    /** El dueño con su cuenta, o quien tiene el enlace firmado del pedido (compra sin cuenta). */
+    private function autorizar(Request $request, Pedido $pedido): void
+    {
+        $esDueno = $request->user() && $pedido->id_cliente === $request->user()->cliente?->id;
+
+        abort_unless($esDueno || $request->hasValidSignature(), 403);
+    }
+
+    /** Carrito vacío, personal de la empresa o cuenta aún en verificación: no hay compra posible. */
     private function sinCompraPosible(Request $request): ?RedirectResponse
     {
+        // El personal registra las ventas desde el panel (venta de mostrador), no desde el portal
+        abort_if($request->user()?->esPersonal(), 403);
+
         if ($this->carrito->estaVacio()) {
             return redirect()->route('carrito.index')->with('error', 'Tu lista está vacía. Agrega productos desde el catálogo.');
         }
 
-        if (! $request->user()->cliente) {
+        if ($request->user() && ! $request->user()->cliente) {
             return redirect()->route('carrito.index')->with('error',
                 'Tu cuenta está en verificación: un vendedor te llamará para confirmar tus datos. Mientras tanto puedes enviar la cotización.');
         }

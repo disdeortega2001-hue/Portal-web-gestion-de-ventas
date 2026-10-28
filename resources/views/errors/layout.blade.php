@@ -17,7 +17,7 @@
     <header class="bg-white">
         <div class="mx-auto flex h-16 max-w-[1320px] items-center gap-3 px-4 sm:px-6 lg:px-8">
             <a href="{{ url('/') }}" class="flex items-center gap-2.5 no-underline">
-                <span class="grid size-11 place-items-center bg-tierra"><img src="{{ asset('img/logo.png') }}" alt="" class="size-9 object-contain"></span>
+                <img src="{{ asset('img/logo.png') }}" alt="" class="size-11 object-contain">
                 <span class="font-rotulo text-[1.375rem] font-extrabold uppercase text-tinta">Rialto 7</span>
             </a>
         </div>

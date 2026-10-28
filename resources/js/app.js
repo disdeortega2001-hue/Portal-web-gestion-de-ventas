@@ -63,6 +63,9 @@ document.addEventListener('submit', (e) => {
     if (mensaje && !window.confirm(mensaje)) { e.preventDefault(); e.stopImmediatePropagation(); }
 });
 
+// Enlaces para copiar (<input data-seleccionar>): al tocarlos queda todo seleccionado
+document.addEventListener('focusin', (e) => { if (e.target.matches?.('[data-seleccionar]')) e.target.select(); });
+
 // Validación en vivo (HTML5). El servidor vuelve a validar todo.
 document.querySelectorAll('form.needs-validation').forEach((form) => {
     form.querySelectorAll('input, select, textarea').forEach((campo) => {

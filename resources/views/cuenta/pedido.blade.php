@@ -2,7 +2,7 @@
 @section('titulo', 'Pedido ' . $pedido->codigo)
 
 @section('cabecera')
-    <a href="{{ route('cuenta.pedidos') }}" class="mb-3 inline-flex items-center gap-1.5 text-sm font-bold text-white/80 hover:text-white"><x-icono nombre="flecha-izq" class="size-4" /> Mis pedidos</a>
+    @unless($sinCuenta)<a href="{{ route('cuenta.pedidos') }}" class="mb-3 inline-flex items-center gap-1.5 text-sm font-bold text-white/80 hover:text-white"><x-icono nombre="flecha-izq" class="size-4" /> Mis pedidos</a>@endunless
     <h1 class="titular text-4xl sm:text-5xl">Pedido <em class="cifra">{{ $pedido->codigo }}</em></h1>
     <p class="mt-3 flex flex-wrap items-center gap-2 text-white/85">
         <span class="cifra">{{ $pedido->fecha->format('d/m/Y h:i a') }}</span>
@@ -14,6 +14,19 @@
 @section('contenido')
 <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-10">
     <div class="space-y-8">
+        {{-- Compra sin cuenta: este enlace es la única forma de volver al pedido --}}
+        @if($sinCuenta)
+            <section class="aviso aviso-info" aria-labelledby="t-enlace">
+                <x-icono nombre="info" class="size-5 shrink-0" />
+                <div class="min-w-0 flex-1">
+                    <p id="t-enlace" class="font-bold">Guarda este enlace para ver tu pedido y reportar el pago</p>
+                    <p class="text-sm">Compraste sin cuenta: con este enlace vuelves cuando quieras. Guárdalo en favoritos o envíatelo por WhatsApp.</p>
+                    <label for="enlace-pedido" class="sr-only">Enlace de tu pedido</label>
+                    <input id="enlace-pedido" type="text" readonly value="{{ $urlPedido }}" class="campo mt-2 w-full text-sm" data-seleccionar>
+                    <a href="https://wa.me/?text={{ rawurlencode('Mi pedido ' . $pedido->codigo . ' en Rialto 7: ' . $urlPedido) }}" target="_blank" rel="noopener" class="enlace mt-2 inline-block text-sm">Enviármelo por WhatsApp</a>
+                </div>
+            </section>
+        @endif
         {{-- Pago reportado: ya no hace falta repetir las instrucciones --}}
         @if($pedido->estado_pago === 'por_verificar')
             <section aria-labelledby="t-verificando" class="sobre-azul relative overflow-hidden rounded-[10px] bg-tierra-oscura p-6 text-white sm:p-8">
@@ -54,7 +67,7 @@
         @if($pedido->aceptaReporteDePago())
             <section aria-labelledby="t-reporte">
                 <h2 id="t-reporte" class="titular subrayado text-3xl text-tierra-oscura">Reporta tu pago</h2>
-                <form method="POST" action="{{ route('cuenta.pedidos.pago', $pedido) }}" enctype="multipart/form-data" class="needs-validation lobulo mt-8 grid gap-4 p-5 sm:grid-cols-2 sm:p-6" novalidate>
+                <form method="POST" action="{{ $urlPago }}" enctype="multipart/form-data" class="needs-validation lobulo mt-8 grid gap-4 p-5 sm:grid-cols-2 sm:p-6" novalidate>
                     @csrf
                     <div>
                         <label for="referencia" class="etiqueta">Número de referencia *</label>
@@ -97,7 +110,7 @@
         @else
             <details class="lobulo p-4 sm:p-5">
                 <summary class="cursor-pointer font-bold text-coral-tinta">{{ $pedido->clientePuedeCancelar() ? '¿Quieres cancelar este pedido?' : '¿Necesitas devolver este pedido?' }}</summary>
-                <form method="POST" action="{{ route('cuenta.pedidos.devolucion', $pedido) }}" class="needs-validation mt-4 space-y-3" novalidate>
+                <form method="POST" action="{{ $urlDevolucion }}" class="needs-validation mt-4 space-y-3" novalidate>
                     @csrf
                     <label for="motivo" class="etiqueta">Motivo *</label>
                     <textarea id="motivo" name="motivo" rows="2" class="campo @error('motivo') is-invalid @enderror" required minlength="5" maxlength="500" placeholder="Ej. pedí el repuesto equivocado">{{ old('motivo') }}</textarea>

@@ -49,11 +49,22 @@ class CuentaController extends Controller
     public function pedido(Request $request, Pedido $pedido): View
     {
         abort_unless($pedido->id_cliente === $request->user()->cliente?->id, 403);
+
+        return self::vistaPedido($pedido, sinCuenta: false);
+    }
+
+    /** Con cuenta, los formularios van a «Mis pedidos»; sin cuenta, a enlaces firmados del mismo pedido. */
+    public static function vistaPedido(Pedido $pedido, bool $sinCuenta): View
+    {
         $pedido->load(['detalles.producto:id,codigo_fabrica,nombre', 'pagos']);
 
         return view('cuenta.pedido', [
             'pedido' => $pedido,
             'datosPago' => $pedido->metodo_pago ? (MetodosPago::disponibles()[$pedido->metodo_pago]['datos'] ?? []) : [],
+            'sinCuenta' => $sinCuenta,
+            'urlPedido' => $sinCuenta ? CompraController::enlaceSeguimiento($pedido) : null,
+            'urlPago' => $sinCuenta ? CompraController::enlaceSeguimiento($pedido, 'pedidos.seguimiento.pago') : route('cuenta.pedidos.pago', $pedido),
+            'urlDevolucion' => $sinCuenta ? CompraController::enlaceSeguimiento($pedido, 'pedidos.seguimiento.devolucion') : route('cuenta.pedidos.devolucion', $pedido),
         ]);
     }
 

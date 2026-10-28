@@ -15,14 +15,6 @@
             <p><strong>Acceso del personal.</strong> Ingresa con tu correo de la empresa y tu contraseña; entrarás directo al panel de gestión.</p>
         </div>
     @endif
-    {{-- Viene de «Comprar ahora»: la cuenta se pide recién en la compra --}}
-    @if(str_contains((string) session('url.intended'), '/comprar'))
-        <div class="aviso aviso-atencion mb-5 flex-col sm:flex-row sm:items-center" role="status">
-            <x-icono nombre="info" class="size-5 shrink-0" />
-            <p class="flex-1"><strong>Para comprar necesitas una cuenta.</strong> Si ya tienes, ingresa; si es tu primera compra, créala en un minuto.</p>
-            <a href="{{ route('registro') }}" class="btn btn-sol btn-mini">Crear cuenta</a>
-        </div>
-    @endif
     <form method="POST" action="{{ route('login') }}" class="lobulo needs-validation space-y-5 p-6 sm:p-8" novalidate>
         @csrf
         <div>

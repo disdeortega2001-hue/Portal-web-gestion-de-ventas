@@ -177,7 +177,7 @@ class PedidoService
     }
 
     /** Anula un pedido. Si ya estaba confirmado, repone el stock con movimientos de entrada. */
-    public function anular(Pedido $pedido, Usuario $usuario, ?string $motivo = null): Pedido
+    public function anular(Pedido $pedido, ?Usuario $usuario, ?string $motivo = null): Pedido
     {
         return DB::transaction(function () use ($pedido, $usuario, $motivo) {
             $pedido = Pedido::with('detalles')->lockForUpdate()->findOrFail($pedido->id);
@@ -205,7 +205,7 @@ class PedidoService
                         'motivo' => "Anulación del pedido {$pedido->codigo}",
                         'id_pedido' => $pedido->id,
                         'fecha' => now(),
-                        'id_usuario' => $usuario->id,
+                        'id_usuario' => $usuario?->id,
                     ]);
                 }
             }

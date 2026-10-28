@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Route;
 | Organizadas en bloques según quién puede acceder:
 |   1. Públicas (catálogo, carrito, cotización como invitado)
 |   2. Invitados (login / registro / recuperar contraseña)
-|   3. Cliente autenticado (compra, mi cuenta, reporte de pagos)
+|   3. Compra (con o sin cuenta) y área del cliente con cuenta
 |   4. Panel, los tres perfiles: vendedor, administrativo y directivo
 |      (tablero, cotizaciones, pedidos, clientes, existencias)
 |   5. Administrativo y directivo (inventario, pagos, reportes, catálogo, tasa e IVA)
@@ -93,10 +93,13 @@ Route::middleware(['auth', 'rol:cliente'])->prefix('mi-cuenta')->name('cuenta.')
     Route::post('/pedidos/{pedido}/devolucion', [CompraController::class, 'solicitarDevolucion'])->middleware('throttle:10,1')->name('pedidos.devolucion');
 });
 
-// Compra: el visitante sin sesión va a ingresar o crear su cuenta, y vuelve aquí
-Route::middleware(['auth', 'rol:cliente'])->group(function () {
-    Route::get('/comprar', [CompraController::class, 'create'])->name('compra.create');
-    Route::post('/comprar', [CompraController::class, 'store'])->middleware('throttle:10,1')->name('compra.store');
+// Compra: crear cuenta es opcional. Sin cuenta, el pedido se sigue por un enlace firmado
+Route::get('/comprar', [CompraController::class, 'create'])->name('compra.create');
+Route::post('/comprar', [CompraController::class, 'store'])->middleware('throttle:10,1')->name('compra.store');
+Route::middleware('signed')->prefix('pedido/{pedido}')->name('pedidos.seguimiento')->group(function () {
+    Route::get('/', [CompraController::class, 'seguimiento']);
+    Route::post('/pago', [CompraController::class, 'reportarPago'])->middleware('throttle:10,1')->name('.pago');
+    Route::post('/devolucion', [CompraController::class, 'solicitarDevolucion'])->middleware('throttle:10,1')->name('.devolucion');
 });
 
 // 4. PANEL: VENDEDOR, ADMINISTRATIVO Y DIRECTIVO --------------------------

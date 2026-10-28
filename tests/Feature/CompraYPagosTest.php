@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\CompraController;
 use App\Models\Pago;
 use App\Models\Pedido;
 use App\Models\Usuario;
@@ -12,7 +13,7 @@ use Tests\Concerns\CreaDatos;
 use Tests\TestCase;
 
 /**
- * Compra en el portal: el catálogo y la cotización son libres, la compra pide cuenta.
+ * Compra en el portal: con cuenta o sin ella (sin cuenta, el pedido se sigue con un enlace firmado).
  * Pagos: el cliente reporta, el personal administrativo verifica (o cobra en la tienda).
  */
 class CompraYPagosTest extends TestCase
@@ -44,29 +45,71 @@ class CompraYPagosTest extends TestCase
         return Pedido::latest('id')->firstOrFail();
     }
 
-    public function test_el_visitante_cotiza_sin_cuenta_pero_para_comprar_debe_ingresar(): void
-    {
-        $producto = $this->crearProducto();
-        $this->post(route('carrito.agregar', $producto), ['cantidad' => 1]);
+    /** Datos básicos de quien compra sin cuenta (sin correo ni contraseña). */
+    private const DATOS_SIN_CUENTA = [
+        'tipo_identificacion' => 'V', 'numero_identificacion' => '20111222',
+        'nombre' => 'Pedro Pérez', 'telefono' => '0414-1112233', 'direccion' => 'Finca La Ceiba, Zaraza',
+    ];
 
-        $this->get(route('carrito.index'))->assertOk()->assertSee('Comprar ahora')->assertSee('Enviar cotización');
-        $this->get(route('compra.create'))->assertRedirect(route('login'));
-        $this->get(route('login'))->assertSee('Para comprar necesitas una cuenta.');
+    private function comprarSinCuenta(string $metodo = 'pago_movil', array $datos = []): Pedido
+    {
+        $producto = $this->crearProducto(['stock' => 10, 'precio' => '100.00']);
+        $this->post(route('carrito.agregar', $producto), ['cantidad' => 1]);
+        $this->post(route('compra.store'), $datos + self::DATOS_SIN_CUENTA + ['metodo_pago' => $metodo, 'entrega' => 'retiro'])
+            ->assertRedirectContains('/pedido/');
+
+        return Pedido::latest('id')->firstOrFail();
     }
 
-    public function test_al_registrarse_desde_comprar_vuelve_a_la_compra(): void
+    public function test_el_visitante_compra_sin_crear_cuenta(): void
     {
         $producto = $this->crearProducto();
         $this->post(route('carrito.agregar', $producto), ['cantidad' => 1]);
-        $this->get(route('compra.create'));
+        $this->get(route('carrito.index'))->assertOk()->assertSee('Comprar ahora')->assertSee('No necesitas crear cuenta.');
+        $this->get(route('compra.create'))->assertOk()->assertSee('No necesitas crear cuenta')->assertDontSee('id="correo"', false);
 
-        $this->post(route('registro'), [
-            'tipo_identificacion' => 'V', 'numero_identificacion' => '20111222',
-            'nombre' => 'Pedro Pérez', 'telefono' => '0414-1112233', 'direccion' => 'Finca La Ceiba, Zaraza',
-            'correo' => 'pedro@prueba.test', 'contrasena' => 'Clave1234', 'contrasena_confirmation' => 'Clave1234',
-        ])->assertRedirect(route('compra.create'));
+        $pedido = $this->comprarSinCuenta('zelle');
 
-        $this->get(route('compra.create'))->assertOk()->assertSee('Finalizar');
+        $this->assertSame('V-20111222', $pedido->cliente->identificacion);
+        $this->assertSame(0, Usuario::where('rol', 'cliente')->count());
+        $this->assertGuest();
+        $this->get(CompraController::enlaceSeguimiento($pedido))->assertOk()
+            ->assertSee($pedido->codigo)->assertSee('Guarda este enlace');
+    }
+
+    public function test_el_pedido_sin_cuenta_solo_se_abre_con_su_enlace_firmado(): void
+    {
+        $pedido = $this->comprarSinCuenta();
+        $pago = ['referencia' => '00451234', 'fecha_pago' => now()->toDateString(), 'monto' => (string) $pedido->total_bs];
+
+        $this->get(route('pedidos.seguimiento', $pedido))->assertForbidden();
+        $this->post(route('pedidos.seguimiento.pago', $pedido), $pago)->assertForbidden();
+        $this->actingAs($this->crearUsuario('cliente'))->get(route('cuenta.pedidos.show', $pedido))->assertForbidden();
+        auth()->logout();
+
+        $this->post(CompraController::enlaceSeguimiento($pedido, 'pedidos.seguimiento.pago'), $pago)->assertSessionHas('exito');
+        $this->assertSame(Pedido::PAGO_POR_VERIFICAR, $pedido->fresh()->estado_pago);
+    }
+
+    public function test_sin_cuenta_se_puede_cancelar_el_pedido_pendiente(): void
+    {
+        $pedido = $this->comprarSinCuenta('efectivo');
+
+        $this->post(route('pedidos.seguimiento.devolucion', $pedido), ['motivo' => 'Ya no lo necesito'])->assertForbidden();
+        $this->post(CompraController::enlaceSeguimiento($pedido, 'pedidos.seguimiento.devolucion'), ['motivo' => 'Ya no lo necesito'])
+            ->assertSessionHas('exito');
+        $this->assertSame(Pedido::ANULADO, $pedido->fresh()->estado);
+    }
+
+    public function test_comprar_sin_cuenta_con_una_cedula_existente_no_cambia_su_ficha(): void
+    {
+        $cliente = tap($this->crearCliente())->update(['identificacion' => 'V-20111222', 'telefono' => '0414-0000000']);
+
+        $pedido = $this->comprarSinCuenta('pago_movil', ['telefono' => '0424-9999999']);
+
+        $this->assertSame($cliente->id, $pedido->id_cliente);
+        $this->assertSame('0414-0000000', $cliente->fresh()->telefono);
+        $this->assertStringContainsString('0424-9999999', $pedido->observaciones);
     }
 
     public function test_se_ofrecen_todos_los_metodos_de_pago(): void

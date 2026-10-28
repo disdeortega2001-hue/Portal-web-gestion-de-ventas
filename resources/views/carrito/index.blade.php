@@ -87,11 +87,11 @@
         </form>
         @include('partials.resumen', ['r' => $resumen])
 
-        {{-- Comprar: pide la cuenta en ese momento (ingresar o registrarse) y vuelve a la compra --}}
+        {{-- Comprar: con cuenta o sin ella (crear cuenta es opcional) --}}
         @unless(auth()->user()?->esPersonal())
             <div class="lobulo space-y-3 p-4 sm:p-5">
                 <a href="{{ route('compra.create') }}" class="btn btn-tierra btn-grande w-full">Comprar ahora <span class="chip"><x-icono nombre="flecha" class="size-4" /></span></a>
-                <p class="apoyo text-sm">Pago Móvil, transferencia, Zelle, efectivo o punto de venta.@guest Te pedimos crear tu cuenta (o ingresar) al comprar.@endguest</p>
+                <p class="apoyo text-sm">Pago Móvil, transferencia, Zelle, efectivo o punto de venta.@guest No necesitas crear cuenta.@endguest</p>
             </div>
             <p class="flex items-center gap-3 text-sm font-bold uppercase tracking-[0.08em] text-tinta-suave" aria-hidden="true"><span class="h-px flex-1 bg-linea"></span>o pide una cotización<span class="h-px flex-1 bg-linea"></span></p>
         @endunless

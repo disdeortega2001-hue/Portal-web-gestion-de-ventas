@@ -87,7 +87,7 @@
              :class="abierto && 'translate-x-0'">
             <span class="franja-v pointer-events-none absolute inset-y-0 right-0" aria-hidden="true"></span>
             <div class="relative flex items-center gap-3 px-5 pb-4 pt-5">
-                <span class="grid size-12 place-items-center rounded-[6px] bg-rialto"><x-logo tamano="size-10" /></span>
+                <x-logo tamano="size-12" />
                 <div class="leading-tight"><div class="text-2xl font-black uppercase">Rialto 7</div><div class="text-sm font-semibold text-white/75">Gestión de ventas</div></div>
                 <button type="button" class="ml-auto mr-3 grid size-10 place-items-center hover:bg-white/10 lg:hidden" @click="abierto = false" aria-label="Cerrar menú"><x-icono nombre="x" /></button>
             </div>
@@ -131,7 +131,7 @@
             class="sticky top-0 z-40 bg-white transition-shadow duration-300" :class="bajo && 'shadow-[0_8px_24px_-16px_rgb(5_43_112/0.45)]'">
         <div class="mx-auto flex h-16 max-w-[1320px] items-center gap-3 px-4 sm:px-6 lg:h-[4.5rem] lg:gap-6 2xl:gap-8 lg:px-8">
             <a href="{{ route('inicio') }}" class="flex shrink-0 items-center gap-2.5 no-underline" aria-label="Inversiones Rialto 7, ir al inicio">
-                <span class="grid size-11 place-items-center rounded-[6px] bg-rialto lg:size-12"><x-logo tamano="size-9 lg:size-10" /></span>
+                <x-logo tamano="size-11 lg:size-12" />
                 <span class="leading-none">
                     <span class="block whitespace-nowrap text-[1.375rem] font-black uppercase leading-none text-tierra-oscura lg:text-2xl">Rialto 7</span>
                     <span class="hidden whitespace-nowrap text-[0.8125rem] font-semibold text-tinta-suave xl:block">Repuestos y maquinaria agrícola</span>
@@ -255,7 +255,7 @@
         <div class="mx-auto grid max-w-[1320px] gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr] lg:px-8">
             <div>
                 <div class="flex items-center gap-3">
-                    <span class="grid size-16 shrink-0 place-items-center rounded-[8px] bg-rialto"><x-logo tamano="size-14" /></span>
+                    <x-logo tamano="size-24" con-rif />
                     <div>
                         <p class="text-xl font-black uppercase text-white">Inversiones Rialto 7 C.A.</p>
                         <p class="text-sm">RIF J-50668510-8 · Valle de la Pascua desde 1963</p>

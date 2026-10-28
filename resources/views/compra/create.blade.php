@@ -16,13 +16,26 @@
         {{-- Quién compra --}}
         <section aria-labelledby="t-cliente">
             <h2 id="t-cliente" class="seccion-titulo">Tus datos</h2>
-            <div class="lobulo mt-3 flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5">
-                <div>
-                    <p class="font-bold">{{ $cliente->nombre }}</p>
-                    <p class="apoyo text-sm cifra">{{ $cliente->identificacion }} · {{ $cliente->telefono }}</p>
-                    <p class="apoyo text-sm">{{ $cliente->direccion }}</p>
+            @if($cliente)
+                <div class="lobulo mt-3 flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5">
+                    <div>
+                        <p class="font-bold">{{ $cliente->nombre }}</p>
+                        <p class="apoyo text-sm cifra">{{ $cliente->identificacion }} · {{ $cliente->telefono }}</p>
+                        <p class="apoyo text-sm">{{ $cliente->direccion }}</p>
+                    </div>
                 </div>
-            </div>
+            @else
+                {{-- Sin cuenta: solo lo necesario para entregar y confirmar el pago --}}
+                <p class="apoyo mt-1 text-sm">No necesitas crear cuenta. ¿Ya tienes una? <a href="{{ route('login') }}" class="enlace">Ingresa</a> para no escribirlos.</p>
+                <div class="lobulo mt-3 space-y-4 p-4 sm:p-5">
+                    @include('partials.campos-cliente', ['recordado' => $recordado, 'sinCorreo' => true])
+                    <label class="flex cursor-pointer gap-3">
+                        <input type="checkbox" name="recordar" value="1" class="mt-0.5" @checked(old('recordar', $recordado ? '1' : null))>
+                        <span><span class="font-semibold">Recordar mis datos en este teléfono</span>
+                            <span class="ayuda !mt-0.5 block">Para no escribirlos la próxima vez. No lo marques si el teléfono es prestado.</span></span>
+                    </label>
+                </div>
+            @endif
         </section>
 
         {{-- Cómo paga --}}
@@ -48,7 +61,7 @@
             <div class="aviso aviso-info mt-4" aria-live="polite">
                 <x-icono nombre="info" class="size-5 shrink-0" />
                 <p x-show="@js(collect($metodos)->filter(fn ($m) => $m['en_linea'])->keys()->values()).includes(metodo)">
-                    Al confirmar te mostramos los datos para pagar. Luego reportas la referencia y el comprobante desde tu pedido; lo verificamos y te avisamos.
+                    Al confirmar te mostramos los datos para pagar. Luego reportas la referencia y el comprobante desde tu pedido; lo verificamos y te avisamos por teléfono.
                 </p>
                 <p x-show="! @js(collect($metodos)->filter(fn ($m) => $m['en_linea'])->keys()->values()).includes(metodo)" x-cloak>
                     Pagas al retirar en el Edificio Campagna. Te escribimos por WhatsApp cuando tu pedido esté listo.

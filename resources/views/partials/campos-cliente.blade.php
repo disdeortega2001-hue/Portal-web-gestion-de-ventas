@@ -4,6 +4,7 @@
     ClienteRequest las une en "V-12345678".
     $recordado (opcional): datos guardados en este teléfono con "Recordar mis datos".
     $angosto (opcional): en una columna lateral, un campo por fila para que la cédula no se corte.
+    $sinCorreo (opcional): compra sin cuenta, donde el correo no hace falta.
 --}}
 @php($r = $recordado ?? [])
 @php($col = ($angosto ?? false) ? 'sm:col-span-2' : '')
@@ -37,12 +38,14 @@
                class="campo cifra @error('telefono') is-invalid @enderror" required pattern="0[0-9]{3}-?[0-9]{7}" placeholder="0414-1234567" inputmode="tel" autocomplete="tel">
         <p class="error-campo">@error('telefono'){{ $message }}@else Formato: 0414-1234567. @enderror</p>
     </div>
+    @unless($sinCorreo ?? false)
     <div class="{{ $col }}">
         <label for="correo" class="etiqueta">Correo {{ ($correoObligatorio ?? false) ? '*' : '(opcional)' }}</label>
         <input type="email" id="correo" name="correo" value="{{ old('correo', $r['correo'] ?? '') }}"
                class="campo @error('correo') is-invalid @enderror" maxlength="150" autocomplete="email" @if($correoObligatorio ?? false) required @endif>
         <p class="error-campo">@error('correo'){{ $message }}@else Escribe un correo válido. @enderror</p>
     </div>
+    @endunless
     <div class="sm:col-span-2">
         <label for="direccion" class="etiqueta">Dirección *</label>
         <input type="text" id="direccion" name="direccion" value="{{ old('direccion', $r['direccion'] ?? '') }}"
