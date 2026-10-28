@@ -59,7 +59,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#0d5192">
     {{-- Con JavaScript, las secciones entran animadas; sin él, todo se ve desde el principio --}}
-    <script>document.documentElement.classList.add('js')</script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">document.documentElement.classList.add('js')</script>
     <title>@yield('titulo', 'Catálogo') · Inversiones Rialto 7</title>
     @include('partials.meta')
     {{-- El logo del sitio es blanco sobre transparente; la pestaña usa la versión con fondo verde --}}
@@ -271,7 +271,7 @@
                     <li><a href="{{ route('contacto') }}" class="hover:text-white hover:underline">Contacto</a></li>
                     <li><a href="{{ route('legal.privacidad') }}" class="hover:text-white hover:underline">Privacidad</a></li>
                     <li><a href="{{ route('legal.terminos') }}" class="hover:text-white hover:underline">Términos de venta</a></li>
-                    <li class="pt-2"><a href="{{ route('panel') }}" class="inline-flex items-center gap-2 font-bold text-sol hover:underline"><x-icono nombre="usuario-check" class="size-4" /> Acceso del personal</a></li>
+                    @guest<li class="pt-2"><a href="{{ route('panel') }}" class="inline-flex items-center gap-2 font-bold text-sol hover:underline"><x-icono nombre="usuario-check" class="size-4" /> Acceso del personal</a></li>@endguest
                 </ul>
             </nav>
             <div>
@@ -295,7 +295,7 @@
 <div id="aviso" role="status" aria-live="polite"
      class="toast flex w-[min(92vw,30rem)] items-center gap-3 bg-tinta py-2 pl-5 pr-2 text-[0.9375rem] text-white data-[tipo=error]:bg-coral-tinta">
     <span data-texto class="flex-1 [&_a]:text-sol"></span>
-    <button type="button" class="grid size-9 place-items-center hover:bg-white/10" onclick="this.parentElement.removeAttribute('data-visible')" aria-label="Cerrar aviso"><x-icono nombre="x" class="size-4" /></button>
+    <button type="button" class="grid size-9 place-items-center hover:bg-white/10" x-data @click="$el.parentElement.removeAttribute('data-visible')" aria-label="Cerrar aviso"><x-icono nombre="x" class="size-4" /></button>
 </div>
 
 @stack('scripts')

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Vite;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -14,7 +15,29 @@ class CabecerasSeguridad
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // Un nonce por petición: solo se ejecutan los scripts del portal que lo llevan (Vite lo agrega a los suyos)
+        Vite::useCspNonce();
+
         $respuesta = $next($request);
+
+        // Política de contenido: todo se sirve desde el propio portal. Alpine.js necesita 'unsafe-eval'
+        // para sus expresiones; los formularios de contacto pueden abrir WhatsApp.
+        $nonce = Vite::cspNonce();
+        $respuesta->headers->set('Content-Security-Policy', implode('; ', [
+            "default-src 'self'",
+            "script-src 'self' 'nonce-{$nonce}' 'unsafe-eval'",
+            "style-src 'self' 'unsafe-inline'",
+            "img-src 'self' data: blob:",
+            "font-src 'self' data:",
+            "connect-src 'self'",
+            "form-action 'self' https://wa.me https://api.whatsapp.com",
+            "frame-ancestors 'self'",
+            "base-uri 'self'",
+            "object-src 'none'",
+        ]));
+        // No se anuncia la versión de PHP
+        $respuesta->headers->remove('X-Powered-By');
+        header_remove('X-Powered-By');
 
         // El navegador no adivina tipos de archivo (evita ejecutar como script algo subido como imagen)
         $respuesta->headers->set('X-Content-Type-Options', 'nosniff');

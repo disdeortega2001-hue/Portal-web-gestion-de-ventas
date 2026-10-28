@@ -111,7 +111,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     // Mismo cálculo que CalculadoraComercial (en centavos; IGTF si paga en dólares, IVA si paga en bolívares); el servidor lo vuelve a hacer al guardar
     function mostrador(catalogo, p, clienteInicial, previas, urlClientes) {
         const formato = (n) => n.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });

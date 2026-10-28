@@ -5,11 +5,12 @@
     // Línea de vida (reseña histórica del Capítulo I). Cuando se conozcan los años exactos de la
     // importación desde Brasil y de la representación exclusiva, reemplaza «Oficio» y «Alianzas» por el año.
     $hitos = [
-        ['1963', 'Fundación', 'Nace Inversiones Campagna, una empresa familiar al servicio del productor llanero.'],
-        ['Oficio', 'Importación desde Brasil', 'Traemos repuestos y equipos difíciles de conseguir en el país.'],
-        ['Alianzas', 'Agente autorizado exclusivo', 'Representamos en Venezuela a Marchesan Tatu, Colombo Aemco, Vicon y Lumagi.'],
-        ['2024', 'Ahora somos Rialto 7', 'Nuevo nombre e imagen, con los valores de siempre.'],
-        [(string) now()->year, 'Catálogo en línea', 'Existencias, precios y cotizaciones desde la finca.'],
+        // [año, título, texto, foto] (fotos reales de la empresa en public/img/portada)
+        ['1963', 'Fundación', 'Nace Inversiones Campagna, una empresa familiar al servicio del productor llanero.', 'sede-fachada.jpg'],
+        ['Oficio', 'Importación desde Brasil', 'Traemos repuestos y equipos difíciles de conseguir en el país.', 'historia-importacion.jpg'],
+        ['Alianzas', 'Agente autorizado exclusivo', 'Representamos en Venezuela a Marchesan Tatu, Colombo Aemco, Vicon y Lumagi.', 'historia-recepcion.jpg'],
+        ['2024', 'Ahora somos Rialto 7', 'Nuevo nombre e imagen, con los valores de siempre.', 'historia-familia.jpg'],
+        [(string) now()->year, 'Catálogo en línea', 'Existencias, precios y cotizaciones desde la finca.', 'campo-1.webp'],
     ];
     // Pilares: los valores que la reseña atribuye a la empresa desde su fundación
     $pilares = [
@@ -114,9 +115,11 @@
     {{-- Tarjetas: se deslizan con el dedo, las flechas o los años --}}
     <ol x-ref="pista" @scroll.debounce.120ms="seguir()" tabindex="0" aria-label="Momentos de nuestra historia"
         class="-mx-4 mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-4 px-4 pb-4 [scrollbar-width:none] sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:scroll-px-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
-        @foreach($hitos as $k => [$cuando, $titulo, $texto])
-            <li class="lobulo panel-tapa flex w-[82%] shrink-0 snap-start flex-col p-6 pt-8 transition-[border-color,box-shadow] duration-300 sm:w-[46%] lg:w-[calc((100%-2rem)/3)]"
+        @foreach($hitos as $k => [$cuando, $titulo, $texto, $foto])
+            <li class="lobulo panel-tapa flex w-[82%] shrink-0 snap-start flex-col overflow-hidden p-6 pt-0 transition-[border-color,box-shadow] duration-300 sm:w-[46%] lg:w-[calc((100%-2rem)/3)]"
                 :class="i === {{ $k }} && '!border-tierra shadow-[0_0_0_1px_var(--color-tierra)]'">
+                <img src="{{ asset('img/portada/' . $foto) }}" alt="{{ $titulo }}" width="1000" height="750" loading="lazy"
+                     class="-mx-6 mb-5 aspect-[4/3] w-[calc(100%+3rem)] max-w-none object-cover">
                 <span class="font-rotulo text-lg self-start px-3 py-1 font-extrabold cifra transition-colors duration-300"
                       :class="i === {{ $k }} ? 'bg-sol text-tinta' : 'bg-agua-honda text-tinta-suave'">{{ $cuando }}</span>
                 <h3 class="mt-4 font-rotulo text-2xl font-extrabold uppercase leading-tight">{{ $titulo }}</h3>

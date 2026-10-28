@@ -142,7 +142,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     // Al escribir una cantidad, se guarda sola al salir del campo o con Enter (sin botón "Actualizar")
     document.querySelectorAll('form[data-cantidad]').forEach(function (form) {
         const campo = form.querySelector('input[name="cantidad"]');

@@ -120,7 +120,7 @@
 
 @push('scripts')
 @vite('resources/js/graficos.js')
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
 // Los módulos (gráficos) corren antes de DOMContentLoaded: aquí window.Chart ya existe si cargó
 document.addEventListener('DOMContentLoaded', function () {
     const URL_DATOS = @json(route('gestion.tablero.datos'));

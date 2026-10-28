@@ -124,7 +124,7 @@
                         @if(is_string($valor))<input type="hidden" name="{{ $nombre }}" value="{{ $valor }}">@endif
                     @endforeach
                     <label for="orden" class="hidden text-sm font-semibold text-tinta-suave sm:block">Ordenar</label>
-                    <select id="orden" name="orden" class="campo !min-h-11 !w-auto !py-0 !text-[0.9375rem]" onchange="this.form.submit()">
+                    <select id="orden" name="orden" class="campo !min-h-11 !w-auto !py-0 !text-[0.9375rem]" x-data @change="$el.form.submit()">
                         @foreach(\App\Http\Controllers\CatalogoController::ORDENES as $valor => $texto)
                             <option value="{{ $valor }}" @selected(($filtros['orden'] ?? 'disponibles') === $valor)>{{ $texto }}</option>
                         @endforeach
@@ -175,7 +175,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     // Sugerencias del buscador: consulta al escribir 2 letras o más; Enter sin elegir busca normal
     function sugerencias(url) {
         return {

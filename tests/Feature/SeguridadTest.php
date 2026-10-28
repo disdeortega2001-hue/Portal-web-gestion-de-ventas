@@ -234,4 +234,19 @@ class SeguridadTest extends TestCase
         $this->assertSame($formula, $hoja->getCell('D2')->getValue());
         $this->assertSame(DataType::TYPE_NUMERIC, $hoja->getCell('J2')->getDataType());  // Los montos siguen siendo números
     }
+
+    public function test_las_paginas_llevan_politica_de_contenido_y_no_anuncian_php(): void
+    {
+        $respuesta = $this->get(route('inicio'))->assertOk();
+
+        $csp = $respuesta->headers->get('Content-Security-Policy');
+        $this->assertStringContainsString("default-src 'self'", $csp);
+        $this->assertStringContainsString("object-src 'none'", $csp);
+        $this->assertMatchesRegularExpression("/script-src 'self' 'nonce-[A-Za-z0-9]+'/", $csp);
+        $this->assertFalse($respuesta->headers->has('X-Powered-By'));
+
+        // El script en línea de la página lleva el nonce de la política
+        preg_match("/'nonce-([A-Za-z0-9]+)'/", $csp, $m);
+        $respuesta->assertSee('nonce="' . $m[1] . '"', false);
+    }
 }

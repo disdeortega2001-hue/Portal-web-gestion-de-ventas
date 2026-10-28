@@ -133,7 +133,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     // Stock en tiempo real: consulta cada 30 s, solo con la pestaña visible
     (function () {
         const textos = { disponible: n => 'Disponibles: ' + n, bajo: n => 'Quedan ' + n, agotado: () => 'Agotado' };

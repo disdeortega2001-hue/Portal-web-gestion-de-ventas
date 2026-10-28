@@ -79,7 +79,7 @@ Route::middleware('guest')->group(function () {
 Route::post('/salir', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
 
 // Acceso del personal: direcciones fáciles de recordar que llevan al panel de gestión
-Route::redirect('/panel', '/gestion/tablero')->name('panel');
+Route::get('/panel', fn () => redirect()->route(auth()->user()?->rol === \App\Models\Usuario::ROL_CLIENTE ? 'cuenta.pedidos' : 'gestion.tablero'))->name('panel');
 Route::redirect('/gestion', '/gestion/tablero');
 Route::redirect('/admin', '/gestion/tablero');
 
