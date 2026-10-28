@@ -40,8 +40,8 @@
                 <span class="relative flex size-2.5"><span class="latido absolute inset-0 rounded-full bg-[#3ddc84]"></span><span class="relative size-2.5 rounded-full bg-[#3ddc84]"></span></span>
                 Valle de la Pascua desde 1963
             </p>
-            <h1 id="t-portada" class="titular mt-6 text-[2.6rem] sm:text-6xl lg:text-7xl" data-entrar style="--orden:1">El repuesto exacto, <em>desde 1963</em> junto al productor</h1>
-            <p class="mt-5 max-w-xl text-lg text-white/85 sm:text-xl" data-entrar style="--orden:2">Existencia real, precio en dólares y bolívares, y tu cotización en minutos sin salir de la finca.</p>
+            <h1 id="t-portada" class="titular mt-6 text-[2.6rem] sm:text-6xl lg:text-7xl" data-entrar style="--orden:1">El campo no se detiene, <em>nosotros tampoco</em></h1>
+            <p class="mt-5 max-w-xl text-lg text-white/85 sm:text-xl" data-entrar style="--orden:2">Desde 1963 llevamos maquinaria y repuestos al productor guariqueño, temporada tras temporada.</p>
 
             <form method="GET" action="{{ route('catalogo.index') }}" role="search" class="mt-8 flex max-w-xl gap-2" data-entrar style="--orden:3">
                 <label for="q-inicio" class="sr-only">Buscar por código de fábrica, pieza o modelo</label>
