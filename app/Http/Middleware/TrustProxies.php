@@ -8,11 +8,12 @@ use Illuminate\Http\Request;
 class TrustProxies extends Middleware
 {
     /**
-     * The trusted proxies for this application.
+     * Proxies de confianza: el túnel o el proxy del hosting que corre en el mismo equipo.
+     * Así Laravel respeta X-Forwarded-Proto y arma los enlaces con https detrás del túnel.
      *
      * @var array<int, string>|string|null
      */
-    protected $proxies;
+    protected $proxies = ['127.0.0.1', '::1'];
 
     /**
      * The headers that should be used to detect proxies.
