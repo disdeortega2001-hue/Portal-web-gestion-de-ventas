@@ -9,7 +9,7 @@ class MovimientoInventarioRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->esPersonal() ?? false;
+        return $this->user()?->puedeAdministrar() ?? false;
     }
 
     public function rules(): array

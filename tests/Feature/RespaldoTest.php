@@ -96,7 +96,7 @@ class RespaldoTest extends TestCase
     {
         $this->actingAs($this->crearUsuario('vendedor'))->get(route('admin.respaldos.index'))->assertForbidden();
 
-        $admin = $this->crearUsuario('administrador');
+        $admin = $this->crearUsuario('directivo');
         $this->actingAs($admin)->post(route('admin.respaldos.store'))->assertRedirect(route('admin.respaldos.index'));
 
         $nombre = app(RespaldoService::class)->listar()[0]['nombre'];

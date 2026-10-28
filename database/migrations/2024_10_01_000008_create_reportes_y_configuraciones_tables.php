@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * - reportes: auditoría de cada reporte generado (quién, qué, con qué filtros, formato).
- * - configuraciones: parámetros de negocio editables por el administrador
+ * - configuraciones: parámetros de negocio editables por el personal administrativo
  *   (tasa_cambio, porcentaje_iva, umbral_stock_bajo, descuentos).
  */
 return new class extends Migration

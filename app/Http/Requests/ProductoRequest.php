@@ -13,7 +13,7 @@ class ProductoRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->esAdministrador() ?? false;
+        return $this->user()?->puedeAdministrar() ?? false;
     }
 
     public function rules(): array

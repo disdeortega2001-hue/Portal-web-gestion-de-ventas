@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 use LogicException;
 
 /**
- * Ciclo de vida del pedido: crear (desde cotización o en mostrador),
+ * Ciclo de vida del pedido: crear (desde cotización, en mostrador o comprado en el portal),
  * confirmar la venta (descuenta stock) y anular (repone stock).
  *
  * Toda operación que toca stock corre dentro de DB::transaction():
@@ -47,7 +47,8 @@ class PedidoService
                     'precio' => (string) $d->precio_unitario,
                     'cantidad' => $d->cantidad,
                 ]),
-                $cotizacion->id
+                $cotizacion->id,
+                ['origen' => Pedido::DESDE_COTIZACION]
             );
 
             $cotizacion->update(['estado' => Cotizacion::CONVERTIDA, 'id_usuario' => $vendedor->id]);
@@ -73,6 +74,30 @@ class PedidoService
             ]);
 
             return $this->registrarPedido($cliente->id, $vendedor, $lineas);
+        }, self::REINTENTOS);
+    }
+
+    /**
+     * Compra del cliente en el portal: queda pendiente, sin vendedor asignado y sin tocar el stock,
+     * hasta que el personal verifica el pago y confirma la venta.
+     *
+     * @param  iterable<array{producto: Producto, precio: string, cantidad: int}>  $lineas  las del carrito
+     */
+    public function crearEnLinea(Cliente $cliente, iterable $lineas, string $metodoPago, string $entrega, ?string $observaciones): Pedido
+    {
+        return DB::transaction(function () use ($cliente, $lineas, $metodoPago, $entrega, $observaciones) {
+            $items = collect($lineas)->map(fn ($l) => [
+                'id_producto' => $l['producto']->id,
+                'precio' => (string) $l['producto']->precio,
+                'cantidad' => (int) $l['cantidad'],
+            ])->values();
+
+            return $this->registrarPedido($cliente->id, null, $items, null, [
+                'origen' => Pedido::PORTAL,
+                'metodo_pago' => $metodoPago,
+                'entrega' => $entrega,
+                'observaciones' => $observaciones,
+            ]);
         }, self::REINTENTOS);
     }
 
@@ -138,10 +163,11 @@ class PedidoService
                 ]);
             }
 
-            // Paso 5
+            // Paso 5 (una compra del portal queda a cargo de quien confirma la venta)
             $pedido->update([
                 'estado' => Pedido::CONFIRMADO,
                 'fecha_confirmacion' => now(),
+                'id_usuario' => $pedido->id_usuario ?? $usuario->id,
             ]);
 
             return $pedido;
@@ -189,13 +215,13 @@ class PedidoService
     }
 
     /** Guarda cabecera y detalle con los totales del motor de cálculo. */
-    private function registrarPedido(int $idCliente, Usuario $vendedor, $lineas, ?int $idCotizacion = null): Pedido
+    private function registrarPedido(int $idCliente, ?Usuario $vendedor, $lineas, ?int $idCotizacion = null, array $extra = []): Pedido
     {
         $calculo = $this->calculadora->calcular($lineas);
 
-        $pedido = Pedido::create([
+        $pedido = Pedido::create($extra + [
             'id_cliente' => $idCliente,
-            'id_usuario' => $vendedor->id,
+            'id_usuario' => $vendedor?->id,
             'id_cotizacion' => $idCotizacion,
             'fecha' => now(),
             'subtotal' => $calculo['subtotal'],
@@ -206,6 +232,8 @@ class PedidoService
             'tasa_cambio' => $calculo['tasa_cambio'],
             'total_bs' => $calculo['total_bs'],
             'estado' => Pedido::PENDIENTE,
+            'origen' => Pedido::MOSTRADOR,
+            'estado_pago' => Pedido::SIN_PAGO,
         ]);
 
         foreach ($calculo['lineas'] as $linea) {

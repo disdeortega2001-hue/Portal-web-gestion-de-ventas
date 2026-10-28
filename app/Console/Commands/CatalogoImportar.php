@@ -18,7 +18,7 @@ class CatalogoImportar extends Command
         {archivo : Excel (.xlsx/.xls) o CSV con los productos}
         {--fotos= : Carpeta de fotos (por defecto, «fotos» junto al archivo)}
         {--reemplazar : Borra antes TODO el catálogo actual con sus pedidos, cotizaciones y movimientos}
-        {--usuario= : Correo del administrador que queda como responsable de la existencia inicial}
+        {--usuario= : Correo del administrativo o directivo que queda como responsable de la existencia inicial}
         {--probar : Solo valida y muestra lo que se cargaría, sin guardar nada}
         {--force : No pedir confirmación}';
 
@@ -83,13 +83,13 @@ class CatalogoImportar extends Command
 
     private function responsable(): ?Usuario
     {
-        $consulta = Usuario::where('rol', Usuario::ROL_ADMINISTRADOR);
+        $consulta = Usuario::whereIn('rol', [Usuario::ROL_ADMINISTRATIVO, Usuario::ROL_DIRECTIVO]);
         $usuario = $this->option('usuario')
             ? $consulta->where('correo', $this->option('usuario'))->first()
             : $consulta->orderBy('id')->first();
 
         if (! $usuario) {
-            $this->error('No se encontró el administrador responsable (usa --usuario=correo).');
+            $this->error('No se encontró el responsable (administrativo o directivo; usa --usuario=correo).');
         }
 
         return $usuario;

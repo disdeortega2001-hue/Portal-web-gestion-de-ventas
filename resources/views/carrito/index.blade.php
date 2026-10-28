@@ -13,7 +13,7 @@
             </li>
         @endforeach
     </ol>
-    <p class="mt-4 text-white/80">Revisa las cantidades y envíala: un vendedor confirma la existencia y te escribe.</p>
+    <p class="mt-4 text-white/80">Cómprala ahora con tu cuenta, o envíala como cotización sin registrarte: un vendedor confirma la existencia y te escribe.</p>
 @endsection
 
 @section('contenido')
@@ -74,6 +74,15 @@
 
     <div class="space-y-5 lg:sticky lg:top-6 lg:self-start">
         @include('partials.resumen', ['r' => $resumen])
+
+        {{-- Comprar: pide la cuenta en ese momento (ingresar o registrarse) y vuelve a la compra --}}
+        @unless(auth()->user()?->esPersonal())
+            <div class="lobulo space-y-3 p-4 sm:p-5">
+                <a href="{{ route('compra.create') }}" class="btn btn-tierra btn-grande w-full">Comprar ahora <span class="chip"><x-icono nombre="flecha" class="size-4" /></span></a>
+                <p class="apoyo text-sm">Pago Móvil, transferencia, Zelle, efectivo o punto de venta.@guest Te pedimos crear tu cuenta (o ingresar) al comprar.@endguest</p>
+            </div>
+            <p class="flex items-center gap-3 text-sm font-bold uppercase tracking-[0.08em] text-tinta-suave" aria-hidden="true"><span class="h-px flex-1 bg-linea"></span>o pide una cotización<span class="h-px flex-1 bg-linea"></span></p>
+        @endunless
         <p class="apoyo text-sm">Montos calculados por el sistema. Los precios quedan fijos cuando envías la cotización.</p>
 
         {{-- Formulario aparte (no se pueden anidar formularios): lo envía el botón "Borrar mis datos" --}}
@@ -113,7 +122,7 @@
                 <label for="observaciones" class="etiqueta">Observaciones (opcional)</label>
                 <textarea id="observaciones" name="observaciones" class="campo" rows="2" maxlength="500" placeholder="Ej. necesito entrega en la finca">{{ old('observaciones') }}</textarea>
             </div>
-            <button class="btn btn-sol btn-grande w-full" data-cargando="Enviando cotización…">Enviar cotización <span class="chip"><x-icono nombre="enviar" class="size-4" /></span></button>
+            <button class="btn btn-linea btn-grande w-full" data-cargando="Enviando cotización…">Enviar cotización <span class="chip"><x-icono nombre="enviar" class="size-4" /></span></button>
         </form>
     </div>
 </div>

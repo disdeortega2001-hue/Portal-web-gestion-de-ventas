@@ -32,7 +32,7 @@ class ReporteController extends Controller
     {
         $datos = [
             'productos' => Producto::orderBy('nombre')->get(['id', 'codigo_fabrica', 'nombre']),
-            'vendedores' => Usuario::whereIn('rol', ['vendedor', 'administrador'])->orderBy('nombre')->get(['id', 'nombre']),
+            'vendedores' => Usuario::whereIn('rol', Usuario::PERFILES_PANEL)->orderBy('nombre')->get(['id', 'nombre']),
             'categorias' => Categoria::orderBy('nombre')->get(['id', 'nombre']),
             'resultado' => null,
         ];

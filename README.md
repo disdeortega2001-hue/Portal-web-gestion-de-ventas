@@ -12,7 +12,7 @@ El proyecto ya está completo y probado aquí: dependencias en `vendor/`, `.env`
    C:\xampp\php\php.exe artisan serve
    ```
    Los estilos y scripts ya están compilados en `public/build`. Si cambias una vista o `resources/css/app.css`, vuelve a compilar con `npm run build`, o deja `npm run dev` abierto mientras trabajas.
-3. Abre http://127.0.0.1:8000. Usuarios de prueba (contraseña `Rialto7*2024`): `admin@rialto7.test`, `vendedor@rialto7.test`, `cliente@rialto7.test`.
+3. Abre http://127.0.0.1:8000. Usuarios de prueba (contraseña `Rialto7*2024`): `directivo@rialto7.test`, `administrativo@rialto7.test`, `vendedor@rialto7.test`, `cliente@rialto7.test`.
 
 El manual de uso para cada perfil, con la guía para cambiar textos y diseño, está en `..\Manual del portal Rialto 7.docx`.
 
@@ -67,7 +67,7 @@ La carpeta ya es un proyecto Laravel completo. `composer.json` incluye Laravel 1
    php artisan serve
    ```
 
-Usuarios de prueba (contraseña `Rialto7*2024`): `admin@rialto7.test`, `vendedor@rialto7.test`, `cliente@rialto7.test`.
+Usuarios de prueba (contraseña `Rialto7*2024`): `directivo@rialto7.test`, `administrativo@rialto7.test`, `vendedor@rialto7.test`, `cliente@rialto7.test`.
 
 > **Breeze o login propio:** Breeze asume la tabla `users` con columnas `email`/`password`. Como el esquema exige `usuarios(correo, contrasena)`, aquí se escribió un `LoginController` equivalente. Usa las mismas piezas de Laravel (`Auth::attempt`, regeneración de sesión, `RateLimiter`), así que la seguridad es la misma y no hace falta instalar Breeze.
 
@@ -183,13 +183,13 @@ resources/views/gestion/tablero.blade.php
 resources/views/gestion/reportes/index.blade.php, pdf/ventas, pdf/inventario, pdf/_estilos, pdf/_encabezado
 ```
 
-**Tablero** (`/gestion/tablero`, vendedor y administrador). Es la página de inicio del personal al iniciar sesión.
+**Tablero** (`/gestion/tablero`, vendedor, administrativo y directivo). Es la página de inicio del personal al iniciar sesión.
 - **Indicadores:** ventas del día y del mes, cotizaciones pendientes (y cuántas llevan más de 24 h), productos con bajo stock y agotados, y tasa de conversión de cotizaciones del mes.
 - **Gráficos (Chart.js 4.4.1):** ventas diarias de los últimos 30 días y los 5 productos más vendidos del mes. Una tabla muestra las alertas de inventario según `umbral_stock_bajo`.
 - **Tiempo real:** la página se dibuja con datos del servidor y luego consulta `/gestion/tablero/datos` (JSON) cada 60 s. Así se actualiza sin recargar y, si se pierde la señal, conserva los últimos valores.
 - **Rendimiento:** `TableroService` no usa caché. Cada métrica es una sola consulta agregada (`SUM`, `COUNT`, `GROUP BY`) sobre columnas indexadas (`estado`, `fecha_confirmacion`, `stock`).
 
-**Reportes** (`/gestion/reportes`, solo administrador, como pide el perfil).
+**Reportes** (`/gestion/reportes`, administrativo y directivo).
 - **Ventas:** una fila por producto vendido en pedidos **confirmados**, con filtros de fechas, producto y vendedor. El resumen trae pedidos, unidades, subtotal, IVA, total en USD y Bs., y las ventas por vendedor.
 - **Inventario:** existencias actuales (estado, stock y valor a **precio de venta**; el costo nunca se expone) más los movimientos del período, con filtros de producto, categoría y usuario responsable. El Excel sale en un libro con dos hojas.
 - **Una sola consulta para todo:** `ReporteService` devuelve *consultas*, no listas. La pantalla las pagina de 50 en 50 y el PDF y el Excel las leen completas, así lo que se ve en pantalla es exactamente lo que se exporta.
@@ -207,7 +207,7 @@ app/Http/Requests/UsuarioRequest.php, CategoriaRequest.php, ConfiguracionRequest
 resources/views/admin/usuarios/{index,form}, categorias/{index,form}, productos/{index,form}, configuracion
 ```
 
-Todo vive bajo `/admin`, con el middleware `rol:administrador`, y se abre desde el menú **Administración**. Cada entidad usa un solo formulario Blade para crear y editar (`$modelo->exists` decide el título, la ruta y el método `PUT`), lo que evita duplicar campos y validaciones.
+Todo vive bajo `/admin`, con el middleware `rol:administrativo,directivo` (usuarios y respaldos: `rol:directivo`), y se abre desde el menú **Administración**. Cada entidad usa un solo formulario Blade para crear y editar (`$modelo->exists` decide el título, la ruta y el método `PUT`), lo que evita duplicar campos y validaciones.
 
 - **Usuarios:** crear, editar, desactivar y eliminar (borrado lógico).
   - Al editar, la contraseña vacía no se cambia.
@@ -528,3 +528,37 @@ A pedido de la usuaria, el portal toma el estilo y las animaciones de cicmelinst
 - **Gestión:** el mismo azul y amarillo, sin fotos ni animaciones de entrada. Los gráficos y los PDF también pasaron al azul.
 
 **Pruebas:** 111 pruebas, 460 verificaciones, todas aprobadas.
+
+## 16. Perfiles del panel, compra y pagos (28/10/2026)
+
+**Perfiles.** El panel lo usan solo tres perfiles. El cliente compra en el portal, pero no entra al panel.
+
+| Perfil | Acceso |
+|---|---|
+| Vendedor | Tablero, cotizaciones, pedidos, clientes, consulta de existencias y verificación de cuentas |
+| Administrativo | Lo del vendedor, más movimientos de inventario, pagos, reportes, productos, categorías y tasa, IVA y pagos |
+| Directivo | Todo, incluidos los usuarios del panel y los respaldos |
+
+- **Cambio de perfiles:** la migración `2026_10_28_000001_perfiles_y_pagos` convierte al antiguo «administrador» en directivo.
+- **Usuarios:** la pantalla solo crea y muestra los tres perfiles del panel. Los clientes se registran solos.
+- **Usuarios de prueba:** `directivo@`, `administrativo@`, `vendedor@` y `cliente@rialto7.test`, todos con la contraseña `Rialto7*2024`.
+
+**Compra.** Ver el catálogo y pedir cotización siguen sin cuenta.
+- «Comprar ahora» (`/comprar`) pide ingresar o crear la cuenta. Al terminar, el registro devuelve a la compra.
+- El cliente elige el método de pago y la entrega (retiro o envío a coordinar).
+- El pedido nace pendiente, sin vendedor asignado y sin tocar la existencia (`PedidoService::crearEnLinea`).
+
+**Pagos** (`App\Support\MetodosPago`, `PagoService`, tabla `pagos`).
+- **Métodos:** Pago Móvil, transferencia, Zelle, efectivo y punto de venta, todos activos.
+- **Datos de las cuentas:** son opcionales y se cargan en Administración → Tasa, IVA y pagos. Mientras estén vacíos, el cliente ve que la empresa se los envía por WhatsApp.
+- **Pagos a distancia:** el cliente reporta la referencia, la fecha, el monto y el comprobante. El comprobante se guarda en el disco privado `storage/app/comprobantes`.
+- **Verificación:** el administrativo o el directivo verifica el pago en Gestión → Pagos. El pedido queda pagado y la venta se confirma en el mismo paso. Si rechaza el pago, el cliente ve el motivo y puede reportarlo de nuevo.
+- **Cobros en la tienda:** se registran en la ficha del pedido y quedan verificados de inmediato.
+
+**Pruebas:**
+- `tests/Feature/CompraYPagosTest.php`: 11 casos;
+- matriz de acceso de `ControlAccesoTest` con cuatro perfiles.
+
+Total al 28/10/2026: **126 pruebas, 552 verificaciones**, todas aprobadas.
+
+**Pendiente:** los respaldos todavía no incluyen los comprobantes de pago (solo la base de datos y las fotos).

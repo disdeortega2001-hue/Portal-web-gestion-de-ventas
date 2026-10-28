@@ -196,7 +196,7 @@ class PortalCompletoTest extends TestCase
     public function test_el_administrador_carga_productos_desde_excel_con_revision_previa(): void
     {
         Storage::fake('public');
-        $admin = $this->crearUsuario('administrador');
+        $admin = $this->crearUsuario('directivo');
         $carpeta = storage_path('framework/testing/excel-' . uniqid());
         File::ensureDirectoryExists($carpeta);
         $archivo = "{$carpeta}/productos.xlsx";

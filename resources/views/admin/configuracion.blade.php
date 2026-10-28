@@ -1,12 +1,12 @@
 @extends('layouts.app')
-@section('titulo', 'Configuración')
+@section('titulo', 'Tasa, IVA y pagos')
 
 @section('contenido')
 @php
     $valor = fn ($clave, $defecto = '') => old($clave, $configuraciones[$clave]->valor ?? $defecto);
     $actualizado = fn ($clave) => isset($configuraciones[$clave]) ? $configuraciones[$clave]->updated_at->format('d/m/Y h:i a') : 'nunca';
 @endphp
-<x-encabezado titulo="Tasa, IVA y contacto">
+<x-encabezado titulo="Tasa, IVA y pagos">
     <span class="block max-w-[70ch]">Los cambios se aplican de inmediato en el catálogo y en las cotizaciones. Las cotizaciones y pedidos ya emitidos conservan la tasa y el IVA con que se crearon.</span>
 </x-encabezado>
 
@@ -79,6 +79,28 @@
         <input type="tel" id="telefono_whatsapp" name="telefono_whatsapp" value="{{ $valor('telefono_whatsapp') }}" class="campo max-w-xs cifra @error('telefono_whatsapp') is-invalid @enderror" placeholder="0414-1234567" inputmode="tel" pattern="(\+?58|0)[\s\-]?\d{3}[\s\-]?\d{7}">
         <p class="error-campo">@error('telefono_whatsapp'){{ $message }}@else Escribe el número completo, por ejemplo 0414-1234567. @enderror</p>
         <p class="ayuda max-w-[65ch]">Activa el botón «WhatsApp» de la cabecera, la consulta de productos agotados y el contacto al terminar una cotización. Déjalo vacío para ocultarlos.</p>
+    </section>
+
+    <section class="lobulo p-5 lg:p-6" aria-labelledby="t-pagos">
+        <h2 id="t-pagos" class="seccion-titulo">Métodos de pago</h2>
+        <p class="ayuda max-w-[70ch]">Los métodos activos se ofrecen al comprar. Los datos de las cuentas son opcionales: si están vacíos, el cliente ve que se los envías por WhatsApp.</p>
+        <div class="mt-4 grid gap-4 md:grid-cols-2">
+            @foreach(\App\Support\MetodosPago::METODOS as $metodo => $definicion)
+                <fieldset class="rounded-[8px] border border-linea p-4">
+                    <legend class="px-1">
+                        <label class="flex cursor-pointer items-center gap-2 font-extrabold uppercase">
+                            <input type="checkbox" name="{{ $metodo }}_activo" value="1" @checked(old("{$metodo}_activo", $configuraciones["{$metodo}_activo"]->valor ?? '1') === '1')>
+                            {{ $definicion['nombre'] }}
+                        </label>
+                    </legend>
+                    <p class="apoyo text-sm">{{ $definicion['descripcion'] }}</p>
+                    @foreach($definicion['campos'] as $clave => $etiqueta)
+                        <label for="{{ $clave }}" class="etiqueta mt-3">{{ $etiqueta }}</label>
+                        <input type="text" id="{{ $clave }}" name="{{ $clave }}" value="{{ $valor($clave) }}" class="campo @error($clave) is-invalid @enderror" maxlength="120" placeholder="Por definir">
+                    @endforeach
+                </fieldset>
+            @endforeach
+        </div>
     </section>
 
     <button class="btn btn-sol btn-grande">Guardar configuración</button>

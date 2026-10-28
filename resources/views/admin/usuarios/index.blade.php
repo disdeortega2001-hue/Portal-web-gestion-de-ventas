@@ -1,8 +1,9 @@
 @extends('layouts.app')
-@section('titulo', 'Usuarios')
+@section('titulo', 'Usuarios del panel')
 
 @section('contenido')
-<x-encabezado titulo="Usuarios">
+<x-encabezado titulo="Usuarios del panel">
+    Vendedor: cotizaciones, pedidos, clientes y existencias. Administrativo: además catálogo, inventario, tasa, pagos y reportes. Directivo: todo, con usuarios y respaldos.
     <x-slot:acciones>
         <a href="{{ route('admin.usuarios.create') }}" class="btn btn-sol"><x-icono nombre="mas" class="size-4" /> Nuevo usuario</a>
     </x-slot:acciones>
@@ -15,7 +16,7 @@
     </div>
     <select name="rol" class="campo sm:!w-52" aria-label="Perfil">
         <option value="">Todos los perfiles</option>
-        @foreach(['administrador' => 'Administrador', 'vendedor' => 'Vendedor', 'cliente' => 'Cliente'] as $valor => $texto)
+        @foreach(\Illuminate\Support\Arr::only(\App\Models\Usuario::NOMBRES_ROL, \App\Models\Usuario::PERFILES_PANEL) as $valor => $texto)
             <option value="{{ $valor }}" @selected(request('rol') === $valor)>{{ $texto }}</option>
         @endforeach
     </select>
@@ -30,7 +31,7 @@
             <tr>
                 <td class="font-semibold">{{ $usuario->nombre }} @if($usuario->is(auth()->user()))<span class="apoyo text-sm font-normal">(tú)</span>@endif</td>
                 <td>{{ $usuario->correo }}</td>
-                <td>{{ ucfirst($usuario->rol) }}</td>
+                <td>{{ $usuario->nombreRol() }}</td>
                 <td><span class="estado estado-{{ $usuario->estado === 'activo' ? 'activo' : 'inactivo' }}">{{ ucfirst($usuario->estado) }}</span></td>
                 <td class="text-right whitespace-nowrap">
                     <a href="{{ route('admin.usuarios.edit', $usuario) }}" class="btn btn-linea btn-mini"><x-icono nombre="lapiz" class="size-4" /> Editar</a>

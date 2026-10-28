@@ -70,7 +70,8 @@ class RegistroController extends Controller
         Auth::login($usuario);
         $request->session()->regenerate();
 
-        return redirect()->route('catalogo.index')->with('exito', $enVerificacion
+        // Si venía de «Comprar», vuelve a la compra
+        return redirect()->intended(route('catalogo.index'))->with('exito', $enVerificacion
             ? '¡Bienvenido! Como esta cédula ya tenía cotizaciones, un vendedor te llamará al teléfono que nos diste antes para confirmar que eres tú. Mientras tanto puedes cotizar normalmente.'
             : '¡Bienvenido! Tu cuenta fue creada.');
     }

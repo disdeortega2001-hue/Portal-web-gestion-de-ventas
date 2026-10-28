@@ -146,7 +146,7 @@ class ReportesTest extends TestCase
     public function test_exportar_a_excel_entrega_las_mismas_filas_y_queda_auditado(): void
     {
         Excel::fake();
-        $admin = $this->crearUsuario('administrador');
+        $admin = $this->crearUsuario('directivo');
 
         $this->actingAs($admin)
             ->get(route('gestion.reportes.exportar', $this->filtros + ['formato' => 'excel']))
@@ -168,7 +168,7 @@ class ReportesTest extends TestCase
     {
         Excel::fake();
 
-        $this->actingAs($this->crearUsuario('administrador'))
+        $this->actingAs($this->crearUsuario('directivo'))
             ->get(route('gestion.reportes.exportar', ['tipo' => 'inventario', 'formato' => 'excel'] + $this->filtros))
             ->assertOk();
 
@@ -180,7 +180,7 @@ class ReportesTest extends TestCase
 
     public function test_exportar_a_pdf(): void
     {
-        $respuesta = $this->actingAs($this->crearUsuario('administrador'))
+        $respuesta = $this->actingAs($this->crearUsuario('directivo'))
             ->get(route('gestion.reportes.exportar', $this->filtros + ['formato' => 'pdf']));
 
         $respuesta->assertOk();
@@ -191,7 +191,7 @@ class ReportesTest extends TestCase
 
     public function test_rango_mayor_a_un_anio_es_rechazado(): void
     {
-        $this->actingAs($this->crearUsuario('administrador'))
+        $this->actingAs($this->crearUsuario('directivo'))
             ->get(route('gestion.reportes.exportar', ['tipo' => 'ventas', 'desde' => '2023-01-01', 'hasta' => '2024-06-30', 'formato' => 'pdf']))
             ->assertSessionHasErrors('hasta');
 

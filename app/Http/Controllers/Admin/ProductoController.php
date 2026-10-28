@@ -16,7 +16,7 @@ use Illuminate\View\View;
 use Throwable;
 
 /**
- * Catálogo de productos (administrador).
+ * Catálogo de productos (administrativo y directivo).
  * - El stock inicial se registra como movimiento de "entrada" (trazabilidad desde el primer día).
  * - Después, el stock solo cambia desde Inventario o por ventas, nunca editando la ficha.
  * - Las fotos se guardan redimensionadas en storage/app/public/productos (enlazado con storage:link).

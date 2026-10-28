@@ -4,11 +4,14 @@ namespace Database\Seeders;
 
 use App\Models\Cliente;
 use App\Models\Configuracion;
+use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Usuario;
 use App\Services\CotizacionService;
 use App\Services\ImportadorCatalogo;
+use App\Services\PagoService;
 use App\Services\PedidoService;
+use App\Support\MetodosPago;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use RuntimeException;
@@ -18,9 +21,10 @@ use RuntimeException;
  * Ejecutar: php artisan migrate:fresh --seed
  *
  * Credenciales de prueba (cámbialas antes de producción):
- *   admin@rialto7.test     / Rialto7*2024   (administrador)
- *   vendedor@rialto7.test  / Rialto7*2024   (vendedor)
- *   cliente@rialto7.test   / Rialto7*2024   (cliente)
+ *   directivo@rialto7.test      / Rialto7*2024   (directivo: acceso total)
+ *   administrativo@rialto7.test / Rialto7*2024   (administrativo)
+ *   vendedor@rialto7.test       / Rialto7*2024   (vendedor)
+ *   cliente@rialto7.test        / Rialto7*2024   (cliente: compra en el portal, sin panel)
  */
 class DatabaseSeeder extends Seeder
 {
@@ -32,10 +36,10 @@ class DatabaseSeeder extends Seeder
         Carbon::setTestNow($hoy->copy()->subDays(31)->setTime(8, 0));
 
         $this->configuraciones();
-        [$admin, $vendedor, $usuarioCliente] = $this->usuarios();
-        $productos = $this->productos($admin);
+        [$directivo, $administrativo, $vendedor, $usuarioCliente] = $this->usuarios();
+        $productos = $this->productos($administrativo);
         $clientes = $this->clientes($usuarioCliente);
-        $this->historialDeVentas($clientes, $productos, [$vendedor, $admin], $hoy);
+        $this->historialDeVentas($clientes, $productos, [$vendedor, $administrativo], $hoy);
 
         Carbon::setTestNow();
         $this->cotizacionesYPedidos($clientes, $productos, $vendedor);
@@ -53,6 +57,12 @@ class DatabaseSeeder extends Seeder
             ['telefono_whatsapp', '04129477195', 'WhatsApp de atención (0414-1234567); vacío oculta los botones de contacto'],
         ];
 
+        // Métodos de pago: todos activos y sin datos de cuentas (la empresa los envía por WhatsApp
+        // hasta que se carguen en Administración → Tasa, IVA y pagos)
+        foreach (MetodosPago::METODOS as $metodo => $definicion) {
+            $valores[] = ["{$metodo}_activo", '1', "Ofrecer {$definicion['nombre']} al comprar"];
+        }
+
         foreach ($valores as [$clave, $valor, $descripcion]) {
             Configuracion::updateOrCreate(['clave' => $clave], compact('valor', 'descripcion'));
         }
@@ -63,7 +73,8 @@ class DatabaseSeeder extends Seeder
         $clave = 'Rialto7*2024';
 
         return [
-            Usuario::create(['nombre' => 'Administrador Rialto', 'correo' => 'admin@rialto7.test', 'contrasena' => $clave, 'rol' => 'administrador']),
+            Usuario::create(['nombre' => 'Dirección Rialto', 'correo' => 'directivo@rialto7.test', 'contrasena' => $clave, 'rol' => Usuario::ROL_DIRECTIVO]),
+            Usuario::create(['nombre' => 'Ana Campagna', 'correo' => 'administrativo@rialto7.test', 'contrasena' => $clave, 'rol' => Usuario::ROL_ADMINISTRATIVO]),
             Usuario::create(['nombre' => 'Carlos Mendoza', 'correo' => 'vendedor@rialto7.test', 'contrasena' => $clave, 'rol' => 'vendedor']),
             Usuario::create(['nombre' => 'Agropecuaria El Samán', 'correo' => 'cliente@rialto7.test', 'contrasena' => $clave, 'rol' => 'cliente']),
         ];
@@ -74,7 +85,7 @@ class DatabaseSeeder extends Seeder
      * Se carga con el mismo importador del comando catalogo:importar, así la existencia inicial
      * queda como movimiento de inventario. Devuelve los productos indexados por código de fábrica.
      */
-    private function productos(Usuario $admin): array
+    private function productos(Usuario $responsable): array
     {
         $importador = app(ImportadorCatalogo::class);
         $carpeta = database_path('seeders/catalogo');
@@ -84,7 +95,7 @@ class DatabaseSeeder extends Seeder
             throw new RuntimeException("El catálogo de ejemplo tiene errores:\n" . implode("\n", $lectura['errores']));
         }
 
-        $importador->importar($lectura['filas'], $admin, false);
+        $importador->importar($lectura['filas'], $responsable, false);
 
         return Producto::all()->keyBy('codigo_fabrica')->all();
     }
@@ -105,6 +116,7 @@ class DatabaseSeeder extends Seeder
     private function historialDeVentas(array $clientes, array $p, array $vendedores, Carbon $hoy): void
     {
         $pedidos = app(PedidoService::class);
+        $metodos = ['efectivo', 'pago_movil', 'punto_venta', 'transferencia', 'zelle'];
         // Repuestos de alta rotación: cuchillas, discos, tornillos, crucetas, yugos y engrasadoras
         $rotacion = ['0501052742R', 'CC55', '0602030250R', '0501047573R', 'CC56', 'LUB600'];
 
@@ -117,7 +129,8 @@ class DatabaseSeeder extends Seeder
             }
 
             $vendedor = $vendedores[$i % 2];
-            $pedidos->confirmarVenta($pedidos->crearDirecto($clientes[$i % 3], $lineas, $vendedor), $vendedor);
+            // Cobrado en la tienda: el pago queda verificado y la venta se confirma en el mismo paso
+            $this->cobrar($pedidos->crearDirecto($clientes[$i % 3], $lineas, $vendedor), $metodos[$i % 5], $vendedor);
         }
     }
 
@@ -140,7 +153,7 @@ class DatabaseSeeder extends Seeder
             $linea('70632', 1),
             $linea('CC55', 4),
         ]));
-        $pedidos->confirmarVenta($pedidos->crearDesdeCotizacion($c2, $vendedor), $vendedor);
+        $this->cobrar($pedidos->crearDesdeCotizacion($c2, $vendedor), 'transferencia', $vendedor);
 
         // 3. Convertida en pedido pendiente de confirmar
         $c3 = $cotizaciones->crear($clientes[2], collect([
@@ -153,6 +166,22 @@ class DatabaseSeeder extends Seeder
         $p4 = $pedidos->crearDirecto($clientes[1], [
             ['id_producto' => $p['CC56']->id, 'cantidad' => 2],
         ], $vendedor);
-        $pedidos->confirmarVenta($p4, $vendedor);
+        $this->cobrar($p4, 'efectivo', $vendedor);
+
+        // 5. Compra del cliente en el portal con Pago Móvil, reportada y esperando verificación
+        $p5 = $pedidos->crearEnLinea($clientes[0], [$linea('0501052742R', 2), $linea('LUB600', 1)], 'pago_movil', 'retiro', 'Retiro el viernes.');
+        app(PagoService::class)->reportar($p5, [
+            'referencia' => '00128734', 'fecha_pago' => now()->toDateString(), 'monto' => (string) $p5->total_bs,
+        ], null);
+
+        // 6. Compra en el portal para pagar en efectivo al retirar
+        $pedidos->crearEnLinea($clientes[0], [$linea('CC55', 2)], 'efectivo', 'retiro', null);
+    }
+
+    /** Registra el pago completo en la moneda del método (lo usa el historial de ventas). */
+    private function cobrar(Pedido $pedido, string $metodo, Usuario $usuario): void
+    {
+        $monto = MetodosPago::montoEnMoneda(MetodosPago::moneda($metodo), $pedido->total, $pedido->total_bs);
+        app(PagoService::class)->registrarEnTienda($pedido, ['metodo' => $metodo, 'monto' => $monto, 'referencia' => null], $usuario);
     }
 }

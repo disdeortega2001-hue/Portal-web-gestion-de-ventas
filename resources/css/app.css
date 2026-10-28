@@ -173,6 +173,11 @@
     .estado-agotado, .estado-anulado, .estado-rechazada, .estado-inactivo { @apply bg-coral-clara text-coral-tinta; }
     .estado-pendiente { @apply bg-lila-clara text-[#4c2a7a]; }
     .estado-info { @apply bg-laguna-clara text-laguna-tinta; }
+    /* Pagos */
+    .estado-pagado, .estado-verificado { @apply bg-sabana-clara text-[#14613a]; }
+    .estado-por_verificar { @apply bg-sol-clara text-[#5f4400]; }
+    .estado-sin_pago { @apply bg-lila-clara text-[#4c2a7a]; }
+    .estado-rechazado { @apply bg-coral-clara text-coral-tinta; }
 
     /* ---- Avisos ---- */
     .aviso { @apply flex gap-3 rounded-[6px] px-4 py-3 text-[0.9375rem]; }

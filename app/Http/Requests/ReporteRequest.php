@@ -13,7 +13,7 @@ class ReporteRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->esAdministrador() ?? false;
+        return $this->user()?->puedeAdministrar() ?? false;
     }
 
     public function rules(): array
@@ -23,7 +23,7 @@ class ReporteRequest extends FormRequest
             'desde' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'],
             'hasta' => ['required', 'date_format:Y-m-d', 'after_or_equal:desde', 'before_or_equal:' . $this->fechaMaxima()],
             'id_producto' => ['nullable', 'integer', 'exists:productos,id'],
-            'id_vendedor' => ['nullable', 'integer', Rule::exists('usuarios', 'id')->whereIn('rol', ['vendedor', 'administrador'])],
+            'id_vendedor' => ['nullable', 'integer', Rule::exists('usuarios', 'id')->whereIn('rol', \App\Models\Usuario::PERFILES_PANEL)],
             'id_categoria' => ['nullable', 'integer', 'exists:categorias,id'],
             'formato' => ['nullable', 'in:pantalla,pdf,excel'],
         ];

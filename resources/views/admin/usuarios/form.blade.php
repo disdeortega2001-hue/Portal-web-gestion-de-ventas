@@ -23,11 +23,12 @@
         <div>
             <label for="rol" class="etiqueta">Perfil *</label>
             <select id="rol" name="rol" class="campo @error('rol') is-invalid @enderror" required>
-                @foreach(['administrador' => 'Administrador', 'vendedor' => 'Vendedor', 'cliente' => 'Cliente'] as $valor => $texto)
+                @foreach(\Illuminate\Support\Arr::only(\App\Models\Usuario::NOMBRES_ROL, \App\Models\Usuario::PERFILES_PANEL) as $valor => $texto)
                     <option value="{{ $valor }}" @selected(old('rol', $usuario->rol) === $valor)>{{ $texto }}</option>
                 @endforeach
             </select>
             <p class="error-campo">@error('rol'){{ $message }}@enderror</p>
+            <p class="ayuda">Los clientes no se crean aquí: se registran solos al comprar.</p>
         </div>
         <div>
             <label for="estado" class="etiqueta">Estado *</label>

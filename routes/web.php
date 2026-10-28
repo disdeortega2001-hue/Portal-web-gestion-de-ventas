@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\RecuperarContrasenaController;
 use App\Http\Controllers\Auth\RegistroController;
 use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\CatalogoController;
+use App\Http\Controllers\CompraController;
 use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\CuentaController;
 use App\Http\Controllers\Gestion;
@@ -18,12 +19,14 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | Rutas web del portal Rialto 7
 |--------------------------------------------------------------------------
-| Organizadas en 4 bloques según quién puede acceder:
+| Organizadas en bloques según quién puede acceder:
 |   1. Públicas (catálogo, carrito, cotización como invitado)
 |   2. Invitados (login / registro / recuperar contraseña)
-|   3. Cliente autenticado (mi cuenta)
-|   4. Personal: vendedor y administrador (tablero, cotizaciones, pedidos, inventario)
-|   5. Solo administrador (reportes, usuarios, categorías, productos, configuración)
+|   3. Cliente autenticado (compra, mi cuenta, reporte de pagos)
+|   4. Panel, los tres perfiles: vendedor, administrativo y directivo
+|      (tablero, cotizaciones, pedidos, clientes, existencias)
+|   5. Administrativo y directivo (inventario, pagos, reportes, catálogo, tasa e IVA)
+|   6. Solo directivo (usuarios y respaldos)
 */
 
 // 1. PÚBLICAS ---------------------------------------------------------------
@@ -79,10 +82,18 @@ Route::middleware(['auth', 'rol:cliente'])->prefix('mi-cuenta')->name('cuenta.')
     Route::get('/cotizaciones', [CuentaController::class, 'cotizaciones'])->name('cotizaciones');
     Route::post('/cotizaciones/{cotizacion}/repetir', [CuentaController::class, 'repetir'])->middleware('throttle:20,1')->name('cotizaciones.repetir');
     Route::get('/pedidos', [CuentaController::class, 'pedidos'])->name('pedidos');
+    Route::get('/pedidos/{pedido}', [CuentaController::class, 'pedido'])->name('pedidos.show');
+    Route::post('/pedidos/{pedido}/pago', [CompraController::class, 'reportarPago'])->middleware('throttle:10,1')->name('pedidos.pago');
 });
 
-// 4. VENDEDOR Y ADMINISTRADOR -----------------------------------------------
-Route::middleware(['auth', 'rol:vendedor,administrador'])->prefix('gestion')->name('gestion.')->group(function () {
+// Compra: el visitante sin sesión va a ingresar o crear su cuenta, y vuelve aquí
+Route::middleware(['auth', 'rol:cliente'])->group(function () {
+    Route::get('/comprar', [CompraController::class, 'create'])->name('compra.create');
+    Route::post('/comprar', [CompraController::class, 'store'])->middleware('throttle:10,1')->name('compra.store');
+});
+
+// 4. PANEL: VENDEDOR, ADMINISTRATIVO Y DIRECTIVO --------------------------
+Route::middleware(['auth', 'rol:vendedor,administrativo,directivo'])->prefix('gestion')->name('gestion.')->group(function () {
     Route::get('/tablero', [Gestion\TableroController::class, 'index'])->name('tablero');
     Route::get('/tablero/datos', [Gestion\TableroController::class, 'datos'])->name('tablero.datos');
 
@@ -109,15 +120,20 @@ Route::middleware(['auth', 'rol:vendedor,administrador'])->prefix('gestion')->na
     Route::post('/inventario/movimientos', [Gestion\InventarioController::class, 'store'])->name('inventario.store');
 });
 
-// 5. SOLO ADMINISTRADOR -----------------------------------------------------
-Route::middleware(['auth', 'rol:administrador'])->prefix('gestion')->name('gestion.')->group(function () {
+// 5. ADMINISTRATIVO Y DIRECTIVO ---------------------------------------------
+Route::middleware(['auth', 'rol:administrativo,directivo'])->prefix('gestion')->name('gestion.')->group(function () {
+    Route::get('/pagos', [Gestion\PagoController::class, 'index'])->name('pagos.index');
+    Route::post('/pagos/{pago}/verificar', [Gestion\PagoController::class, 'verificar'])->name('pagos.verificar');
+    Route::post('/pagos/{pago}/rechazar', [Gestion\PagoController::class, 'rechazar'])->name('pagos.rechazar');
+    Route::get('/pagos/{pago}/comprobante', [Gestion\PagoController::class, 'comprobante'])->name('pagos.comprobante');
+    Route::post('/pedidos/{pedido}/pagos', [Gestion\PagoController::class, 'registrar'])->name('pedidos.pagos.store');
+
     Route::get('/reportes', [Gestion\ReporteController::class, 'index'])->name('reportes.index');
     Route::get('/reportes/exportar', [Gestion\ReporteController::class, 'exportar'])
         ->middleware('throttle:20,1')->name('reportes.exportar');
 });
 
-Route::middleware(['auth', 'rol:administrador'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('usuarios', Admin\UsuarioController::class)->except('show');
+Route::middleware(['auth', 'rol:administrativo,directivo'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('categorias', Admin\CategoriaController::class)->except('show');
     Route::get('productos/cargar-excel', [Admin\ImportacionController::class, 'create'])->name('importacion.create');
     Route::get('productos/cargar-excel/plantilla', [Admin\ImportacionController::class, 'plantilla'])->name('importacion.plantilla');
@@ -129,6 +145,11 @@ Route::middleware(['auth', 'rol:administrador'])->prefix('admin')->name('admin.'
 
     Route::get('configuracion', [Admin\ConfiguracionController::class, 'edit'])->name('configuracion.edit');
     Route::put('configuracion', [Admin\ConfiguracionController::class, 'update'])->name('configuracion.update');
+});
+
+// 6. SOLO DIRECTIVO ---------------------------------------------------------
+Route::middleware(['auth', 'rol:directivo'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('usuarios', Admin\UsuarioController::class)->except('show');
 
     Route::get('respaldos', [Admin\RespaldoController::class, 'index'])->name('respaldos.index');
     Route::post('respaldos', [Admin\RespaldoController::class, 'store'])->middleware('throttle:6,1')->name('respaldos.store');

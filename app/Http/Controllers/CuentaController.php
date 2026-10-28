@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Cliente;
 use App\Models\Cotizacion;
+use App\Models\Pedido;
 use App\Services\CarritoService;
+use App\Support\MetodosPago;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -40,6 +42,18 @@ class CuentaController extends Controller
         return view('cuenta.pedidos', [
             'pedidos' => $pedidos,
             'enVerificacion' => $this->enVerificacion($request),
+        ]);
+    }
+
+    /** Detalle de un pedido propio: cómo pagarlo, reportar el pago y seguir su estado. */
+    public function pedido(Request $request, Pedido $pedido): View
+    {
+        abort_unless($pedido->id_cliente === $request->user()->cliente?->id, 403);
+        $pedido->load(['detalles.producto:id,codigo_fabrica,nombre', 'pagos']);
+
+        return view('cuenta.pedido', [
+            'pedido' => $pedido,
+            'datosPago' => $pedido->metodo_pago ? (MetodosPago::disponibles()[$pedido->metodo_pago]['datos'] ?? []) : [],
         ]);
     }
 

@@ -5,7 +5,8 @@
 <x-encabezado titulo="Inventario">Toda variación de existencia queda registrada con su motivo y su responsable.</x-encabezado>
 
 <div class="grid grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,1fr)_22rem]">
-    {{-- Registrar movimiento --}}
+    {{-- Registrar movimiento: administrativo y directivo; el vendedor solo consulta las existencias --}}
+    @if(auth()->user()->puedeAdministrar())
     <form method="POST" action="{{ route('gestion.inventario.store') }}" class="lobulo needs-validation grid max-w-4xl gap-4 p-5 md:grid-cols-2 2xl:max-w-none 2xl:grid-cols-1 2xl:order-2 2xl:sticky 2xl:top-6 2xl:self-start" novalidate
           x-data="{ tipo: '{{ old('tipo', 'entrada') }}', ayudas: { entrada: 'Unidades que entran.', salida: 'Unidades que salen.', ajuste: 'Stock contado físicamente (reemplaza al actual).' } }">
         @csrf
@@ -42,6 +43,7 @@
         </div>
         <button class="btn btn-tierra w-full md:col-span-2 md:w-auto md:justify-self-start 2xl:col-span-1 2xl:w-full">Registrar movimiento</button>
     </form>
+    @endif
 
     {{-- Existencias --}}
     <div class="min-w-0 space-y-6 2xl:order-1">

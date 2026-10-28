@@ -47,7 +47,7 @@
     </ul>
 
     <h2 id="pago">Pago y entrega</h2>
-    <p>El portal no procesa pagos. La forma de pago, la entrega o el retiro en la sede y las condiciones de garantía de cada producto te los indica el vendedor al confirmar tu pedido.</p>
+    <p>El portal no cobra en línea: al comprar eliges Pago Móvil, transferencia, Zelle, efectivo o punto de venta. Los pagos a distancia los reportas con su referencia y el personal los verifica antes de confirmar la venta. La entrega o el retiro en la sede y las condiciones de garantía de cada producto te los indica el vendedor al confirmar tu pedido.</p>
 
     <h2 id="validez">Validez de los documentos</h2>
     <p>Las cotizaciones y pedidos generados por el portal son mensajes de datos con la misma eficacia probatoria que los documentos escritos, según la Ley sobre Mensajes de Datos y Firmas Electrónicas (2001).</p>

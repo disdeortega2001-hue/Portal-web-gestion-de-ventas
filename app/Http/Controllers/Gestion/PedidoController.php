@@ -77,7 +77,7 @@ class PedidoController extends Controller
 
     public function show(Pedido $pedido): View
     {
-        $pedido->load(['cliente', 'vendedor', 'cotizacion', 'detalles.producto', 'movimientos.usuario']);
+        $pedido->load(['cliente', 'vendedor', 'cotizacion', 'detalles.producto', 'movimientos.usuario', 'pagos.registradoPor']);
 
         return view('gestion.pedidos.show', compact('pedido'));
     }

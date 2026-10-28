@@ -3,9 +3,10 @@
 
 @section('contenido')
 <x-encabezado :titulo="'Pedido ' . $pedido->codigo" :volver="route('gestion.pedidos.index')" volver-texto="Pedidos">
-    <span class="cifra">{{ $pedido->fecha->format('d/m/Y h:i a') }}</span> · Vendedor: {{ $pedido->vendedor->nombre }}
+    <span class="cifra">{{ $pedido->fecha->format('d/m/Y h:i a') }}</span> · {{ $pedido->etiquetaOrigen() }} · Vendedor: {{ $pedido->vendedor?->nombre ?? 'por asignar' }}
     @if($pedido->cotizacion) · Desde <span class="cifra">{{ $pedido->cotizacion->codigo }}</span> @endif
     · <span class="estado estado-{{ $pedido->estado }}">{{ ucfirst($pedido->estado) }}</span>
+    <span class="estado estado-{{ $pedido->estado_pago }}">{{ $pedido->etiquetaPago() }}</span>
 </x-encabezado>
 
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
@@ -14,6 +15,64 @@
             <p class="text-lg font-extrabold">{{ $pedido->cliente->nombre }}</p>
             <p class="mt-1 cifra">{{ $pedido->cliente->identificacion }} · {{ $pedido->cliente->telefono }}</p>
             <p class="apoyo">{{ $pedido->cliente->direccion }}</p>
+            @if($pedido->metodo_pago || $pedido->entrega)
+                <p class="mt-3 border-t border-linea pt-3 text-sm">
+                    @if($pedido->metodo_pago)<strong>Paga con:</strong> {{ $pedido->nombreMetodoPago() }} ({{ $pedido->montoAPagar() }})@endif
+                    @if($pedido->entrega) · <strong>Entrega:</strong> {{ $pedido->entrega === 'envio' ? 'envío a coordinar' : 'retiro en la tienda' }}@endif
+                </p>
+            @endif
+            @if($pedido->observaciones)<p class="apoyo mt-1 text-sm">«{{ $pedido->observaciones }}»</p>@endif
+        </section>
+
+        {{-- Pagos del pedido: reportados por el cliente o cobrados en la tienda --}}
+        <section aria-labelledby="t-pagos">
+            <h2 id="t-pagos" class="seccion-titulo">Pagos</h2>
+            @forelse($pedido->pagos as $pago)
+                <div class="lobulo mt-3 flex flex-wrap items-center justify-between gap-3 p-4">
+                    <div>
+                        <p class="font-bold">{{ $pago->nombreMetodo() }} · <span class="cifra">{{ $pago->montoFormateado() }}</span></p>
+                        <p class="apoyo text-sm cifra">{{ $pago->fecha_pago->format('d/m/Y') }}@if($pago->referencia) · Ref. {{ $pago->referencia }}@endif
+                            @if($pago->registradoPor) · cobrado por {{ $pago->registradoPor->nombre }}@endif</p>
+                        @if($pago->motivo_rechazo)<p class="mt-1 text-sm font-semibold text-coral-tinta">Rechazado: {{ $pago->motivo_rechazo }}</p>@endif
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="estado estado-{{ $pago->estado }}">{{ $pago->etiquetaEstado() }}</span>
+                        @if($pago->comprobante && auth()->user()->puedeAdministrar())
+                            <a href="{{ route('gestion.pagos.comprobante', $pago) }}" target="_blank" rel="noopener" class="btn btn-linea btn-mini"><x-icono nombre="ojo" class="size-4" /> Comprobante</a>
+                        @endif
+                        @if($pago->estado === 'por_verificar' && auth()->user()->puedeAdministrar())
+                            <a href="{{ route('gestion.pagos.index') }}" class="btn btn-sol btn-mini">Verificar</a>
+                        @endif
+                    </div>
+                </div>
+            @empty
+                <p class="apoyo mt-2">Todavía no hay pagos registrados.</p>
+            @endforelse
+
+            @if(auth()->user()->puedeAdministrar() && $pedido->estado !== 'anulado' && ! $pedido->estaPagado())
+                <form method="POST" action="{{ route('gestion.pedidos.pagos.store', $pedido) }}" class="needs-validation lobulo mt-4 grid gap-4 p-4 sm:grid-cols-2 sm:items-end" novalidate>
+                    @csrf
+                    <div>
+                        <label for="metodo" class="etiqueta">Cobrado con</label>
+                        <select id="metodo" name="metodo" class="campo" required>
+                            @foreach(\App\Support\MetodosPago::METODOS as $clave => $metodo)
+                                <option value="{{ $clave }}" @selected(old('metodo', $pedido->metodo_pago ?? 'efectivo') === $clave)>{{ $metodo['nombre'] }} ({{ $metodo['moneda'] === 'USD' ? 'USD' : 'Bs.' }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label for="monto" class="etiqueta">Monto</label>
+                        <input type="number" id="monto" name="monto" value="{{ old('monto') }}" class="campo cifra @error('monto') is-invalid @enderror" required min="0.01" step="0.01">
+                        <p class="error-campo">@error('monto'){{ $message }}@else Indica el monto. @enderror</p>
+                    </div>
+                    <div>
+                        <label for="referencia" class="etiqueta">Referencia (opcional)</label>
+                        <input type="text" id="referencia" name="referencia" value="{{ old('referencia') }}" class="campo cifra" maxlength="60">
+                    </div>
+                    <button class="btn btn-tierra">Registrar pago</button>
+                    <p class="ayuda sm:col-span-2">Para cobros en la tienda o pagos ya confirmados con el banco: quedan verificados al registrarlos{{ $pedido->estaPendiente() ? ' y la venta se confirma' : '' }}.</p>
+                </form>
+            @endif
         </section>
         <div class="lobulo overflow-x-auto">
             <table class="tabla">

@@ -27,24 +27,26 @@ class ControlAccesoTest extends TestCase
     public static function matrizDeAcceso(): array
     {
         return [
-            // ruta,                             cliente, vendedor, administrador
-            'tablero' => ['gestion.tablero', 403, 200, 200],
-            'cotizaciones' => ['gestion.cotizaciones.index', 403, 200, 200],
-            'pedidos' => ['gestion.pedidos.index', 403, 200, 200],
-            'inventario' => ['gestion.inventario.index', 403, 200, 200],
-            'reportes' => ['gestion.reportes.index', 403, 403, 200],
-            'usuarios' => ['admin.usuarios.index', 403, 403, 200],
-            'categorías' => ['admin.categorias.index', 403, 403, 200],
-            'productos (admin)' => ['admin.productos.index', 403, 403, 200],
-            'configuración' => ['admin.configuracion.edit', 403, 403, 200],
-            'mis cotizaciones' => ['cuenta.cotizaciones', 200, 403, 403],
+            // ruta,                             cliente, vendedor, administrativo, directivo
+            'tablero' => ['gestion.tablero', 403, 200, 200, 200],
+            'cotizaciones' => ['gestion.cotizaciones.index', 403, 200, 200, 200],
+            'pedidos' => ['gestion.pedidos.index', 403, 200, 200, 200],
+            'clientes' => ['gestion.clientes.index', 403, 200, 200, 200],
+            'existencias' => ['gestion.inventario.index', 403, 200, 200, 200],
+            'reportes' => ['gestion.reportes.index', 403, 403, 200, 200],
+            'categorías' => ['admin.categorias.index', 403, 403, 200, 200],
+            'productos (admin)' => ['admin.productos.index', 403, 403, 200, 200],
+            'configuración' => ['admin.configuracion.edit', 403, 403, 200, 200],
+            'usuarios' => ['admin.usuarios.index', 403, 403, 403, 200],
+            'respaldos' => ['admin.respaldos.index', 403, 403, 403, 200],
+            'mis cotizaciones' => ['cuenta.cotizaciones', 200, 403, 403, 403],
         ];
     }
 
     #[DataProvider('matrizDeAcceso')]
-    public function test_cada_rol_solo_entra_a_sus_modulos(string $ruta, int $cliente, int $vendedor, int $administrador): void
+    public function test_cada_rol_solo_entra_a_sus_modulos(string $ruta, int $cliente, int $vendedor, int $administrativo, int $directivo): void
     {
-        foreach (['cliente' => $cliente, 'vendedor' => $vendedor, 'administrador' => $administrador] as $rol => $esperado) {
+        foreach (['cliente' => $cliente, 'vendedor' => $vendedor, 'administrativo' => $administrativo, 'directivo' => $directivo] as $rol => $esperado) {
             $this->actingAs($this->crearUsuario($rol))
                 ->get(route($ruta))
                 ->assertStatus($esperado);
@@ -144,14 +146,43 @@ class ControlAccesoTest extends TestCase
 
     public function test_el_administrador_no_puede_desactivarse_a_si_mismo(): void
     {
-        $admin = $this->crearUsuario('administrador');
+        $admin = $this->crearUsuario('directivo');
 
         $this->actingAs($admin)
             ->put(route('admin.usuarios.update', $admin), [
-                'nombre' => $admin->nombre, 'correo' => $admin->correo, 'rol' => 'administrador', 'estado' => 'inactivo',
+                'nombre' => $admin->nombre, 'correo' => $admin->correo, 'rol' => 'directivo', 'estado' => 'inactivo',
             ])
             ->assertSessionHasErrors('estado');
 
         $this->assertSame('activo', $admin->fresh()->estado);
+    }
+
+    public function test_el_vendedor_consulta_existencias_pero_no_mueve_inventario(): void
+    {
+        $producto = $this->crearProducto(['stock' => 10]);
+        $vendedor = $this->crearUsuario('vendedor');
+
+        $this->actingAs($vendedor)->get(route('gestion.inventario.index'))
+            ->assertOk()->assertDontSee('Registrar movimiento');
+        $this->actingAs($vendedor)->post(route('gestion.inventario.store'), [
+            'id_producto' => $producto->id, 'tipo' => 'entrada', 'cantidad' => 5, 'motivo' => 'Compra',
+        ])->assertForbidden();
+
+        $this->assertSame(10, $producto->fresh()->stock);
+    }
+
+    public function test_el_directivo_solo_crea_los_tres_perfiles_del_panel(): void
+    {
+        $directivo = $this->crearUsuario('directivo');
+        $datos = ['nombre' => 'Nuevo Usuario', 'correo' => 'nuevo@prueba.test', 'estado' => 'activo', 'contrasena' => 'Clave1234', 'contrasena_confirmation' => 'Clave1234'];
+
+        $this->actingAs($directivo)->post(route('admin.usuarios.store'), $datos + ['rol' => 'cliente'])->assertSessionHasErrors('rol');
+        $this->actingAs($directivo)->post(route('admin.usuarios.store'), $datos + ['rol' => 'administrativo'])->assertRedirect(route('admin.usuarios.index'));
+
+        $this->assertDatabaseHas('usuarios', ['correo' => 'nuevo@prueba.test', 'rol' => 'administrativo']);
+        // Las cuentas de clientes no se listan ni se editan en Usuarios
+        $cliente = $this->crearUsuario('cliente', ['nombre' => 'Cliente Escondido']);
+        $this->actingAs($directivo)->get(route('admin.usuarios.index'))->assertDontSee('Cliente Escondido');
+        $this->actingAs($directivo)->get(route('admin.usuarios.edit', $cliente))->assertNotFound();
     }
 }

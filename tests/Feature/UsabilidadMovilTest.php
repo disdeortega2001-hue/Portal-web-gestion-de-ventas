@@ -113,7 +113,7 @@ class UsabilidadMovilTest extends TestCase
 
     public function test_el_administrador_guarda_el_numero_en_cualquier_formato(): void
     {
-        $this->actingAs($this->crearUsuario('administrador'))
+        $this->actingAs($this->crearUsuario('directivo'))
             ->put(route('admin.configuracion.update'), [
                 'tasa_cambio' => '36,50', 'porcentaje_iva' => '16', 'umbral_stock_bajo' => '5',
                 'descuento_porcentaje' => '5', 'descuento_monto_minimo' => '500',
@@ -160,7 +160,7 @@ class UsabilidadMovilTest extends TestCase
         Storage::fake('public');
         $categoria = $this->crearProducto()->id_categoria;
 
-        $this->actingAs($this->crearUsuario('administrador'))
+        $this->actingAs($this->crearUsuario('directivo'))
             ->post(route('admin.productos.store'), [
                 'codigo_fabrica' => 'BOM-TEST-1', 'nombre' => 'Bomba de prueba', 'marca' => 'Pedrollo',
                 'precio' => '285.00', 'id_categoria' => $categoria, 'stock' => 3, 'activo' => '1',
@@ -199,16 +199,16 @@ class UsabilidadMovilTest extends TestCase
 
     public function test_sin_whatsapp_el_tablero_avisa_al_administrador_como_activarlo(): void
     {
-        $this->actingAs($this->crearUsuario('administrador'))->get(route('gestion.tablero'))
+        $this->actingAs($this->crearUsuario('directivo'))->get(route('gestion.tablero'))
             ->assertSee('Los clientes todavía no pueden escribirte.')
             ->assertSee('Configurar WhatsApp');
 
         $this->actingAs($this->crearUsuario('vendedor'))->get(route('gestion.tablero'))
-            ->assertSee('Pídele al administrador que lo configure.')
+            ->assertSee('Pídele al personal administrativo que lo configure.')
             ->assertDontSee('Configurar WhatsApp');
 
         $this->configurar(['telefono_whatsapp' => '04141234567']);
-        $this->actingAs($this->crearUsuario('administrador'))->get(route('gestion.tablero'))
+        $this->actingAs($this->crearUsuario('directivo'))->get(route('gestion.tablero'))
             ->assertDontSee('Los clientes todavía no pueden escribirte.');
     }
 

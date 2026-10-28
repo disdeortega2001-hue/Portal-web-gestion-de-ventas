@@ -196,7 +196,7 @@ class SeguridadTest extends TestCase
         $producto = $this->crearProducto();
         $producto->delete();
 
-        $this->actingAs($this->crearUsuario('vendedor'))
+        $this->actingAs($this->crearUsuario('administrativo'))
             ->post(route('gestion.inventario.store'), [
                 'id_producto' => $producto->id, 'tipo' => 'entrada', 'cantidad' => 5, 'motivo' => 'Compra a proveedor',
             ])

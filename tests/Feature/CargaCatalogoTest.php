@@ -28,7 +28,7 @@ class CargaCatalogoTest extends TestCase
     {
         parent::setUp();
         $this->configurar();
-        $this->crearUsuario('administrador');
+        $this->crearUsuario('directivo');
         Storage::fake('public');
 
         $this->carpeta = storage_path('framework/testing/carga-' . uniqid());

@@ -12,8 +12,8 @@
     <x-slot:acciones>
         {{-- Lo que se hace a diario, a un toque --}}
         <a href="{{ route('gestion.pedidos.create') }}" class="btn btn-sol"><x-icono nombre="mas" class="size-4" /> Nueva venta</a>
-        <a href="{{ route('gestion.inventario.index') }}" class="btn btn-linea"><x-icono nombre="caja" class="size-4" /> Registrar entrada</a>
-        @if(auth()->user()->esAdministrador())
+        @if(auth()->user()->puedeAdministrar())
+            <a href="{{ route('gestion.inventario.index') }}" class="btn btn-linea"><x-icono nombre="caja" class="size-4" /> Registrar entrada</a>
             <a href="{{ route('admin.configuracion.edit') }}" class="btn btn-linea"><x-icono nombre="moneda" class="size-4" /> Tasa del día</a>
         @endif
     </x-slot:acciones>
@@ -37,10 +37,10 @@
             <x-icono nombre="whatsapp" class="size-6 shrink-0" />
             <div class="flex-1"><strong>Los clientes todavía no pueden escribirte.</strong>
                 Falta el WhatsApp de atención: sin él no aparecen el botón de contacto, «Preguntar cuándo llega» en los agotados ni «Escribir al vendedor» al cotizar.</div>
-            @if(auth()->user()->esAdministrador())
+            @if(auth()->user()->puedeAdministrar())
                 <a href="{{ route('admin.configuracion.edit') }}#telefono_whatsapp" class="btn btn-tierra btn-mini">Configurar WhatsApp</a>
             @else
-                <span class="text-sm font-semibold">Pídele al administrador que lo configure.</span>
+                <span class="text-sm font-semibold">Pídele al personal administrativo que lo configure.</span>
             @endif
         </div>
     @endunless

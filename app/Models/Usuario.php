@@ -10,7 +10,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 /**
- * Usuario autenticable del sistema. El rol define qué módulos puede usar.
+ * Usuario autenticable del sistema. El rol define qué módulos puede usar:
+ * - cliente: compra y cotiza en el portal; no entra al panel.
+ * - vendedor: cotizaciones, pedidos, clientes y consulta de existencias.
+ * - administrativo: lo del vendedor más catálogo, inventario, tasa e IVA, pagos y reportes.
+ * - directivo: todo, incluidos los usuarios y los respaldos.
  */
 class Usuario extends Authenticatable
 {
@@ -18,7 +22,18 @@ class Usuario extends Authenticatable
 
     public const ROL_CLIENTE = 'cliente';
     public const ROL_VENDEDOR = 'vendedor';
-    public const ROL_ADMINISTRADOR = 'administrador';
+    public const ROL_ADMINISTRATIVO = 'administrativo';
+    public const ROL_DIRECTIVO = 'directivo';
+
+    /** Los tres perfiles con acceso al panel, en orden de alcance. */
+    public const PERFILES_PANEL = [self::ROL_VENDEDOR, self::ROL_ADMINISTRATIVO, self::ROL_DIRECTIVO];
+
+    public const NOMBRES_ROL = [
+        self::ROL_VENDEDOR => 'Vendedor',
+        self::ROL_ADMINISTRATIVO => 'Administrativo',
+        self::ROL_DIRECTIVO => 'Directivo',
+        self::ROL_CLIENTE => 'Cliente',
+    ];
 
     protected $table = 'usuarios';
 
@@ -59,14 +74,27 @@ class Usuario extends Authenticatable
         return in_array($this->rol, $roles, true);
     }
 
-    public function esAdministrador(): bool
-    {
-        return $this->rol === self::ROL_ADMINISTRADOR;
-    }
-
+    /** Vendedor, administrativo o directivo: entra al panel. */
     public function esPersonal(): bool
     {
-        return $this->tieneRol(self::ROL_VENDEDOR, self::ROL_ADMINISTRADOR);
+        return $this->tieneRol(...self::PERFILES_PANEL);
+    }
+
+    /** Administrativo o directivo: catálogo, inventario, tasa e IVA, pagos y reportes. */
+    public function puedeAdministrar(): bool
+    {
+        return $this->tieneRol(self::ROL_ADMINISTRATIVO, self::ROL_DIRECTIVO);
+    }
+
+    /** Solo el directivo: usuarios y respaldos. */
+    public function esDirectivo(): bool
+    {
+        return $this->rol === self::ROL_DIRECTIVO;
+    }
+
+    public function nombreRol(): string
+    {
+        return self::NOMBRES_ROL[$this->rol] ?? ucfirst((string) $this->rol);
     }
 
     public function cliente(): HasOne
