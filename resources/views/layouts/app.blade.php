@@ -37,7 +37,8 @@
     // Lo que espera atención, a la vista en el menú (conteos sobre columnas indexadas)
     $pendientesMenu = $personal ? array_filter([
         'gestion.cotizaciones.index' => \App\Models\Cotizacion::where('estado', \App\Models\Cotizacion::PENDIENTE)->count(),
-        'gestion.pedidos.index' => \App\Models\Pedido::where('estado', \App\Models\Pedido::PENDIENTE)->count(),
+        'gestion.pedidos.index' => \App\Models\Pedido::where('estado', \App\Models\Pedido::PENDIENTE)->count()
+            + \App\Models\Pedido::whereNotNull('devolucion_solicitada_en')->where('estado', '!=', \App\Models\Pedido::ANULADO)->count(),
         'gestion.verificaciones.index' => \App\Models\Cliente::whereNotNull('id_usuario_solicitante')->count(),
         'gestion.pagos.index' => $usuario->puedeAdministrar() ? \App\Models\Pago::where('estado', \App\Models\Pago::POR_VERIFICAR)->count() : 0,
     ]) : [];
@@ -207,7 +208,7 @@
                 <source media="(max-width: 767px)" srcset="{{ asset('img/portada/' . $fotoCabecera[1]) }}">
                 <img src="{{ asset('img/portada/' . $fotoCabecera[0]) }}" alt="" class="size-full object-cover" fetchpriority="high">
             </picture>
-            <div class="absolute inset-0 -z-10 bg-gradient-to-r from-noche/95 via-tierra-oscura/85 to-rialto/70" aria-hidden="true"></div>
+            <div class="absolute inset-0 -z-10 bg-gradient-to-r from-noche/90 via-tierra-oscura/65 to-rialto/30" aria-hidden="true"></div>
             <x-arcos class="absolute inset-y-0 right-0 h-full w-[42rem] max-w-[70%]" />
             <div class="relative mx-auto max-w-[1320px] px-4 pb-10 pt-9 sm:px-6 lg:px-8 lg:pb-14 lg:pt-12" data-entrar>@yield('cabecera')</div>
             <div class="franja franja-fina" aria-hidden="true"></div>
@@ -260,7 +261,7 @@
                         <p class="text-sm">RIF J-50668510-8 · Valle de la Pascua desde 1963</p>
                     </div>
                 </div>
-                <p class="mt-5 max-w-md text-[0.9375rem]">Agente autorizado exclusivo en Venezuela de Marchesan Tatu, Colombo Aemco, Vicon y Lumagi. Precios en USD más IVA; en bolívares a la tasa oficial del día.</p>
+                <p class="mt-5 max-w-md text-[0.9375rem]">Agente autorizado exclusivo en Venezuela de Marchesan Tatu, Colombo Aemco, Vicon y Lumagi. Precios en USD; en bolívares a la tasa oficial del BCV. Pagos en dólares con IGTF y en bolívares con IVA.</p>
             </div>
             <nav aria-label="Pie de página">
                 <p class="text-xs font-extrabold uppercase tracking-[0.14em] text-sol">El portal</p>

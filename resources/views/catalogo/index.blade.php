@@ -4,8 +4,9 @@
 @if(request()->except('page'))@section('canonica', route('catalogo.index'))@endif
 
 @php
-    // Filtros que viven en el panel (la categoría, la búsqueda y el orden tienen su propio control)
+    // Filtros que viven en el panel «Ajustar búsqueda» (la búsqueda y el orden tienen su propio control)
     $filtrosPanel = array_filter([
+        'categoria' => $filtros['categoria'] ?? null,
         'marca' => $filtros['marca'] ?? null,
         'modelo' => $filtros['modelo'] ?? null,
         'disponibles' => ($filtros['disponibles'] ?? null) === '1' ? '1' : null,
@@ -15,7 +16,7 @@
     $urlSin = fn (array $quitar, array $poner = []) => route('catalogo.index', array_merge(
         \Illuminate\Support\Arr::except(request()->query(), array_merge($quitar, ['page'])), $poner
     ));
-    $etiquetas = ['marca' => fn ($v) => $v, 'modelo' => fn ($v) => "Modelo: {$v}", 'disponibles' => fn () => 'Solo disponibles'];
+    $etiquetas = ['categoria' => fn ($v) => $categorias->firstWhere('id', (int) $v)?->nombre ?? 'Categoría', 'marca' => fn ($v) => $v, 'modelo' => fn ($v) => "Modelo: {$v}", 'disponibles' => fn () => 'Solo disponibles'];
 @endphp
 
 @section('cabecera')
@@ -25,7 +26,6 @@
     {{-- Búsqueda con sugerencias en vivo. Los campos del panel se asocian a este formulario con form="filtros". --}}
     <form id="filtros" method="GET" action="{{ route('catalogo.index') }}" role="search" class="relative mt-7 flex max-w-3xl gap-2"
           x-data="sugerencias(@js(route('catalogo.sugerencias')))" @click.outside="abierto = false" @keydown.escape="abierto = false">
-        @if($categoriaActual)<input type="hidden" name="categoria" value="{{ $categoriaActual->id }}">@endif
         @if(filled($filtros['orden'] ?? null))<input type="hidden" name="orden" value="{{ $filtros['orden'] }}">@endif
         <label for="q" class="sr-only">Buscar por código, nombre o modelo</label>
         <div class="relative flex-1">
@@ -68,17 +68,8 @@
      x-init="window.matchMedia('(min-width: 1024px)').addEventListener('change', e => lg = e.matches)"
      @keydown.escape.window="panel = false">
 
-    {{-- Categorías: placas rectas con su conteo --}}
-    <nav class="-mx-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0" aria-label="Categorías">
-        <ul class="flex gap-2 lg:flex-wrap">
-            <li><a href="{{ $urlSin(['categoria']) }}" class="capsula" @if(! $categoriaActual) aria-current="page" @endif>Todas <span class="conteo">{{ $categorias->sum('productos_count') }}</span></a></li>
-            @foreach($categorias as $categoria)
-                <li><a href="{{ $urlSin(['categoria'], ['categoria' => $categoria->id]) }}" class="capsula" @if($categoriaActual?->id === $categoria->id) aria-current="page" @endif>{{ $categoria->nombre }} <span class="conteo">{{ $categoria->productos_count }}</span></a></li>
-            @endforeach
-        </ul>
-    </nav>
 
-    <div class="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[16rem_minmax(0,1fr)]">
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-[16rem_minmax(0,1fr)]">
         {{-- Panel "Ajustar búsqueda": hoja inferior en el celular, barra lateral desde escritorio --}}
         <div x-show="panel" x-cloak x-transition.opacity class="fixed inset-0 z-40 bg-tinta/50 lg:hidden" @click="panel = false"></div>
         <aside id="panel-filtros" aria-labelledby="titulo-filtros" :inert="!panel && !lg"
@@ -89,6 +80,15 @@
                 <div class="flex items-center justify-between">
                     <h2 id="titulo-filtros" class="seccion-titulo">Ajustar búsqueda</h2>
                     <button type="button" class="grid size-11 place-items-center hover:bg-agua lg:hidden" @click="panel = false" aria-label="Cerrar"><x-icono nombre="x" /></button>
+                </div>
+                <div>
+                    <label for="categoria" class="etiqueta">Tipo de repuesto</label>
+                    <select id="categoria" name="categoria" form="filtros" class="campo">
+                        <option value="">Todos</option>
+                        @foreach($categorias as $categoria)
+                            <option value="{{ $categoria->id }}" @selected($categoriaActual?->id === $categoria->id)>{{ $categoria->nombre }} ({{ $categoria->productos_count }})</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div>
                     <label for="marca" class="etiqueta">Fabricante</label>

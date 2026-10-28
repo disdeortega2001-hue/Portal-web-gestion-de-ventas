@@ -27,7 +27,7 @@
                 <img src="{{ asset($grande) }}" alt="" class="size-full object-cover" @if($i === 0) fetchpriority="high" @else loading="lazy" @endif decoding="async">
             </picture>
         @endforeach
-        <div class="absolute inset-0 bg-gradient-to-r from-noche/95 via-tierra-oscura/75 to-rialto/45"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-noche/90 via-tierra-oscura/55 to-rialto/15"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-noche/90 via-transparent to-transparent"></div>
         <x-arcos class="absolute inset-y-0 right-0 hidden h-full w-[48rem] lg:block" />
     </div>
@@ -237,7 +237,7 @@
 {{-- ======== Visítanos: la fachada de la sede ======== --}}
 <section aria-labelledby="t-visita" class="sobre-azul relative isolate overflow-hidden text-white">
     <img src="{{ asset('img/portada/sede-fachada.jpg') }}" alt="" class="absolute inset-0 -z-10 size-full object-cover" loading="lazy">
-    <div class="absolute inset-0 -z-10 bg-gradient-to-r from-noche/95 via-tierra-oscura/80 to-rialto/60"></div>
+    <div class="absolute inset-0 -z-10 bg-gradient-to-r from-noche/90 via-tierra-oscura/60 to-rialto/25"></div>
     <div class="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-20 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-28" data-revelar>
         <div class="max-w-2xl">
             <h2 id="t-visita" class="titular text-4xl sm:text-5xl">Visítanos en el <em>Edificio Campagna</em></h2>

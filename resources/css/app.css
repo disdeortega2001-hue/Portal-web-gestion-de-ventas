@@ -97,8 +97,8 @@
      * para que el texto y las tarjetas blancas se lean igual que sobre el fondo liso.
      * Uso: class="fondo-foto" style="--foto: url(...)"; con «fondo-foto-verde» el velo tira al verde Rialto.
      */
-    .fondo-foto { background: linear-gradient(180deg, rgb(244 246 249 / 0.80), rgb(231 236 242 / 0.74)), var(--foto) center / cover no-repeat, var(--color-agua); }
-    .fondo-foto-verde { background-image: linear-gradient(180deg, rgb(244 246 249 / 0.80), rgb(220 235 228 / 0.76)), var(--foto); }
+    .fondo-foto { background: linear-gradient(180deg, rgb(244 246 249 / 0.70), rgb(231 236 242 / 0.62)), var(--foto) center / cover no-repeat, var(--color-agua); }
+    .fondo-foto-verde { background-image: linear-gradient(180deg, rgb(244 246 249 / 0.70), rgb(220 235 228 / 0.64)), var(--foto); }
     /* En computadora la foto queda fija y el contenido se desliza encima; en el celular se desplaza con la página */
     @media (min-width: 1024px) { .fondo-foto-fijo { background-attachment: fixed; } }
 
@@ -118,17 +118,18 @@
 
     /* ---- Botones: rectángulos firmes con flecha ---- */
     .btn {
-        @apply relative inline-flex items-center justify-center gap-2.5 rounded-[6px] font-bold uppercase whitespace-nowrap select-none
+        @apply relative inline-flex items-center justify-center gap-2.5 rounded-[6px] font-extrabold uppercase whitespace-nowrap select-none
                min-h-12 px-6 text-[0.9375rem] leading-none tracking-[0.06em] cursor-pointer border-2 border-transparent;
         transition: transform 0.25s var(--ease-rebote), background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
     }
     .btn:hover:not(:disabled) { transform: translateY(-2px); }
     .btn:active:not(:disabled) { transform: translateY(0); }
     .btn:disabled, .btn[aria-disabled="true"] { @apply opacity-55 cursor-not-allowed; }
-    .btn-sol { @apply bg-sol text-tierra-oscura hover:bg-[#ffdf33]; box-shadow: 0 6px 18px -8px rgb(255 211 0 / 0.7); }
-    .btn-tierra { @apply bg-tierra text-white hover:bg-tierra-oscura; box-shadow: 0 6px 18px -8px rgb(13 81 146 / 0.7); }
-    .btn-linea { @apply bg-white text-tierra-oscura border-tierra hover:bg-tierra hover:text-white; }
-    .btn-linea-clara { @apply bg-transparent text-white border-white/70 hover:bg-white hover:text-tierra-oscura; }
+    /* Contraste alto: texto azul noche sobre amarillo, bordes de 2 px en los botones de contorno */
+    .btn-sol { @apply bg-sol text-noche hover:bg-[#ffdf33]; border: 2px solid #e0b800; box-shadow: 0 6px 18px -8px rgb(160 120 0 / 0.75); }
+    .btn-tierra { @apply bg-tierra-oscura text-white hover:bg-noche; border: 2px solid var(--color-tierra-oscura); box-shadow: 0 6px 18px -8px rgb(5 43 112 / 0.8); }
+    .btn-linea { @apply bg-white text-noche border-tierra-oscura hover:bg-tierra-oscura hover:text-white; border-width: 2px; }
+    .btn-linea-clara { @apply bg-noche/40 text-white border-white hover:bg-white hover:text-tierra-oscura; border-width: 2px; backdrop-filter: blur(4px); }
     .btn-grande { @apply min-h-14 px-8 text-base; }
     .btn-mini { @apply min-h-10 px-4 text-[0.8125rem]; }
     .btn .chip { @apply -mr-1 grid size-6 place-items-center; transition: transform 0.25s var(--ease-rebote); }
@@ -189,7 +190,7 @@
         backdrop-filter: blur(6px);
     }
     .tarjeta-producto.tarjeta-viva:hover { border-color: var(--color-rialto); box-shadow: 0 18px 40px -22px rgb(11 74 59 / 0.55); }
-    .foto-producto { background: rgb(255 255 255 / 0.88); }
+    .foto-producto { background: #fff; }
 
     /* ---- Estados ---- */
     .estado { @apply inline-flex items-center gap-1.5 rounded-[4px] px-2.5 py-1 text-[0.8125rem] font-bold uppercase tracking-[0.03em] leading-tight whitespace-nowrap; }
@@ -204,6 +205,7 @@
     .estado-por_verificar { @apply bg-sol-clara text-[#5f4400]; }
     .estado-sin_pago { @apply bg-lila-clara text-[#4c2a7a]; }
     .estado-rechazado { @apply bg-coral-clara text-coral-tinta; }
+    .estado-reembolsado { @apply bg-laguna-clara text-laguna-tinta; }
 
     /* ---- Avisos ---- */
     .aviso { @apply flex gap-3 rounded-[6px] px-4 py-3 text-[0.9375rem]; }
@@ -219,6 +221,24 @@
     .tabla tbody tr { transition: background-color 0.15s; }
     .tabla tbody tr:hover { @apply bg-agua; }
     .tabla .num { @apply text-right cifra whitespace-nowrap; }
+
+    /*
+     * En el teléfono cada fila se vuelve una ficha: «etiqueta  valor», sin deslizar hacia los lados.
+     * La etiqueta de cada celda la pone app.js (data-etiqueta, tomada del encabezado de su columna).
+     */
+    @media (max-width: 639px) {
+        .tabla thead { display: none; }
+        .tabla, .tabla tbody, .tabla tr, .tabla td { display: block; width: 100%; }
+        .tabla tbody tr { @apply border-b border-linea px-4 py-3; }
+        .tabla tbody tr:hover { background: transparent; }
+        /* La etiqueta flota a la izquierda; todo el contenido de la celda queda junto, alineado a la derecha */
+        .tabla td { @apply border-0 px-0 py-1 text-right; overflow: hidden; }
+        .tabla td::before { content: attr(data-etiqueta); float: left; @apply mr-4 pt-0.5 text-left text-xs font-extrabold uppercase tracking-[0.06em] text-tinta-suave; }
+        .tabla td:not([data-etiqueta])::before, .tabla td[data-etiqueta=""]::before { display: none; }
+        .tabla td:not([data-etiqueta]), .tabla td[data-etiqueta=""] { @apply pt-2; }
+        .tabla td[colspan] { @apply text-center; }
+        .tabla .num { white-space: normal; }
+    }
 
     /* ---- Paginación ---- */
     .paginas { @apply flex flex-wrap items-center gap-1.5; }

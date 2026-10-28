@@ -47,7 +47,7 @@
     <div class="tarjeta-producto panel-tapa relative self-start p-2">
         <div class="foto-producto aspect-[4/3] rounded-[6px]">
             <img src="{{ $producto->urlImagen() }}" alt="{{ $producto->nombre }}" width="800" height="600" decoding="async"
-                 @class(['size-full mix-blend-multiply', 'object-contain p-6' => $producto->imagen, 'object-contain p-16 opacity-70' => ! $producto->imagen])>
+                 @class(['size-full', 'object-contain p-6' => $producto->imagen, 'object-contain p-16 opacity-70' => ! $producto->imagen])>
         </div>
     </div>
 

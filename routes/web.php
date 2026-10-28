@@ -90,6 +90,7 @@ Route::middleware(['auth', 'rol:cliente'])->prefix('mi-cuenta')->name('cuenta.')
     Route::get('/pedidos', [CuentaController::class, 'pedidos'])->name('pedidos');
     Route::get('/pedidos/{pedido}', [CuentaController::class, 'pedido'])->name('pedidos.show');
     Route::post('/pedidos/{pedido}/pago', [CompraController::class, 'reportarPago'])->middleware('throttle:10,1')->name('pedidos.pago');
+    Route::post('/pedidos/{pedido}/devolucion', [CompraController::class, 'solicitarDevolucion'])->middleware('throttle:10,1')->name('pedidos.devolucion');
 });
 
 // Compra: el visitante sin sesión va a ingresar o crear su cuenta, y vuelve aquí

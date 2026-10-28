@@ -177,9 +177,9 @@ class PedidoService
     }
 
     /** Anula un pedido. Si ya estaba confirmado, repone el stock con movimientos de entrada. */
-    public function anular(Pedido $pedido, Usuario $usuario): Pedido
+    public function anular(Pedido $pedido, Usuario $usuario, ?string $motivo = null): Pedido
     {
-        return DB::transaction(function () use ($pedido, $usuario) {
+        return DB::transaction(function () use ($pedido, $usuario, $motivo) {
             $pedido = Pedido::with('detalles')->lockForUpdate()->findOrFail($pedido->id);
 
             if ($pedido->estado === Pedido::ANULADO) {
@@ -210,7 +210,12 @@ class PedidoService
                 }
             }
 
-            $pedido->update(['estado' => Pedido::ANULADO]);
+            // Si el cliente ya había pagado, el dinero se le devuelve: el pago queda como reembolsado
+            $pedido->update([
+                'estado' => Pedido::ANULADO,
+                'motivo_anulacion' => $motivo,
+                'estado_pago' => $pedido->estado_pago === Pedido::PAGADO ? Pedido::REEMBOLSADO : $pedido->estado_pago,
+            ]);
 
             return $pedido;
         }, self::REINTENTOS);

@@ -47,6 +47,16 @@ function actualizarContador(items) {
     });
 }
 
+// Tablas en el teléfono: cada celda lleva el nombre de su columna para mostrarse como ficha (ver .tabla en app.css)
+document.querySelectorAll('table.tabla').forEach((tabla) => {
+    const titulos = [...tabla.querySelectorAll('thead th')].map((th) => th.textContent.trim());
+    tabla.querySelectorAll('tbody tr').forEach((fila) => {
+        [...fila.children].forEach((celda, i) => {
+            if (!celda.hasAttribute('colspan') && titulos[i]) celda.dataset.etiqueta = titulos[i];
+        });
+    });
+});
+
 // Confirmación antes de acciones irreversibles: <form data-confirmar="¿…?">. Va primero: si se cancela, nada más corre.
 document.addEventListener('submit', (e) => {
     const mensaje = e.target.dataset?.confirmar;

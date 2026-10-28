@@ -9,6 +9,15 @@
     <span class="estado estado-{{ $pedido->estado_pago }}">{{ $pedido->etiquetaPago() }}</span>
 </x-encabezado>
 
+@if($pedido->devolucionPendiente())
+    <div class="aviso aviso-atencion mb-6" role="alert"><x-icono nombre="alerta" class="size-5 shrink-0" />
+        <p><strong>El cliente pidió cancelar o devolver este pedido</strong> el <span class="cifra">{{ $pedido->devolucion_solicitada_en->format('d/m/Y h:i a') }}</span>: «{{ $pedido->devolucion_motivo }}». Si procede, anúlalo abajo: la existencia se repone{{ $pedido->estaPagado() ? ' y el pago queda como reembolsado' : '' }}.</p>
+    </div>
+@endif
+@if($pedido->estado === 'anulado' && $pedido->motivo_anulacion)
+    <div class="aviso aviso-error mb-6" role="status"><x-icono nombre="info" class="size-5 shrink-0" /><p><strong>Motivo de la anulación:</strong> {{ $pedido->motivo_anulacion }}</p></div>
+@endif
+
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
     <div class="space-y-6">
         <section class="lobulo p-5" aria-label="Cliente">
@@ -124,9 +133,12 @@
         @endif
         {{-- Anular: aislado y en contorno, lejos de «Confirmar venta» --}}
         @if($pedido->estado !== 'anulado')
-            <form method="POST" action="{{ route('gestion.pedidos.anular', $pedido) }}" class="border-t border-linea pt-5 !mt-8"
-                  data-confirmar="¿Anular el pedido {{ $pedido->codigo }}?{{ $pedido->estado === 'confirmado' ? ' El stock será repuesto.' : '' }}">
+            <form method="POST" action="{{ route('gestion.pedidos.anular', $pedido) }}" class="needs-validation space-y-2 border-t border-linea pt-5 !mt-8" novalidate
+                  data-confirmar="¿Anular el pedido {{ $pedido->codigo }}?{{ $pedido->estado === 'confirmado' ? ' La existencia será repuesta.' : '' }}{{ $pedido->estaPagado() ? ' El pago quedará como reembolsado.' : '' }}">
                 @csrf
+                <label for="motivo-anulacion" class="etiqueta">{{ $pedido->estado === 'confirmado' ? 'Anular o registrar devolución' : 'Anular pedido' }}</label>
+                <textarea id="motivo-anulacion" name="motivo" rows="2" class="campo @error('motivo') is-invalid @enderror" required minlength="5" maxlength="500" placeholder="Motivo (ej. el cliente devolvió el repuesto)">{{ old('motivo', $pedido->devolucion_motivo ? 'Devolución solicitada por el cliente: ' . $pedido->devolucion_motivo : '') }}</textarea>
+                <p class="error-campo">@error('motivo'){{ $message }}@else Escribe el motivo. @enderror</p>
                 <button class="btn btn-linea w-full !border-coral-tinta !text-coral-tinta hover:!bg-coral-clara">Anular pedido</button>
             </form>
         @endif

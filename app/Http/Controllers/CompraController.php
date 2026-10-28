@@ -108,6 +108,35 @@ class CompraController extends Controller
         return back()->with('exito', 'Recibimos tu reporte de pago. Te avisamos cuando lo verifiquemos.');
     }
 
+    /**
+     * Cancelar o devolver un pedido propio. Si está pendiente y sin pagar, se cancela al instante;
+     * si ya se pagó o se confirmó, queda la solicitud con su motivo y el personal la atiende
+     * (anula, repone la existencia y devuelve el dinero).
+     */
+    public function solicitarDevolucion(Request $request, Pedido $pedido, PedidoService $pedidos): RedirectResponse
+    {
+        abort_unless($pedido->id_cliente === $request->user()->cliente?->id, 403);
+
+        $datos = $request->validate(['motivo' => ['required', 'string', 'min:5', 'max:500']], [
+            'motivo.required' => 'Cuéntanos por qué quieres cancelar o devolver el pedido.',
+            'motivo.min' => 'Explica un poco más el motivo.',
+        ]);
+
+        if ($pedido->estado === Pedido::ANULADO) {
+            return back()->with('error', "El pedido {$pedido->codigo} ya está anulado.");
+        }
+
+        if ($pedido->clientePuedeCancelar()) {
+            $pedidos->anular($pedido, $request->user(), 'Cancelado por el cliente: ' . $datos['motivo']);
+
+            return back()->with('exito', "Cancelaste el pedido {$pedido->codigo}.");
+        }
+
+        $pedido->update(['devolucion_motivo' => $datos['motivo'], 'devolucion_solicitada_en' => now()]);
+
+        return back()->with('exito', 'Recibimos tu solicitud. Te contactaremos para coordinar la devolución de los productos y de tu dinero.');
+    }
+
     /** Carrito vacío o cuenta aún en verificación: no hay compra posible todavía. */
     private function sinCompraPosible(Request $request): ?RedirectResponse
     {

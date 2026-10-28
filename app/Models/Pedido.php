@@ -25,6 +25,7 @@ class Pedido extends Model
     public const SIN_PAGO = 'sin_pago';
     public const PAGO_POR_VERIFICAR = 'por_verificar';
     public const PAGADO = 'pagado';
+    public const REEMBOLSADO = 'reembolsado';
 
     protected $table = 'pedidos';
 
@@ -32,11 +33,13 @@ class Pedido extends Model
         'codigo', 'id_cliente', 'id_usuario', 'id_cotizacion', 'fecha', 'subtotal', 'descuento',
         'moneda_pago', 'tipo_impuesto', 'porcentaje_impuesto', 'impuesto', 'total', 'tasa_cambio', 'total_bs', 'estado', 'fecha_confirmacion',
         'origen', 'metodo_pago', 'estado_pago', 'entrega', 'observaciones',
+        'devolucion_motivo', 'devolucion_solicitada_en', 'motivo_anulacion',
     ];
 
     protected $casts = [
         'fecha' => 'datetime',
         'fecha_confirmacion' => 'datetime',
+        'devolucion_solicitada_en' => 'datetime',
         'subtotal' => 'decimal:2',
         'descuento' => 'decimal:2',
         'porcentaje_impuesto' => 'decimal:2',
@@ -104,8 +107,21 @@ class Pedido extends Model
         return match ($this->estado_pago) {
             self::PAGADO => 'Pagado',
             self::PAGO_POR_VERIFICAR => 'Pago por verificar',
+            self::REEMBOLSADO => 'Reembolsado',
             default => 'Sin pago',
         };
+    }
+
+    /** El cliente pidió cancelar o devolver y el personal aún no lo atiende. */
+    public function devolucionPendiente(): bool
+    {
+        return $this->devolucion_solicitada_en !== null && $this->estado !== self::ANULADO;
+    }
+
+    /** Pendiente y sin pagar: el cliente puede cancelarlo él mismo, sin intervención del personal. */
+    public function clientePuedeCancelar(): bool
+    {
+        return $this->estado === self::PENDIENTE && $this->estado_pago === self::SIN_PAGO;
     }
 
     public function etiquetaOrigen(): string

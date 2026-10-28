@@ -613,3 +613,17 @@ Total al 28/10/2026: **129 pruebas, 564 verificaciones**, todas aprobadas.
 
 Total al 28/10/2026: **136 pruebas, 588 verificaciones**, todas aprobadas.
 
+## 19. Devoluciones, teléfono y contraste (28/10/2026)
+
+- **Devoluciones** (migración `2026_10_28_000003_devoluciones`):
+  - **Cliente:** desde su pedido pide cancelar o devolver, con motivo. Si el pedido está pendiente y sin pagar, se cancela al instante; si ya está pagado o confirmado, queda la solicitud.
+  - **Personal:** ve las solicitudes en Pedidos → «Devoluciones» y en el contador del menú. Anular exige motivo; la existencia se repone y, si estaba pagado, el pago queda «Reembolsado».
+- **Tablas en el teléfono:** por debajo de 640 px cada fila se muestra como ficha «etiqueta · valor». `app.js` pone el nombre de la columna en cada celda (`data-etiqueta`).
+- **Catálogo:** sin la fila de categorías; el tipo de repuesto se elige en «Ajustar búsqueda».
+- **Contraste:**
+  - botones con borde de 2 px y texto más oscuro;
+  - menos velo sobre las fotos de las cabeceras y de los fondos;
+  - fotos de los productos sobre blanco puro, sin mezcla.
+
+Total al 28/10/2026: **139 pruebas, 608 verificaciones**, todas aprobadas.
+

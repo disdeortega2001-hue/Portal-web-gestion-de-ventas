@@ -9,7 +9,7 @@
         <img src="{{ $producto->urlImagen('mini') }}"
              @if($srcset = $producto->srcsetImagen()) srcset="{{ $srcset }}" sizes="(max-width: 639px) 112px, (max-width: 1023px) 45vw, 300px" @endif
              alt="" width="240" height="180" loading="lazy" decoding="async"
-             @class(['size-full mix-blend-multiply transition-transform duration-500 ease-[var(--ease-salida)] group-hover:scale-[1.04]', 'object-contain p-2 sm:p-5' => $producto->imagen, 'object-contain p-4 sm:p-8 opacity-70' => ! $producto->imagen])>
+             @class(['size-full transition-transform duration-500 ease-[var(--ease-salida)] group-hover:scale-[1.04]', 'object-contain p-2 sm:p-5' => $producto->imagen, 'object-contain p-4 sm:p-8 opacity-70' => ! $producto->imagen])>
     </a>
 
     <div class="flex min-w-0 flex-col gap-1 sm:px-4 sm:pt-8">

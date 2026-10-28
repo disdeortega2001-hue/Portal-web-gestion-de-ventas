@@ -31,7 +31,8 @@ class PedidoController extends Controller
         $busqueda = trim((string) $request->query('q'));
 
         $pedidos = Pedido::with(['cliente:id,identificacion,nombre,telefono', 'vendedor:id,nombre'])
-            ->when($estado !== 'todos', fn ($q) => $q->where('estado', $estado))
+            ->when($estado === 'devolucion', fn ($q) => $q->whereNotNull('devolucion_solicitada_en')->where('estado', '!=', Pedido::ANULADO))
+            ->when(! in_array($estado, ['todos', 'devolucion'], true), fn ($q) => $q->where('estado', $estado))
             // Por código del pedido (PED-000012 o solo 12) o por el cliente (nombre, cédula, teléfono)
             ->when($busqueda !== '', fn ($q) => $q->where(fn ($w) => $w
                 ->where('codigo', 'like', '%' . strtoupper($busqueda) . '%')
@@ -94,14 +95,22 @@ class PedidoController extends Controller
         return back()->with('exito', "Venta procesada. El stock de los productos del pedido {$pedido->codigo} fue descontado.");
     }
 
+    /** Anula (o registra la devolución): repone la existencia si estaba confirmado; el motivo es obligatorio. */
     public function anular(Request $request, Pedido $pedido): RedirectResponse
     {
+        $datos = $request->validate(['motivo' => ['required', 'string', 'min:5', 'max:500']], [
+            'motivo.required' => 'Escribe el motivo de la anulación o devolución.',
+            'motivo.min' => 'Explica un poco más el motivo.',
+        ]);
+
         try {
-            $this->pedidos->anular($pedido, $request->user());
+            $this->pedidos->anular($pedido, $request->user(), $datos['motivo']);
         } catch (LogicException $e) {
             return back()->with('error', $e->getMessage());
         }
 
-        return back()->with('exito', "Pedido {$pedido->codigo} anulado.");
+        $pedido->refresh();
+
+        return back()->with('exito', "Pedido {$pedido->codigo} anulado." . ($pedido->estado_pago === Pedido::REEMBOLSADO ? ' Recuerda devolverle el dinero al cliente: el pago quedó como reembolsado.' : ''));
     }
 }

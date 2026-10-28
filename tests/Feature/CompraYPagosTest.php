@@ -200,4 +200,54 @@ class CompraYPagosTest extends TestCase
     {
         $this->actingAs($this->crearUsuario('vendedor'))->get(route('compra.create'))->assertForbidden();
     }
+
+    public function test_el_cliente_cancela_un_pedido_pendiente_sin_pagar(): void
+    {
+        [$usuario] = $this->clienteConLista();
+        $pedido = $this->comprar($usuario, 'zelle');
+
+        $this->actingAs($usuario)->post(route('cuenta.pedidos.devolucion', $pedido), ['motivo' => 'Me equivoqué de repuesto'])->assertSessionHas('exito');
+
+        $pedido->refresh();
+        $this->assertSame(Pedido::ANULADO, $pedido->estado);
+        $this->assertStringContainsString('Me equivoqué de repuesto', $pedido->motivo_anulacion);
+    }
+
+    public function test_la_devolucion_de_un_pedido_pagado_la_atiende_el_personal_y_repone_existencia(): void
+    {
+        [$usuario, , $producto] = $this->clienteConLista();
+        $pedido = $this->comprar($usuario, 'efectivo');
+        $administrativo = $this->crearUsuario('administrativo');
+        $this->actingAs($administrativo)->post(route('gestion.pedidos.pagos.store', $pedido), ['metodo' => 'efectivo', 'monto' => (string) $pedido->fresh()->total]);
+        $this->assertSame(8, $producto->fresh()->stock);
+
+        // Ya pagado y confirmado: el cliente solo puede solicitar la devolución
+        $this->actingAs($usuario)->post(route('cuenta.pedidos.devolucion', $pedido), ['motivo' => 'El repuesto no sirve para mi rotativa']);
+        $pedido->refresh();
+        $this->assertSame(Pedido::CONFIRMADO, $pedido->estado);
+        $this->assertTrue($pedido->devolucionPendiente());
+        $this->actingAs($administrativo)->get(route('gestion.pedidos.index', ['estado' => 'devolucion']))->assertSee($pedido->codigo);
+
+        // El personal anula sin motivo: no se permite
+        $this->actingAs($administrativo)->post(route('gestion.pedidos.anular', $pedido))->assertSessionHasErrors('motivo');
+
+        // Con motivo: se anula, la existencia vuelve y el pago queda como reembolsado
+        $this->actingAs($administrativo)->post(route('gestion.pedidos.anular', $pedido), ['motivo' => 'Devolución aceptada'])->assertSessionHas('exito');
+        $pedido->refresh();
+        $this->assertSame(Pedido::ANULADO, $pedido->estado);
+        $this->assertSame(Pedido::REEMBOLSADO, $pedido->estado_pago);
+        $this->assertSame(10, $producto->fresh()->stock);
+        $this->actingAs($usuario)->get(route('cuenta.pedidos.show', $pedido))->assertSee('Pedido anulado.')->assertSee('Te devolvemos el dinero');
+    }
+
+    public function test_nadie_pide_la_devolucion_de_un_pedido_ajeno(): void
+    {
+        [$usuario] = $this->clienteConLista();
+        $pedido = $this->comprar($usuario);
+        $ajeno = $this->crearUsuario('cliente');
+        $this->crearCliente($ajeno);
+
+        $this->actingAs($ajeno)->post(route('cuenta.pedidos.devolucion', $pedido), ['motivo' => 'Quiero cancelarlo'])->assertForbidden();
+        $this->assertSame(Pedido::PENDIENTE, $pedido->fresh()->estado);
+    }
 }

@@ -86,6 +86,28 @@
             </section>
         @endif
 
+        {{-- Cancelar o devolver --}}
+        @if($pedido->estado === 'anulado')
+            <div class="aviso aviso-error" role="status"><x-icono nombre="alerta" class="size-5 shrink-0" />
+                <p><strong>Pedido anulado.</strong> @if($pedido->motivo_anulacion){{ $pedido->motivo_anulacion }}@endif
+                @if($pedido->estado_pago === 'reembolsado') Te devolvemos el dinero por el mismo medio de pago.@endif</p></div>
+        @elseif($pedido->devolucionPendiente())
+            <div class="aviso aviso-atencion" role="status"><x-icono nombre="info" class="size-5 shrink-0" />
+                <p><strong>Solicitaste cancelar o devolver este pedido</strong> el <span class="cifra">{{ $pedido->devolucion_solicitada_en->format('d/m/Y') }}</span>: «{{ $pedido->devolucion_motivo }}». Te contactaremos para coordinarlo.</p></div>
+        @else
+            <details class="lobulo p-4 sm:p-5">
+                <summary class="cursor-pointer font-bold text-coral-tinta">{{ $pedido->clientePuedeCancelar() ? '¿Quieres cancelar este pedido?' : '¿Necesitas devolver este pedido?' }}</summary>
+                <form method="POST" action="{{ route('cuenta.pedidos.devolucion', $pedido) }}" class="needs-validation mt-4 space-y-3" novalidate>
+                    @csrf
+                    <label for="motivo" class="etiqueta">Motivo *</label>
+                    <textarea id="motivo" name="motivo" rows="2" class="campo @error('motivo') is-invalid @enderror" required minlength="5" maxlength="500" placeholder="Ej. pedí el repuesto equivocado">{{ old('motivo') }}</textarea>
+                    <p class="error-campo">@error('motivo'){{ $message }}@else Cuéntanos el motivo. @enderror</p>
+                    <p class="ayuda">{{ $pedido->clientePuedeCancelar() ? 'Como aún no lo pagas, se cancela de inmediato.' : 'Revisamos tu solicitud y te contactamos para recibir los productos y devolverte el dinero.' }}</p>
+                    <button class="btn btn-linea !border-coral-tinta !text-coral-tinta">{{ $pedido->clientePuedeCancelar() ? 'Cancelar pedido' : 'Solicitar devolución' }}</button>
+                </form>
+            </details>
+        @endif
+
         {{-- Pagos reportados y su estado --}}
         @if($pedido->pagos->isNotEmpty())
             <section aria-labelledby="t-pagos">

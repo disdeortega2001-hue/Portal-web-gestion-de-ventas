@@ -7,7 +7,7 @@
         <a href="{{ route('gestion.pedidos.create') }}" class="btn btn-sol"><x-icono nombre="mas" class="size-4" /> Venta de mostrador</a>
     </x-slot:acciones>
 </x-encabezado>
-<x-pestanas :opciones="['todos' => 'Todos', 'pendiente' => 'Pendientes', 'confirmado' => 'Confirmados', 'anulado' => 'Anulados']" :actual="$estado" ruta="gestion.pedidos.index" />
+<x-pestanas :opciones="['todos' => 'Todos', 'pendiente' => 'Pendientes', 'confirmado' => 'Confirmados', 'devolucion' => 'Devoluciones', 'anulado' => 'Anulados']" :actual="$estado" ruta="gestion.pedidos.index" />
 <x-buscador :accion="route('gestion.pedidos.index')" :valor="$busqueda" placeholder="Código, cliente, cédula o teléfono" :mantener="['estado' => $estado]" />
 
 <div class="lobulo overflow-x-auto">
@@ -21,7 +21,7 @@
                 <td><a href="{{ route('gestion.clientes.show', $pedido->id_cliente) }}" class="font-semibold hover:underline">{{ $pedido->cliente->nombre }}</a><br><span class="apoyo cifra text-sm">{{ $pedido->cliente->identificacion }}</span></td>
                 <td>{{ $pedido->vendedor?->nombre ?? 'Por asignar' }}@if($pedido->origen === 'portal')<br><span class="apoyo text-sm">Compra en el portal</span>@endif</td>
                 <td class="num font-bold">@usd($pedido->total)</td>
-                <td><span class="estado estado-{{ $pedido->estado }}">{{ ucfirst($pedido->estado) }}</span></td>
+                <td><span class="estado estado-{{ $pedido->estado }}">{{ ucfirst($pedido->estado) }}</span>@if($pedido->devolucionPendiente())<br><span class="estado estado-bajo mt-1">Devolución solicitada</span>@endif</td>
                 <td><span class="estado estado-{{ $pedido->estado_pago }}">{{ $pedido->etiquetaPago() }}</span>@if($pedido->metodo_pago)<br><span class="apoyo text-sm">{{ $pedido->nombreMetodoPago() }}</span>@endif</td>
                 <td class="text-right">
                     @if($wa = \App\Support\Contacto::whatsappA($pedido->cliente->telefono, 'Hola ' . strtok($pedido->cliente->nombre, ' ') . ', te escribimos de Inversiones Rialto 7 por tu pedido ' . $pedido->codigo . '.'))
