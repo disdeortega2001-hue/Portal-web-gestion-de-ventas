@@ -44,8 +44,8 @@
 @php($compartir = \App\Support\Contacto::compartir("{$producto->nombre} ({$producto->codigo_fabrica}) en Inversiones Rialto 7: " . route('catalogo.show', $producto)))
 <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-12">
     {{-- La foto en su box, con el número de carrera: cuántas hay --}}
-    <div class="lobulo panel-tapa relative self-start">
-        <div class="mt-1.5 aspect-[4/3] bg-agua">
+    <div class="tarjeta-producto panel-tapa relative self-start p-2">
+        <div class="foto-producto aspect-[4/3] rounded-[6px]">
             <img src="{{ $producto->urlImagen() }}" alt="{{ $producto->nombre }}" width="800" height="600" decoding="async"
                  @class(['size-full mix-blend-multiply', 'object-contain p-6' => $producto->imagen, 'object-contain p-16 opacity-70' => ! $producto->imagen])>
         </div>

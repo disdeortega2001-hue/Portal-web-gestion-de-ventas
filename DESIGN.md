@@ -92,6 +92,7 @@ Hay dos mundos que comparten tokens. El público (portada, catálogo, historia, 
   - remate verde del subrayado y de la línea amarilla;
   - pie de página (azul noche a verde profundo) y sección «Tres pasos»;
   - el segundo arco decorativo.
+  - las tarjetas de los productos (`.tarjeta-producto`): verde del logo claro y semitransparente, con la foto del producto sobre un recuadro casi blanco.
 
 ### Tertiary (señales)
 - Verde disponible `#2e9b5f`, rojo señal `#d63a2c`, azul info `#2f6fb0` y lila pendiente: estados de existencia y de pedido. Siempre con su versión clara de fondo.

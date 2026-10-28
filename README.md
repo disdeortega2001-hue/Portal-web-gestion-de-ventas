@@ -588,4 +588,6 @@ Total al 28/10/2026: **127 pruebas, 556 verificaciones**, todas aprobadas.
 
 **Fondos con fotos en lugar de blanco:** el área de contenido de cada página pública y las secciones claras de la portada usan una foto de campo o de la sede con un velo claro (clase `.fondo-foto` en `resources/css/app.css`; la foto se elige con `--foto`). En computadora la foto queda fija al desplazarse.
 
+**Tarjetas de productos en verde Rialto:** las tarjetas del catálogo, de «Los más pedidos» y el recuadro de la foto en la ficha usan el verde del logo claro y semitransparente (`.tarjeta-producto`), sobre las fotos de fondo.
+
 Total al 28/10/2026: **129 pruebas, 564 verificaciones**, todas aprobadas.

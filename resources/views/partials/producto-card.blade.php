@@ -1,11 +1,11 @@
 {{--
-    Tarjeta del catálogo: panel blanco que se eleva al pasar el cursor. El círculo azul lleva la existencia,
+    Tarjeta del catálogo: panel en verde Rialto claro y semitransparente que se eleva al pasar el cursor. El círculo azul lleva la existencia,
     a la vista de un vistazo. Celular: horizontal (foto a la izquierda). Desde 640 px: vertical, en rejilla.
 --}}
 @php($agotado = $producto->estaAgotado())
-<article class="lobulo tarjeta-viva group grid h-full grid-cols-[7rem_1fr] gap-x-4 overflow-hidden p-3 sm:grid-cols-1 sm:gap-x-0 sm:p-0" id="producto-{{ $producto->id }}">
+<article class="tarjeta-producto tarjeta-viva group grid h-full grid-cols-[7rem_1fr] gap-x-4 overflow-hidden p-3 sm:grid-cols-1 sm:gap-x-0 sm:p-0" id="producto-{{ $producto->id }}">
     <a href="{{ route('catalogo.show', $producto) }}" tabindex="-1" aria-hidden="true"
-       class="relative row-span-2 block aspect-square self-start rounded-[6px] bg-agua sm:row-span-1 sm:rounded-none sm:aspect-[4/3]">
+       class="foto-producto relative row-span-2 block aspect-square self-start rounded-[6px] sm:row-span-1 sm:rounded-none sm:aspect-[4/3]">
         <img src="{{ $producto->urlImagen('mini') }}"
              @if($srcset = $producto->srcsetImagen()) srcset="{{ $srcset }}" sizes="(max-width: 639px) 112px, (max-width: 1023px) 45vw, 300px" @endif
              alt="" width="240" height="180" loading="lazy" decoding="async"

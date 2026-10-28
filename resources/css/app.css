@@ -178,6 +178,19 @@
     .tarjeta-viva { transition: transform 0.35s var(--ease-salida), box-shadow 0.35s var(--ease-salida), border-color 0.2s; }
     .tarjeta-viva:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -22px rgb(5 43 112 / 0.45); border-color: var(--color-tierra); }
 
+    /*
+     * Plantilla de producto: verde del logo, claro y semitransparente, sobre las fotos de fondo.
+     * La foto del producto va en un recuadro casi blanco para que se vea limpia.
+     */
+    .tarjeta-producto {
+        border-radius: var(--radius-lobulo);
+        border: 1px solid rgb(11 74 59 / 0.35);
+        background: linear-gradient(160deg, rgb(11 74 59 / 0.30), rgb(42 157 111 / 0.16)), rgb(255 255 255 / 0.55);
+        backdrop-filter: blur(6px);
+    }
+    .tarjeta-producto.tarjeta-viva:hover { border-color: var(--color-rialto); box-shadow: 0 18px 40px -22px rgb(11 74 59 / 0.55); }
+    .foto-producto { background: rgb(255 255 255 / 0.88); }
+
     /* ---- Estados ---- */
     .estado { @apply inline-flex items-center gap-1.5 rounded-[4px] px-2.5 py-1 text-[0.8125rem] font-bold uppercase tracking-[0.03em] leading-tight whitespace-nowrap; }
     .estado::before { content: ""; @apply size-2 rounded-full bg-current; }
