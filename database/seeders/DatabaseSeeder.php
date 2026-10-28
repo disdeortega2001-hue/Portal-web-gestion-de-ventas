@@ -75,9 +75,9 @@ class DatabaseSeeder extends Seeder
         $clave = 'Rialto7*2024';
 
         return [
-            Usuario::create(['nombre' => 'Dirección Rialto', 'correo' => 'directivo@rialto7.test', 'contrasena' => $clave, 'rol' => Usuario::ROL_DIRECTIVO]),
-            Usuario::create(['nombre' => 'Ana Campagna', 'correo' => 'administrativo@rialto7.test', 'contrasena' => $clave, 'rol' => Usuario::ROL_ADMINISTRATIVO]),
-            Usuario::create(['nombre' => 'Carlos Mendoza', 'correo' => 'vendedor@rialto7.test', 'contrasena' => $clave, 'rol' => 'vendedor']),
+            Usuario::create(['nombre' => 'Daysi Carpio', 'correo' => 'directivo@rialto7.test', 'contrasena' => $clave, 'rol' => Usuario::ROL_DIRECTIVO]),
+            Usuario::create(['nombre' => 'Luis Alberto Campagna', 'correo' => 'administrativo@rialto7.test', 'contrasena' => $clave, 'rol' => Usuario::ROL_ADMINISTRATIVO]),
+            Usuario::create(['nombre' => 'Disdeira Ortega', 'correo' => 'vendedor@rialto7.test', 'contrasena' => $clave, 'rol' => 'vendedor']),
             Usuario::create(['nombre' => 'Agropecuaria El Samán', 'correo' => 'cliente@rialto7.test', 'contrasena' => $clave, 'rol' => 'cliente']),
         ];
     }
