@@ -476,3 +476,31 @@ Los textos están en las listas `$hitos`, `$pilares` y `$cifras` al inicio de la
 - Pruebas: `tests/Feature/RespaldoTest.php` (5 casos: contenido del respaldo, restauración de datos y fotos, archivo inválido, acceso solo del administrador y rotación).
 
 **Producción.** `.env.produccion.example` trae la configuración lista para el hosting (`APP_DEBUG=false`, HTTPS, SMTP, sesión de un día).
+
+---
+
+## 14. Rediseño «La franja de fábrica» y portal completo (27/10/2026)
+
+**Diseño.** La interfaz pasó del «mapa-guía del llano» (costas onduladas y cápsulas) a **la librea de fábrica**, elegida por la usuaria entre varias propuestas: carrocería verde Rialto, una franja verde-blanco-amarillo como firma, botones y paneles rectos con el talón de franjas, números grandes en círculos blancos («ruedos») y la tipografía Barlow / Barlow Condensed autoalojada (`@fontsource`). El sistema completo está en `DESIGN.md` y `.impeccable/design.json`; los colores y componentes en `resources/css/app.css`.
+
+**Lo que se agregó para que sea un portal web completo:**
+
+| Parte | Qué hace | Archivos |
+|---|---|---|
+| Página de inicio (`/`) | Buscador por código, pizarra del día (tasa, existencias, IVA), equipo estrella, marcas exclusivas, categorías, más pedidos, pasos para cotizar. El catálogo pasó a `/catalogo` | `InicioController`, `inicio.blade.php` |
+| Contacto (`/contacto`) | WhatsApp, llamada, cómo llegar y un formulario que abre la consulta en WhatsApp (no guarda datos) | `contacto.blade.php`, `SitioController::contactoWhatsapp` |
+| Privacidad y términos | Redactados según lo que el portal hace de verdad (datos, cookies, precios, cotizaciones) | `legal/privacidad`, `legal/terminos` |
+| Páginas de error | 403, 404, 419, 429, 500 y 503 propias, sin depender de la base de datos | `resources/views/errors/` |
+| Buscadores y redes | Descripción, URL canónica, Open Graph, datos estructurados (Store y Product), `noindex` en páginas privadas, `sitemap.xml` y `robots.txt` dinámicos | `partials/meta.blade.php`, `SitioController` |
+| Instalable en el teléfono | `site.webmanifest`, íconos de 192 y 512 px, imagen para compartir | `public/` |
+
+**Funciones nuevas (propuesta aprobada tras el recorrido por los módulos):**
+- **Clientes** (personal): directorio con búsqueda por nombre, cédula o teléfono; ficha con historial, totales, WhatsApp, llamada, nueva venta y corrección de datos. `Gestion\ClienteController`.
+- **Venta de mostrador** con buscadores de cliente y producto y totales en vivo (mismo cálculo que `CalculadoraComercial`, en centavos; el servidor vuelve a calcular). Registrar un cliente nuevo vuelve a la venta con él elegido.
+- **Carga desde Excel en el panel**: plantilla descargable, subida del Excel y las fotos, revisión previa (con un error no se carga nada) y confirmación; «Reemplazar todo» crea antes un respaldo. `Admin\ImportacionController`.
+- **Búsqueda y WhatsApp** en cotizaciones y pedidos; **contadores** de lo pendiente en el menú del personal.
+- **Catálogo**: orden (disponibles, precio, nombre) y sugerencias mientras se escribe (`/catalogo/sugerencias`).
+- **Ficha**: copiar código y compartir por WhatsApp. **Mi cuenta**: «Repetir» cotización con los precios de hoy.
+- **Tablero**: accesos rápidos. **Reportes**: períodos de un toque (hoy, semana, mes, mes pasado, año).
+
+**Pruebas:** `tests/Feature/PortalCompletoTest.php` (12 casos). Total al 27/10/2026: **111 pruebas, 459 verificaciones**, todas aprobadas.

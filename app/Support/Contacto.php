@@ -50,6 +50,20 @@ class Contacto
         return $numero ? '0' . substr($numero, 2, 3) . '-' . substr($numero, 5) : null;
     }
 
+    /** Enlace para que el personal escriba a un cliente por WhatsApp (teléfono venezolano 0414-1234567). */
+    public static function whatsappA(?string $telefono, string $mensaje = ''): ?string
+    {
+        $digitos = preg_replace('/\D/', '', (string) $telefono);
+        if (str_starts_with($digitos, '0')) {
+            $digitos = '58' . substr($digitos, 1);
+        }
+        if (strlen($digitos) !== 12) {
+            return null;
+        }
+
+        return 'https://wa.me/' . $digitos . ($mensaje !== '' ? '?text=' . rawurlencode($mensaje) : '');
+    }
+
     /** Compartir un texto por WhatsApp eligiendo el chat (por ejemplo, enviárselo a uno mismo). */
     public static function compartir(string $mensaje): string
     {

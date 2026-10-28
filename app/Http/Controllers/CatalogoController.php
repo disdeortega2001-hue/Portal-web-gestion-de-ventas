@@ -16,6 +16,14 @@ class CatalogoController extends Controller
 {
     private const POR_PAGINA = 12;
 
+    /** Órdenes del catálogo: valor en la URL => texto del selector */
+    public const ORDENES = [
+        'disponibles' => 'Disponibles primero',
+        'precio_menor' => 'Precio: menor a mayor',
+        'precio_mayor' => 'Precio: mayor a menor',
+        'nombre' => 'Nombre (A–Z)',
+    ];
+
     public function index(Request $request): View
     {
         $filtros = $request->validate([
@@ -24,14 +32,23 @@ class CatalogoController extends Controller
             'marca' => ['nullable', 'string', 'max:80'],
             'modelo' => ['nullable', 'string', 'max:80'],
             'disponibles' => ['nullable', 'in:1'],
+            'orden' => ['nullable', 'in:' . implode(',', array_keys(self::ORDENES))],
         ]);
 
-        $productos = Producto::activos()
+        $consulta = Producto::activos()
             ->with('categoria:id,nombre')                 // Eager loading: evita N+1
             ->buscar($filtros['q'] ?? null)
-            ->filtrar($filtros)
-            ->orderByDesc('stock')                         // Primero lo disponible
-            ->orderBy('nombre')
+            ->filtrar($filtros);
+
+        // Orden elegido por el cliente; por defecto, primero lo disponible
+        match ($filtros['orden'] ?? 'disponibles') {
+            'precio_menor' => $consulta->orderBy('precio'),
+            'precio_mayor' => $consulta->orderByDesc('precio'),
+            'nombre' => $consulta->orderBy('nombre'),
+            default => $consulta->orderByRaw('stock = 0')->orderByDesc('stock'),
+        };
+
+        $productos = $consulta->orderBy('nombre')
             ->paginate(self::POR_PAGINA)
             ->withQueryString();
 
@@ -57,6 +74,31 @@ class CatalogoController extends Controller
             ->get();
 
         return view('catalogo.show', compact('producto', 'relacionados'));
+    }
+
+    /** Sugerencias mientras se escribe en el buscador: hasta 6 productos visibles por código, nombre o marca. */
+    public function sugerencias(Request $request): JsonResponse
+    {
+        $texto = trim((string) $request->query('q'));
+        if (mb_strlen($texto) < 2 || mb_strlen($texto) > 100) {
+            return response()->json([]);
+        }
+
+        $productos = Producto::activos()->buscar($texto)
+            ->orderByRaw('codigo_fabrica LIKE ? DESC', [str_replace(['%', '_'], ['\%', '\_'], $texto) . '%'])   // Primero los que empiezan con el código escrito
+            ->orderByDesc('stock')
+            ->limit(6)
+            ->get(['id', 'codigo_fabrica', 'nombre', 'marca', 'precio', 'stock', 'imagen', 'id_categoria']);
+
+        return response()->json($productos->map(fn (Producto $p) => [
+            'codigo' => $p->codigo_fabrica,
+            'nombre' => $p->nombre,
+            'marca' => $p->marca,
+            'precio' => 'USD ' . number_format((float) $p->precio, 2, ',', '.'),
+            'stock' => $p->stock,
+            'imagen' => $p->urlImagen('mini'),
+            'url' => route('catalogo.show', $p),
+        ]));
     }
 
     /** Stock en tiempo real para la ficha (la vista lo consulta cada 30 s). */

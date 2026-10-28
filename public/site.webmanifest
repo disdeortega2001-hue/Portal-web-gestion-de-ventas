@@ -1,0 +1,14 @@
+{
+  "name": "Inversiones Rialto 7",
+  "short_name": "Rialto 7",
+  "description": "Repuestos y maquinaria agrícola en Valle de la Pascua desde 1963.",
+  "lang": "es-VE",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b4a3b",
+  "theme_color": "#0b4a3b",
+  "icons": [
+    { "src": "/img/icono-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/img/icono-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

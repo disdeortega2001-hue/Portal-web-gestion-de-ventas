@@ -1,9 +1,9 @@
 {{-- Resumen de totales. Recibe $r con subtotal, descuento, impuesto, total, total_bs, tasa_cambio, porcentaje_iva --}}
-<div class="lobulo-tierra p-5 sm:p-6">
+<div class="lobulo-tierra panel-tapa p-5 pt-7 sm:p-6 sm:pt-8">
     <dl class="space-y-2 text-white/85 cifra">
         <div class="flex justify-between gap-4"><dt>Subtotal</dt><dd>@usd($r['subtotal'])</dd></div>
         @if((float) $r['descuento'] > 0)
-            <div class="flex justify-between gap-4 text-sabana"><dt>Descuento por volumen</dt><dd>− @usd($r['descuento'])</dd></div>
+            <div class="flex justify-between gap-4 text-sol"><dt>Descuento por volumen</dt><dd>− @usd($r['descuento'])</dd></div>
         @endif
         <div class="flex justify-between gap-4"><dt>IVA ({{ rtrim(rtrim(number_format((float) $r['porcentaje_iva'], 2, ',', ''), '0'), ',') }}%)</dt><dd>@usd($r['impuesto'])</dd></div>
     </dl>

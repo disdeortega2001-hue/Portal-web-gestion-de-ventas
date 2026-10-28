@@ -7,6 +7,8 @@
     },
     "devDependencies": {
         "@fontsource-variable/hanken-grotesk": "^5.2.5",
+        "@fontsource/barlow": "^5.2.5",
+        "@fontsource/barlow-condensed": "^5.2.5",
         "@tailwindcss/vite": "^4.1.11",
         "alpinejs": "^3.14.9",
         "chart.js": "^4.6.1",

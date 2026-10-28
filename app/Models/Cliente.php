@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,6 +25,25 @@ class Cliente extends Model
     public function tieneHistorial(): bool
     {
         return $this->cotizaciones()->exists() || $this->pedidos()->exists();
+    }
+
+    /** Búsqueda del personal por nombre, cédula/RIF (con o sin letra y guion) o teléfono. */
+    public function scopeBuscar(Builder $consulta, ?string $texto): Builder
+    {
+        $texto = trim((string) $texto);
+        if ($texto === '') {
+            return $consulta;
+        }
+        $digitos = preg_replace('/\D/', '', $texto);
+
+        return $consulta->where(function ($q) use ($texto, $digitos) {
+            $q->where('nombre', 'like', '%' . $texto . '%')
+              ->orWhere('identificacion', 'like', '%' . strtoupper($texto) . '%');
+            if (strlen($digitos) >= 4) {
+                $q->orWhere('identificacion', 'like', '%' . $digitos . '%')
+                  ->orWhereRaw("REPLACE(telefono, '-', '') LIKE ?", ['%' . $digitos . '%']);
+            }
+        });
     }
 
     /** Normaliza la cédula/RIF: mayúsculas y con guion tras la letra (V-12345678). */

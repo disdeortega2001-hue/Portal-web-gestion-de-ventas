@@ -4,9 +4,27 @@
 @section('contenido')
 <x-encabezado titulo="Reportes">Lo que ves en pantalla es exactamente lo que se exporta a PDF y Excel.</x-encabezado>
 
-@php($tipo = request('tipo', 'ventas'))
-<form method="GET" action="{{ route('gestion.reportes.index') }}" class="rounded-lobulo bg-agua-honda p-5 needs-validation lg:p-6" novalidate id="form-reporte"
-      x-data="{ tipo: '{{ $tipo }}' }">
+@php
+    $tipo = request('tipo', 'ventas');
+    // Períodos de un toque: llenan «Desde» y «Hasta»; el reporte se genera con «Ver en pantalla»
+    $hoy = now();
+    $periodos = [
+        'Hoy' => [$hoy->toDateString(), $hoy->toDateString()],
+        'Esta semana' => [$hoy->copy()->startOfWeek()->toDateString(), $hoy->toDateString()],
+        'Este mes' => [$hoy->copy()->startOfMonth()->toDateString(), $hoy->toDateString()],
+        'Mes pasado' => [$hoy->copy()->subMonthNoOverflow()->startOfMonth()->toDateString(), $hoy->copy()->subMonthNoOverflow()->endOfMonth()->toDateString()],
+        'Este año' => [$hoy->copy()->startOfYear()->toDateString(), $hoy->toDateString()],
+    ];
+@endphp
+<form method="GET" action="{{ route('gestion.reportes.index') }}" class="lobulo panel-tapa p-5 pt-7 needs-validation lg:p-6 lg:pt-8" novalidate id="form-reporte"
+      x-data="{ tipo: '{{ $tipo }}', periodo(d, h) { $refs.desde.value = d; $refs.hasta.min = d; $refs.hasta.value = h; } }">
+    <div class="mb-4 flex flex-wrap items-center gap-2">
+        <span class="mr-1 text-sm font-semibold text-tinta-suave">Período:</span>
+        @foreach($periodos as $texto => [$d, $h])
+            <button type="button" class="capsula !min-h-9 !pr-3.5 !text-[0.9375rem]" @click="periodo('{{ $d }}', '{{ $h }}')"
+                    @if(request('desde') === $d && request('hasta') === $h) aria-current="true" @endif>{{ $texto }}</button>
+        @endforeach
+    </div>
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <div>
             <label for="tipo" class="etiqueta">Reporte *</label>

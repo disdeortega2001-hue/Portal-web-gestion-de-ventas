@@ -2,17 +2,26 @@
 @section('titulo', 'Mi cotización')
 
 @section('cabecera')
-    <h1 class="titular text-4xl sm:text-5xl">Mi cotización</h1>
-    <p class="mt-2 text-white/80">Revisa las cantidades y envíala: un vendedor confirma la existencia y te llama.</p>
+    <h1 class="titular text-5xl sm:text-6xl">Mi cotización</h1>
+    {{-- Los tres pasos, con el actual marcado: elegir ya pasó; aquí se revisa y se envía --}}
+    <ol class="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2" aria-label="Pasos de la cotización">
+        @foreach(['Elegir', 'Revisar', 'Enviar'] as $i => $paso)
+            <li class="flex items-center gap-2 {{ $i === 0 ? 'text-white/70' : 'text-white' }}" @if($i === 1) aria-current="step" @endif>
+                <span @class(['ruedo size-8 text-sm', '!border-sol !bg-sol' => $i === 1])>@if($i === 0)<x-icono nombre="check" class="size-4" />@else{{ $i + 1 }}@endif</span>
+                <span class="font-rotulo text-lg font-bold uppercase tracking-wide">{{ $paso }}</span>
+                @unless($loop->last)<span class="h-0.5 w-6 bg-white/40 sm:w-10" aria-hidden="true"></span>@endunless
+            </li>
+        @endforeach
+    </ol>
+    <p class="mt-4 text-white/80">Revisa las cantidades y envíala: un vendedor confirma la existencia y te escribe.</p>
 @endsection
 
 @section('contenido')
 @if($lineas->isEmpty())
-    <div class="relative overflow-hidden rounded-lobulo bg-agua-honda px-6 py-12 sm:px-12">
-        <svg class="absolute -bottom-12 -right-8 size-64 text-sabana/40" viewBox="0 0 200 200" aria-hidden="true"><path fill="currentColor" d="M44 30C70 4 120 10 150 30s46 70 26 104-70 60-110 44S-4 116 6 80s12-34 38-50Z"/></svg>
-        <h2 class="titular relative text-3xl">Tu cotización está vacía</h2>
-        <p class="relative mt-3 max-w-lg text-tinta-suave">Busca el repuesto por su código o por el modelo de tu maquinaria y tócalo en «Agregar».</p>
-        <a href="{{ route('catalogo.index') }}" class="btn btn-tierra relative mt-6">Ir al catálogo <span class="chip"><x-icono nombre="flecha" class="size-4" /></span></a>
+    <div class="lobulo panel-tapa px-6 py-12 sm:px-12">
+        <h2 class="titular text-4xl">Tu cotización está vacía</h2>
+        <p class="mt-3 max-w-lg text-tinta-suave">Busca el repuesto por su código o por el modelo de tu maquinaria y tócalo en «Agregar».</p>
+        <a href="{{ route('catalogo.index') }}" class="btn btn-tierra mt-6">Ir al catálogo <span class="chip"><x-icono nombre="flecha" class="size-4" /></span></a>
     </div>
 @else
 <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-10">
@@ -23,25 +32,25 @@
                 <li class="p-4 sm:p-5" id="linea-{{ $producto->id }}">
                     <div class="flex justify-between gap-4">
                         <div class="min-w-0">
-                            <span class="codigo">{{ $producto->codigo_fabrica }}</span>
-                            <div class="mt-0.5 text-[1.0625rem] font-bold">{{ $producto->nombre }}</div>
+                            <span class="font-rotulo text-xl font-extrabold uppercase text-tierra cifra">{{ $producto->codigo_fabrica }}</span>
+                            <div class="mt-0.5 text-[1.0625rem] font-semibold">{{ $producto->nombre }}</div>
                             <div class="apoyo text-sm cifra">@usd($linea['precio_unitario']) c/u · hay {{ $producto->stock }}</div>
                         </div>
-                        <div class="text-lg font-extrabold whitespace-nowrap cifra">@usd($linea['subtotal'])</div>
+                        <div class="font-rotulo text-2xl font-extrabold whitespace-nowrap cifra">@usd($linea['subtotal'])</div>
                     </div>
                     <div class="mt-3 flex items-center justify-between gap-3">
                         {{-- Cantidad: − / + de un toque, o se escribe el número (útil para 40 discos) --}}
-                        <form method="POST" action="{{ route('carrito.actualizar', $producto) }}" class="flex h-12 items-center rounded-full border-[1.5px] border-linea bg-white p-1" data-cantidad>
+                        <form method="POST" action="{{ route('carrito.actualizar', $producto) }}" class="flex h-12 items-stretch border-[1.5px] border-tinta bg-white" data-cantidad>
                             @csrf @method('PATCH')
                             {{-- Botón por defecto (Enter) sin ajuste: así Enter no resta una unidad --}}
                             <button type="submit" class="sr-only" tabindex="-1" aria-hidden="true">Actualizar</button>
-                            <button type="submit" name="ajuste" value="-1" class="grid size-10 place-items-center rounded-full hover:bg-agua" aria-label="{{ $linea['cantidad'] === 1 ? 'Quitar' : 'Una unidad menos de' }} {{ $producto->nombre }}">
+                            <button type="submit" name="ajuste" value="-1" class="grid w-11 place-items-center hover:bg-agua" aria-label="{{ $linea['cantidad'] === 1 ? 'Quitar' : 'Una unidad menos de' }} {{ $producto->nombre }}">
                                 <x-icono :nombre="$linea['cantidad'] === 1 ? 'papelera' : 'menos'" />
                             </button>
                             <label class="sr-only" for="cant-{{ $producto->id }}">Cantidad de {{ $producto->nombre }}</label>
                             <input type="number" id="cant-{{ $producto->id }}" name="cantidad" value="{{ $linea['cantidad'] }}" min="1" max="{{ $producto->stock }}" inputmode="numeric"
-                                   class="w-14 border-0 bg-transparent text-center text-lg font-bold cifra focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
-                            <button type="submit" name="ajuste" value="1" class="grid size-10 place-items-center rounded-full hover:bg-agua disabled:opacity-40" aria-label="Una unidad más de {{ $producto->nombre }}" @disabled($linea['cantidad'] >= $producto->stock)>
+                                   class="w-14 border-x border-linea bg-transparent text-center font-rotulo text-xl font-extrabold cifra focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
+                            <button type="submit" name="ajuste" value="1" class="grid w-11 place-items-center hover:bg-agua disabled:opacity-40" aria-label="Una unidad más de {{ $producto->nombre }}" @disabled($linea['cantidad'] >= $producto->stock)>
                                 <x-icono nombre="mas" />
                             </button>
                         </form>
@@ -77,7 +86,7 @@
         <form method="POST" action="{{ route('cotizaciones.store') }}" class="needs-validation space-y-5" novalidate>
             @csrf
             @if($cliente)
-                <div class="lobulo p-4">
+                <div class="lobulo panel-tapa p-4 pt-6">
                     <div class="font-bold">{{ $cliente->nombre }}</div>
                     <div class="apoyo text-sm">{{ $cliente->identificacion }} · {{ $cliente->telefono }}</div>
                 </div>

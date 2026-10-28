@@ -4,5 +4,5 @@
 --}}
 @props(['tamano' => 'size-14'])
 @if($archivoLogo = \App\Support\Logo::ruta())
-    <img src="{{ asset($archivoLogo) }}" alt="Inversiones Rialto 7 C.A." {{ $attributes->merge(['class' => $tamano . ' shrink-0 rounded-xl object-contain']) }} width="112" height="112">
+    <img src="{{ asset($archivoLogo) }}" alt="Inversiones Rialto 7 C.A." {{ $attributes->merge(['class' => $tamano . ' shrink-0 object-contain']) }} width="112" height="112">
 @endif

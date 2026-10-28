@@ -16,7 +16,7 @@
             <p class="apoyo mt-2 text-sm">{{ $cliente->direccion }}</p>
             <p class="apoyo text-sm cifra">{{ $cliente->cotizaciones_count }} cotizaciones · {{ $cliente->pedidos_count }} pedidos</p>
         </div>
-        <div class="rounded-2xl bg-agua p-4">
+        <div class="rounded-[3px] bg-agua p-4">
             <p class="apoyo text-sm">Cuenta que pide asociarse</p>
             <p class="font-bold">{{ $cliente->solicitante?->nombre }}</p>
             <p class="text-sm">{{ $cliente->solicitante?->correo }} · <span class="cifra">{{ $cliente->solicitud_vinculacion_en?->format('d/m/Y h:i a') }}</span></p>

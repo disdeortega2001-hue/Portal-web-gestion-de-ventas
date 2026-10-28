@@ -6,6 +6,7 @@ use App\Exceptions\StockInsuficienteException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PedidoRequest;
 use App\Models\Cliente;
+use App\Models\Configuracion;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Services\PedidoService;
@@ -27,22 +28,39 @@ class PedidoController extends Controller
     public function index(Request $request): View
     {
         $estado = $request->query('estado', 'todos');
+        $busqueda = trim((string) $request->query('q'));
 
-        $pedidos = Pedido::with(['cliente:id,identificacion,nombre', 'vendedor:id,nombre'])
+        $pedidos = Pedido::with(['cliente:id,identificacion,nombre,telefono', 'vendedor:id,nombre'])
             ->when($estado !== 'todos', fn ($q) => $q->where('estado', $estado))
+            // Por código del pedido (PED-000012 o solo 12) o por el cliente (nombre, cédula, teléfono)
+            ->when($busqueda !== '', fn ($q) => $q->where(fn ($w) => $w
+                ->where('codigo', 'like', '%' . strtoupper($busqueda) . '%')
+                ->orWhereHas('cliente', fn ($c) => $c->buscar($busqueda))))
             ->latest('fecha')
             ->paginate(15)
             ->withQueryString();
 
-        return view('gestion.pedidos.index', compact('pedidos', 'estado'));
+        return view('gestion.pedidos.index', compact('pedidos', 'estado', 'busqueda'));
     }
 
-    public function create(): View
+    /**
+     * Venta de mostrador: el cliente se busca por nombre, cédula o teléfono y los productos por código;
+     * la vista muestra los totales en vivo, y el servidor los vuelve a calcular al guardar.
+     */
+    public function create(Request $request): View
     {
+        $idCliente = old('id_cliente', $request->query('cliente'));
+
         return view('gestion.pedidos.create', [
-            'clientes' => Cliente::orderBy('nombre')->get(['id', 'identificacion', 'nombre']),
+            'clienteElegido' => $idCliente ? Cliente::find($idCliente, ['id', 'identificacion', 'nombre', 'telefono']) : null,
             'productos' => Producto::activos()->where('stock', '>', 0)->orderBy('nombre')
-                ->get(['id', 'codigo_fabrica', 'nombre', 'precio', 'stock']),
+                ->get(['id', 'codigo_fabrica', 'nombre', 'marca', 'precio', 'stock']),
+            'parametros' => [
+                'tasa' => (float) Configuracion::valor('tasa_cambio', 0),
+                'iva' => (float) Configuracion::valor('porcentaje_iva', 16),
+                'descuento' => (float) Configuracion::valor('descuento_porcentaje', 0),
+                'minimo' => (float) Configuracion::valor('descuento_monto_minimo', 0),
+            ],
         ]);
     }
 

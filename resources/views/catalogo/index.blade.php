@@ -1,8 +1,10 @@
 @extends('layouts.app')
 @section('titulo', 'Catálogo')
+@section('descripcion', 'Catálogo de repuestos y maquinaria agrícola con existencia real y precios en USD y Bs.: cuchillas, discos, cardanes, repuestos de abonadoras y más.')
+@if(request()->except('page'))@section('canonica', route('catalogo.index'))@endif
 
 @php
-    // Filtros que viven en el panel (la categoría y la búsqueda tienen su propio control)
+    // Filtros que viven en el panel (la categoría, la búsqueda y el orden tienen su propio control)
     $filtrosPanel = array_filter([
         'marca' => $filtros['marca'] ?? null,
         'modelo' => $filtros['modelo'] ?? null,
@@ -17,31 +19,46 @@
 @endphp
 
 @section('cabecera')
-    <h1 class="titular max-w-3xl text-[2.25rem] sm:text-5xl lg:text-[4rem]">Repuestos con existencia real</h1>
-    <p class="mt-3 max-w-2xl text-white/80 sm:text-lg">Precio en USD y en bolívares a la tasa del día, sin salir de tu finca.</p>
+    <h1 class="titular max-w-3xl text-5xl sm:text-6xl lg:text-7xl">Catálogo de repuestos</h1>
+    <p class="mt-3 max-w-2xl text-lg text-white/80">Existencia real y precio en USD y bolívares a la tasa del día.</p>
 
-    {{-- Búsqueda: siempre visible. Los campos del panel se asocian a este formulario con form="filtros". --}}
-    <form id="filtros" method="GET" action="{{ route('catalogo.index') }}" role="search" class="mt-6 flex max-w-3xl gap-2 lg:mt-8">
+    {{-- Búsqueda con sugerencias en vivo. Los campos del panel se asocian a este formulario con form="filtros". --}}
+    <form id="filtros" method="GET" action="{{ route('catalogo.index') }}" role="search" class="relative mt-7 flex max-w-3xl gap-2"
+          x-data="sugerencias(@js(route('catalogo.sugerencias')))" @click.outside="abierto = false" @keydown.escape="abierto = false">
         @if($categoriaActual)<input type="hidden" name="categoria" value="{{ $categoriaActual->id }}">@endif
+        @if(filled($filtros['orden'] ?? null))<input type="hidden" name="orden" value="{{ $filtros['orden'] }}">@endif
         <label for="q" class="sr-only">Buscar por código, nombre o modelo</label>
         <div class="relative flex-1">
-            <x-icono nombre="buscar" class="pointer-events-none absolute left-5 top-1/2 size-5 -translate-y-1/2 text-tinta-suave" />
+            <x-icono nombre="buscar" class="pointer-events-none absolute left-4 top-1/2 z-10 size-5 -translate-y-1/2 text-tinta-suave" />
             <input type="search" id="q" name="q" value="{{ $filtros['q'] ?? '' }}" placeholder="Código de fábrica, pieza o modelo" maxlength="100" enterkeyhint="search" autocomplete="off"
-                   class="h-14 w-full rounded-full border-0 bg-white pl-13 pr-4 text-base text-tinta placeholder:text-tinta-suave focus:outline-none focus:ring-4 focus:ring-sol/70 lg:h-16 lg:text-lg">
+                   role="combobox" aria-autocomplete="list" aria-controls="lista-sugerencias" :aria-expanded="abierto"
+                   x-model="q" @input.debounce.250ms="buscar()" @focus="abierto = items.length > 0"
+                   @keydown.arrow-down.prevent="mover(1)" @keydown.arrow-up.prevent="mover(-1)" @keydown.enter="if (activo >= 0) { $event.preventDefault(); window.location = items[activo].url }"
+                   class="campo !min-h-14 !pl-12 !text-lg lg:!min-h-16">
+            <ul id="lista-sugerencias" role="listbox" x-show="abierto" x-cloak class="absolute inset-x-0 top-full z-30 mt-1 border border-linea bg-white text-tinta">
+                <template x-for="(s, i) in items" :key="s.url">
+                    <li role="option" :aria-selected="i === activo">
+                        <a :href="s.url" class="grid grid-cols-[3rem_1fr_auto] items-center gap-3 px-3 py-2.5 no-underline hover:bg-agua" :class="i === activo && 'bg-agua'">
+                            <img :src="s.imagen" alt="" class="size-12 bg-agua object-contain mix-blend-multiply">
+                            <span class="min-w-0"><span class="block font-rotulo text-lg font-extrabold uppercase leading-tight text-tierra" x-text="s.codigo"></span><span class="block truncate text-sm" x-text="s.nombre"></span></span>
+                            <span class="text-right text-sm cifra"><span class="block font-bold" x-text="s.precio"></span><span class="block" :class="s.stock > 0 ? 'text-tierra' : 'text-coral-tinta'" x-text="s.stock > 0 ? 'Hay ' + s.stock : 'Agotado'"></span></span>
+                        </a>
+                    </li>
+                </template>
+            </ul>
         </div>
-        <button class="btn btn-sol !min-h-14 !px-4 sm:!px-5 lg:!min-h-16 lg:!px-7" type="submit">
+        <button class="btn btn-sol !min-h-14 !px-4 sm:!px-6 lg:!min-h-16" type="submit">
             <x-icono nombre="buscar" class="size-6 sm:hidden" /><span class="sr-only sm:not-sr-only">Buscar</span>
-            <span class="chip hidden sm:grid lg:!-mr-4"><x-icono nombre="flecha" class="size-4" /></span>
         </button>
     </form>
 
-    <p class="mt-5 flex max-w-3xl flex-wrap items-center gap-x-2 gap-y-1 text-sm text-white/80 lg:mt-6">
+    <p class="mt-5 flex max-w-3xl flex-wrap items-center gap-x-2 gap-y-1 text-[0.9375rem] text-white/80">
         <x-icono nombre="check-circulo" class="size-4 text-sol" />
         <span>Agente autorizado exclusivo en Venezuela:</span>
         @foreach(['Marchesan Tatu', 'Colombo Aemco', 'Vicon', 'Lumagi'] as $marca)
             <a href="{{ route('catalogo.index', ['marca' => $marca]) }}" class="font-bold text-white hover:text-sol">{{ $marca }}</a>@unless($loop->last)<span aria-hidden="true">·</span>@endunless
         @endforeach
-        <a href="{{ route('nosotros') }}" class="ml-1 font-semibold text-sol underline decoration-2 underline-offset-4">Conócenos</a>
+        <a href="{{ route('nosotros') }}" class="ml-1 font-semibold text-sol underline">Conócenos</a>
     </p>
 @endsection
 
@@ -49,13 +66,10 @@
 {{-- lg: en escritorio el panel es una barra lateral siempre visible; en el celular es una hoja que se abre --}}
 <div x-data="{ panel: false, lg: window.matchMedia('(min-width: 1024px)').matches }"
      x-init="window.matchMedia('(min-width: 1024px)').addEventListener('change', e => lg = e.matches)"
-     @keydown.escape.window="panel = false" class="relative">
+     @keydown.escape.window="panel = false">
 
-    {{-- Lóbulo de sabana que se sale por el borde derecho, detrás de las categorías --}}
-    <svg class="pointer-events-none absolute -right-40 -top-24 -z-10 w-[34rem] text-sabana/30 sm:-right-28 lg:-right-20" viewBox="0 0 400 260" aria-hidden="true"><path fill="currentColor" d="M58 64C96 14 170 0 236 18c58 16 86 -4 128 26 40 28 40 84 14 118-24 32-4 70-48 88-50 20-104-12-160 0C114 262 40 244 14 196-10 152 26 104 58 64Z"/></svg>
-
-    {{-- Categorías: un toque, sin escribir. El chip de conteo cruza al frente en la categoría activa. --}}
-    <nav class="-mx-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 lg:pr-56" aria-label="Categorías">
+    {{-- Categorías: placas rectas con su conteo --}}
+    <nav class="-mx-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0" aria-label="Categorías">
         <ul class="flex gap-2 lg:flex-wrap">
             <li><a href="{{ $urlSin(['categoria']) }}" class="capsula" @if(! $categoriaActual) aria-current="page" @endif>Todas <span class="conteo">{{ $categorias->sum('productos_count') }}</span></a></li>
             @foreach($categorias as $categoria)
@@ -68,12 +82,13 @@
         {{-- Panel "Ajustar búsqueda": hoja inferior en el celular, barra lateral desde escritorio --}}
         <div x-show="panel" x-cloak x-transition.opacity class="fixed inset-0 z-40 bg-tinta/50 lg:hidden" @click="panel = false"></div>
         <aside id="panel-filtros" aria-labelledby="titulo-filtros" :inert="!panel && !lg"
-               class="fixed inset-x-0 bottom-0 z-50 max-h-[85dvh] translate-y-full overflow-y-auto rounded-t-[1.75rem] bg-agua p-6 transition-transform duration-400 ease-[var(--ease-salida)] lg:static lg:z-auto lg:max-h-none lg:translate-y-0 lg:overflow-visible lg:rounded-none lg:bg-transparent lg:p-0"
+               class="fixed inset-x-0 bottom-0 z-50 max-h-[85dvh] translate-y-full overflow-y-auto bg-white p-6 transition-transform duration-300 ease-[var(--ease-salida)] lg:static lg:z-auto lg:max-h-none lg:translate-y-0 lg:overflow-visible lg:bg-transparent lg:p-0"
                :class="panel && '!translate-y-0'">
-            <div class="lg:sticky lg:top-6 space-y-5">
+            <div class="franja franja-fina absolute inset-x-0 top-0 lg:hidden" aria-hidden="true"></div>
+            <div class="space-y-5 lg:sticky lg:top-28">
                 <div class="flex items-center justify-between">
                     <h2 id="titulo-filtros" class="seccion-titulo">Ajustar búsqueda</h2>
-                    <button type="button" class="grid size-11 place-items-center rounded-full hover:bg-agua-honda lg:hidden" @click="panel = false" aria-label="Cerrar"><x-icono nombre="x" /></button>
+                    <button type="button" class="grid size-11 place-items-center hover:bg-agua lg:hidden" @click="panel = false" aria-label="Cerrar"><x-icono nombre="x" /></button>
                 </div>
                 <div>
                     <label for="marca" class="etiqueta">Fabricante</label>
@@ -100,14 +115,26 @@
         </aside>
 
         <section aria-labelledby="resultados" class="min-w-0">
-            <div class="flex flex-wrap items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3 border-b-2 border-tinta pb-3">
                 <p id="resultados" aria-live="polite" class="text-lg">
-                    <strong class="cifra">{{ $productos->total() }}</strong> {{ $productos->total() === 1 ? 'producto' : 'productos' }}@if($categoriaActual) en <strong>{{ $categoriaActual->nombre }}</strong>@endif
+                    <strong class="font-rotulo text-2xl cifra">{{ $productos->total() }}</strong> {{ $productos->total() === 1 ? 'producto' : 'productos' }}@if($categoriaActual) en <strong>{{ $categoriaActual->nombre }}</strong>@endif
                 </p>
-                {{-- "Ajustar", no "Filtros": la empresa tiene una categoría llamada Filtros justo arriba --}}
-                <button type="button" class="btn btn-linea btn-mini ml-auto lg:hidden" @click="panel = true" aria-controls="panel-filtros" :aria-expanded="panel">
+                <form method="GET" action="{{ route('catalogo.index') }}" class="ml-auto flex items-center gap-2">
+                    @foreach(\Illuminate\Support\Arr::except(request()->query(), ['orden', 'page']) as $nombre => $valor)
+                        @if(is_string($valor))<input type="hidden" name="{{ $nombre }}" value="{{ $valor }}">@endif
+                    @endforeach
+                    <label for="orden" class="hidden text-sm font-semibold text-tinta-suave sm:block">Ordenar</label>
+                    <select id="orden" name="orden" class="campo !min-h-11 !w-auto !py-0 !text-[0.9375rem]" onchange="this.form.submit()">
+                        @foreach(\App\Http\Controllers\CatalogoController::ORDENES as $valor => $texto)
+                            <option value="{{ $valor }}" @selected(($filtros['orden'] ?? 'disponibles') === $valor)>{{ $texto }}</option>
+                        @endforeach
+                    </select>
+                    <noscript><button class="btn btn-linea btn-mini">Aplicar</button></noscript>
+                </form>
+                {{-- "Ajustar", no "Filtros": la empresa tiene una categoría llamada Filtros --}}
+                <button type="button" class="btn btn-linea btn-mini lg:hidden" @click="panel = true" aria-controls="panel-filtros" :aria-expanded="panel">
                     <x-icono nombre="deslizadores" class="size-4" /> Ajustar
-                    @if(count($filtrosPanel))<span class="grid size-6 place-items-center rounded-full bg-tierra text-xs text-white">{{ count($filtrosPanel) }}<span class="sr-only"> {{ count($filtrosPanel) === 1 ? 'ajuste activo' : 'ajustes activos' }}</span></span>@endif
+                    @if(count($filtrosPanel))<span class="ruedo size-6 !border-2 text-xs">{{ count($filtrosPanel) }}<span class="sr-only"> {{ count($filtrosPanel) === 1 ? 'ajuste activo' : 'ajustes activos' }}</span></span>@endif
                 </button>
             </div>
 
@@ -124,11 +151,10 @@
             @endif
 
             @if($productos->isEmpty())
-                <div class="relative mt-6 overflow-hidden rounded-lobulo bg-agua-honda px-6 py-10 sm:px-10">
-                    <svg class="absolute -right-10 -top-10 size-48 text-laguna/25" viewBox="0 0 200 200" aria-hidden="true"><path fill="currentColor" d="M44 30C70 4 120 10 150 30s46 70 26 104-70 60-110 44S-4 116 6 80s12-34 38-50Z"/></svg>
-                    <h2 class="titular relative text-3xl">No encontramos ese repuesto</h2>
-                    <p class="relative mt-3 max-w-xl text-tinta-suave">Revisa el código o prueba con el modelo de tu maquinaria. También puede que lo tengamos y aún no esté publicado.</p>
-                    <div class="relative mt-6 flex flex-wrap gap-2">
+                <div class="lobulo panel-tapa mt-6 px-6 py-10 sm:px-10">
+                    <h2 class="titular text-4xl">No encontramos ese repuesto</h2>
+                    <p class="mt-3 max-w-xl text-tinta-suave">Revisa el código o prueba con el modelo de tu maquinaria. También puede que lo tengamos y aún no esté publicado.</p>
+                    <div class="mt-6 flex flex-wrap gap-2">
                         <a href="{{ route('catalogo.index') }}" class="btn btn-linea">Ver todo el catálogo</a>
                         @if($wa = \App\Support\Contacto::whatsapp('Hola, busco el repuesto: ' . ($filtros['q'] ?? '')))
                             <a href="{{ $wa }}" class="btn btn-sol" target="_blank" rel="noopener"><x-icono nombre="whatsapp" /> Preguntar por WhatsApp</a>
@@ -136,7 +162,7 @@
                     </div>
                 </div>
             @else
-                <ul class="mt-5 grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3" role="list">
+                <ul class="mt-6 grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3" role="list">
                     @foreach($productos as $producto)
                         <li>@include('partials.producto-card', ['producto' => $producto])</li>
                     @endforeach
@@ -147,3 +173,30 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Sugerencias del buscador: consulta al escribir 2 letras o más; Enter sin elegir busca normal
+    function sugerencias(url) {
+        return {
+            q: document.getElementById('q')?.value ?? '', items: [], abierto: false, activo: -1, control: null,
+            async buscar() {
+                this.activo = -1;
+                if (this.q.trim().length < 2) { this.items = []; this.abierto = false; return; }
+                this.control?.abort();
+                this.control = new AbortController();
+                try {
+                    const r = await fetch(url + '?q=' + encodeURIComponent(this.q.trim()), { headers: { Accept: 'application/json' }, signal: this.control.signal });
+                    this.items = r.ok ? await r.json() : [];
+                    this.abierto = this.items.length > 0;
+                } catch (e) { /* búsqueda anterior cancelada o sin señal: se ignora */ }
+            },
+            mover(paso) {
+                if (!this.items.length) return;
+                this.abierto = true;
+                this.activo = (this.activo + paso + this.items.length) % this.items.length;
+            },
+        };
+    }
+</script>
+@endpush

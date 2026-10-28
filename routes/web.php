@@ -9,7 +9,9 @@ use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\CuentaController;
 use App\Http\Controllers\Gestion;
+use App\Http\Controllers\InicioController;
 use App\Http\Controllers\NosotrosController;
+use App\Http\Controllers\SitioController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,9 +27,17 @@ use Illuminate\Support\Facades\Route;
 */
 
 // 1. PÚBLICAS ---------------------------------------------------------------
-Route::get('/', [CatalogoController::class, 'index'])->name('catalogo.index');
+Route::get('/', InicioController::class)->name('inicio');
+Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo.index');
+Route::get('/catalogo/sugerencias', [CatalogoController::class, 'sugerencias'])->middleware('throttle:90,1')->name('catalogo.sugerencias');
 Route::get('/productos/{producto}', [CatalogoController::class, 'show'])->name('catalogo.show');
 Route::get('/nosotros', NosotrosController::class)->name('nosotros');
+Route::view('/contacto', 'contacto')->name('contacto');
+Route::get('/contacto/whatsapp', [SitioController::class, 'contactoWhatsapp'])->middleware('throttle:20,1')->name('contacto.whatsapp');
+Route::view('/privacidad', 'legal.privacidad')->name('legal.privacidad');
+Route::view('/terminos', 'legal.terminos')->name('legal.terminos');
+Route::get('/sitemap.xml', [SitioController::class, 'sitemap'])->name('sitemap');
+Route::get('/robots.txt', [SitioController::class, 'robots'])->name('robots');
 Route::get('/productos/{producto}/stock', [CatalogoController::class, 'stock'])
     ->middleware('throttle:60,1')->name('catalogo.stock');
 
@@ -67,6 +77,7 @@ Route::post('/salir', [LoginController::class, 'destroy'])->middleware('auth')->
 // 3. CLIENTE ----------------------------------------------------------------
 Route::middleware(['auth', 'rol:cliente'])->prefix('mi-cuenta')->name('cuenta.')->group(function () {
     Route::get('/cotizaciones', [CuentaController::class, 'cotizaciones'])->name('cotizaciones');
+    Route::post('/cotizaciones/{cotizacion}/repetir', [CuentaController::class, 'repetir'])->middleware('throttle:20,1')->name('cotizaciones.repetir');
     Route::get('/pedidos', [CuentaController::class, 'pedidos'])->name('pedidos');
 });
 
@@ -87,6 +98,9 @@ Route::middleware(['auth', 'rol:vendedor,administrador'])->prefix('gestion')->na
     Route::post('/pedidos/{pedido}/confirmar', [Gestion\PedidoController::class, 'confirmar'])->name('pedidos.confirmar');
     Route::post('/pedidos/{pedido}/anular', [Gestion\PedidoController::class, 'anular'])->name('pedidos.anular');
 
+    Route::get('/clientes/buscar', [Gestion\ClienteController::class, 'buscar'])->middleware('throttle:120,1')->name('clientes.buscar');
+    Route::resource('clientes', Gestion\ClienteController::class)->except('destroy');
+
     Route::get('/verificaciones', [Gestion\VerificacionController::class, 'index'])->name('verificaciones.index');
     Route::post('/verificaciones/{cliente}/aprobar', [Gestion\VerificacionController::class, 'aprobar'])->name('verificaciones.aprobar');
     Route::post('/verificaciones/{cliente}/rechazar', [Gestion\VerificacionController::class, 'rechazar'])->name('verificaciones.rechazar');
@@ -105,6 +119,10 @@ Route::middleware(['auth', 'rol:administrador'])->prefix('gestion')->name('gesti
 Route::middleware(['auth', 'rol:administrador'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('usuarios', Admin\UsuarioController::class)->except('show');
     Route::resource('categorias', Admin\CategoriaController::class)->except('show');
+    Route::get('productos/cargar-excel', [Admin\ImportacionController::class, 'create'])->name('importacion.create');
+    Route::get('productos/cargar-excel/plantilla', [Admin\ImportacionController::class, 'plantilla'])->name('importacion.plantilla');
+    Route::post('productos/cargar-excel', [Admin\ImportacionController::class, 'store'])->middleware('throttle:10,1')->name('importacion.store');
+    Route::post('productos/cargar-excel/confirmar', [Admin\ImportacionController::class, 'confirmar'])->middleware('throttle:10,1')->name('importacion.confirmar');
     Route::resource('productos', Admin\ProductoController::class)->except('show');
     Route::post('productos/{id}/restaurar', [Admin\ProductoController::class, 'restaurar'])
         ->whereNumber('id')->name('productos.restaurar');

@@ -22,15 +22,20 @@ class CotizacionController extends Controller
     public function index(Request $request): View
     {
         $estado = $request->query('estado', Cotizacion::PENDIENTE);
+        $busqueda = trim((string) $request->query('q'));
 
         $cotizaciones = Cotizacion::with('cliente:id,identificacion,nombre,telefono')
             ->withCount('detalles')
             ->when($estado !== 'todas', fn ($q) => $q->where('estado', $estado))
+            // Por código (COT-000012 o solo 12) o por el cliente (nombre, cédula, teléfono)
+            ->when($busqueda !== '', fn ($q) => $q->where(fn ($w) => $w
+                ->where('codigo', 'like', '%' . strtoupper($busqueda) . '%')
+                ->orWhereHas('cliente', fn ($c) => $c->buscar($busqueda))))
             ->latest('fecha')
             ->paginate(15)
             ->withQueryString();
 
-        return view('gestion.cotizaciones.index', compact('cotizaciones', 'estado'));
+        return view('gestion.cotizaciones.index', compact('cotizaciones', 'estado', 'busqueda'));
     }
 
     public function show(Cotizacion $cotizacion): View

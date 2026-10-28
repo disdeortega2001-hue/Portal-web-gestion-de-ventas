@@ -12,7 +12,7 @@
             <p class="text-lg font-extrabold">{{ $cotizacion->cliente->nombre }}</p>
             <p class="mt-1 cifra">{{ $cotizacion->cliente->identificacion }} · <a href="tel:{{ $cotizacion->cliente->telefono }}" class="enlace">{{ $cotizacion->cliente->telefono }}</a> @if($cotizacion->cliente->correo)· {{ $cotizacion->cliente->correo }}@endif</p>
             <p class="apoyo">{{ $cotizacion->cliente->direccion }}</p>
-            @if($cotizacion->observaciones)<p class="mt-3 rounded-2xl bg-sol-clara px-4 py-3"><strong>Observaciones:</strong> {!! nl2br(e($cotizacion->observaciones)) !!}</p>@endif
+            @if($cotizacion->observaciones)<p class="mt-3 rounded-[3px] bg-sol-clara px-4 py-3"><strong>Observaciones:</strong> {!! nl2br(e($cotizacion->observaciones)) !!}</p>@endif
         </section>
         <div class="lobulo overflow-x-auto">
             <table class="tabla">

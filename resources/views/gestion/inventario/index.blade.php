@@ -24,7 +24,7 @@
             <legend class="etiqueta">Tipo *</legend>
             <div class="grid gap-2">
                 @foreach(['entrada' => 'Entrada de mercancía', 'salida' => 'Salida (merma, uso interno)', 'ajuste' => 'Ajuste por conteo físico'] as $valor => $texto)
-                    <label class="flex min-h-11 cursor-pointer items-center gap-3 rounded-2xl border-[1.5px] border-linea px-4 font-semibold has-[:checked]:border-tierra has-[:checked]:bg-tierra-clara">
+                    <label class="flex min-h-11 cursor-pointer items-center gap-3 rounded-[3px] border-[1.5px] border-linea px-4 font-semibold has-[:checked]:border-tierra has-[:checked]:bg-tierra-clara">
                         <input type="radio" name="tipo" id="tipo-{{ $valor }}" value="{{ $valor }}" x-model="tipo" required class="size-4 accent-[#0b4a3b]" @checked(old('tipo', 'entrada') === $valor)> {{ $texto }}
                     </label>
                 @endforeach

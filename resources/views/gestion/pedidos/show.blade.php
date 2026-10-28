@@ -38,7 +38,7 @@
                 <h2 id="t-mov" class="seccion-titulo">Movimientos de inventario</h2>
                 <ul class="mt-3 space-y-2">
                     @foreach($pedido->movimientos as $mov)
-                        <li class="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl bg-agua-honda px-4 py-2.5 text-sm">
+                        <li class="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-[3px] bg-agua-honda px-4 py-2.5 text-sm">
                             <span class="cifra">{{ $mov->fecha->format('d/m/Y h:i a') }}</span>
                             <span class="font-bold">{{ ucfirst($mov->tipo) }} de {{ $mov->cantidad }}</span>
                             <span class="cifra">{{ $mov->stock_anterior }} → {{ $mov->stock_nuevo }}</span>

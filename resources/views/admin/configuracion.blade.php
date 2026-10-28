@@ -36,7 +36,7 @@
             </div>
         </div>
         {{-- Ejemplo orientativo para revisar los valores antes de guardar (el cálculo oficial lo hace el servidor) --}}
-        <p class="mt-4 rounded-2xl bg-laguna-clara px-4 py-3 text-sm text-laguna-tinta cifra" id="ejemplo" aria-live="polite"
+        <p class="mt-4 rounded-[3px] bg-laguna-clara px-4 py-3 text-sm text-laguna-tinta cifra" id="ejemplo" aria-live="polite"
            x-text="'Ejemplo: un producto de USD 100,00 queda en USD ' + f.format(100 + iva) + ' con IVA, equivalente a Bs. ' + f.format((100 + iva) * (tasa || 0)) + '.'"></p>
     </section>
 

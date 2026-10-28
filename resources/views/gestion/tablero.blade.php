@@ -9,6 +9,14 @@
 @section('contenido')
 <x-encabezado titulo="Tablero">
     Actualizado: <span data-m="actualizado" class="cifra">{{ $m['actualizado'] }}</span>
+    <x-slot:acciones>
+        {{-- Lo que se hace a diario, a un toque --}}
+        <a href="{{ route('gestion.pedidos.create') }}" class="btn btn-sol"><x-icono nombre="mas" class="size-4" /> Nueva venta</a>
+        <a href="{{ route('gestion.inventario.index') }}" class="btn btn-linea"><x-icono nombre="caja" class="size-4" /> Registrar entrada</a>
+        @if(auth()->user()->esAdministrador())
+            <a href="{{ route('admin.configuracion.edit') }}" class="btn btn-linea"><x-icono nombre="moneda" class="size-4" /> Tasa del día</a>
+        @endif
+    </x-slot:acciones>
 </x-encabezado>
 
 <div class="space-y-3 empty:hidden mb-6">
@@ -56,7 +64,7 @@
     <a href="{{ route('gestion.cotizaciones.index') }}" class="group border-t border-white/15 p-5 transition-colors hover:bg-white/5 sm:border-r xl:border-t-0 xl:p-6">
         <p class="flex items-center justify-between text-sm font-bold text-white/75">Cotizaciones pendientes <x-icono nombre="flecha" class="size-4 transition-transform group-hover:translate-x-1" /></p>
         <p class="titular mt-2 text-[2rem] cifra" data-m="cotizaciones.pendientes">{{ $m['cotizaciones']['pendientes'] }}</p>
-        <p class="mt-1 text-sm"><span class="rounded-full bg-sol px-2 py-0.5 font-bold text-tinta"><span data-m="cotizaciones.atrasadas" class="cifra">{{ $m['cotizaciones']['atrasadas'] }}</span> con más de 24 h</span></p>
+        <p class="mt-1 text-sm"><span class="bg-sol px-2 py-0.5 font-bold text-tinta"><span data-m="cotizaciones.atrasadas" class="cifra">{{ $m['cotizaciones']['atrasadas'] }}</span> con más de 24 h</span></p>
     </a>
     <a href="{{ route('gestion.inventario.index', ['bajo_stock' => 1]) }}" class="group border-t border-white/15 p-5 transition-colors hover:bg-white/5 xl:border-t-0 xl:p-6">
         <p class="flex items-center justify-between text-sm font-bold text-white/75">Bajo stock / agotados <x-icono nombre="flecha" class="size-4 transition-transform group-hover:translate-x-1" /></p>
@@ -96,7 +104,7 @@
         <p class="apoyo mt-2 text-sm" data-sin-graficos hidden>No se pudieron cargar los gráficos. Las cifras de arriba están al día.</p>
     </section>
 
-    <section class="order-3 rounded-lobulo bg-sabana p-5 text-tinta lg:order-2 lg:col-span-4 xl:p-6" aria-labelledby="t-conversion">
+    <section class="order-3 rounded-lobulo bg-tierra-clara p-5 text-tinta lg:order-2 lg:col-span-4 xl:p-6" aria-labelledby="t-conversion">
         <h2 id="t-conversion" class="seccion-titulo">Conversión del mes</h2>
         <p class="titular mt-4 text-6xl cifra"><span data-m="cotizaciones.conversion_mes">{{ number_format($m['cotizaciones']['conversion_mes'], 1, ',', '.') }}</span> %</p>
         <p class="mt-3 max-w-xs">De las cotizaciones recibidas este mes, este porcentaje terminó en pedido.</p>

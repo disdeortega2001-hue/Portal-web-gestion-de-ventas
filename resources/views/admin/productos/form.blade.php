@@ -65,11 +65,11 @@
         <div class="space-y-4">
             <div class="lobulo p-5" x-data="{ error: '' }">
                 <label for="imagen" class="etiqueta">Imagen</label>
-                <div @class(['mb-3 aspect-[4/3] overflow-hidden rounded-2xl', 'bg-sabana-clara' => ! $producto->imagen])>
+                <div @class(['mb-3 aspect-[4/3] overflow-hidden rounded-[3px]', 'bg-sabana-clara' => ! $producto->imagen])>
                     <img src="{{ $producto->exists ? $producto->urlImagen() : asset('img/producto-generico.svg') }}" alt="Vista previa" id="vista-previa" class="size-full object-contain">
                 </div>
                 <input type="file" id="imagen" name="imagen" accept="image/jpeg,image/png,image/webp"
-                       class="block w-full text-sm file:mr-3 file:cursor-pointer file:rounded-full file:border-0 file:bg-tierra file:px-4 file:py-2.5 file:font-bold file:text-white @error('imagen') is-invalid @enderror"
+                       class="block w-full text-sm file:mr-3 file:cursor-pointer file:rounded-[2px] file:border-0 file:bg-tierra file:px-4 file:py-2.5 file:font-bold file:text-white @error('imagen') is-invalid @enderror"
                        @change="const a = $event.target.files[0]; if (!a) return;
                                 if (a.size > 2 * 1024 * 1024) { $event.target.setCustomValidity('La imagen supera 2 MB.'); error = 'La imagen supera 2 MB.'; return; }
                                 $event.target.setCustomValidity(''); error = ''; document.getElementById('vista-previa').src = URL.createObjectURL(a);">

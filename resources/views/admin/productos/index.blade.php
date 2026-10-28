@@ -4,6 +4,7 @@
 @section('contenido')
 <x-encabezado titulo="Productos">
     <x-slot:acciones>
+        <a href="{{ route('admin.importacion.create') }}" class="btn btn-linea"><x-icono nombre="excel" class="size-4" /> Cargar desde Excel</a>
         <a href="{{ route('admin.productos.create') }}" class="btn btn-sol"><x-icono nombre="mas" class="size-4" /> Nuevo producto</a>
     </x-slot:acciones>
 </x-encabezado>
@@ -37,7 +38,7 @@
         <tbody>
         @forelse($productos as $producto)
             <tr>
-                <td><img src="{{ $producto->urlImagen('mini') }}" alt="" width="56" height="42" @class(['h-11 w-14 rounded-xl object-cover', 'bg-sabana-clara object-contain p-1' => ! $producto->imagen])></td>
+                <td><img src="{{ $producto->urlImagen('mini') }}" alt="" width="56" height="42" @class(['h-11 w-14 bg-agua object-contain mix-blend-multiply', 'bg-sabana-clara object-contain p-1' => ! $producto->imagen])></td>
                 <td><span class="codigo">{{ $producto->codigo_fabrica }}</span></td>
                 <td><span class="font-semibold">{{ $producto->nombre }}</span> @unless($producto->activo)<span class="estado estado-pendiente ml-1">Oculto</span>@endunless<br><span class="apoyo text-sm">{{ $producto->marca }}</span></td>
                 <td class="apoyo">{{ $producto->categoria?->nombre }}</td>
