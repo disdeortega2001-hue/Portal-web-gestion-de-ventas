@@ -1,12 +1,12 @@
 @extends('layouts.app')
-@section('titulo', 'Tasa, IVA y pagos')
+@section('titulo', 'Configuración del portal')
 
 @section('contenido')
 @php
     $valor = fn ($clave, $defecto = '') => old($clave, $configuraciones[$clave]->valor ?? $defecto);
     $actualizado = fn ($clave) => isset($configuraciones[$clave]) ? $configuraciones[$clave]->updated_at->format('d/m/Y h:i a') : 'nunca';
 @endphp
-<x-encabezado titulo="Tasa, IVA y pagos">
+<x-encabezado titulo="Configuración del portal">
     <span class="block max-w-[70ch]">Los cambios se aplican de inmediato en el catálogo y en las cotizaciones. Las cotizaciones y pedidos ya emitidos conservan la tasa y el impuesto con que se crearon.</span>
 </x-encabezado>
 

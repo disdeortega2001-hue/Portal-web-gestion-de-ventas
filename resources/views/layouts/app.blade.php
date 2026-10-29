@@ -46,7 +46,8 @@
     $menuAdmin = [
         ['admin.productos.index', 'admin.productos.*', 'etiqueta', 'Productos', false],
         ['admin.categorias.index', 'admin.categorias.*', 'rejilla', 'Categorías', false],
-        ['admin.configuracion.edit', 'admin.configuracion.*', 'moneda', 'Tasa, IVA y pagos', true],
+        ['admin.tasa.edit', 'admin.tasa.*', 'moneda', 'Tasa del día', false],
+        ['admin.configuracion.edit', 'admin.configuracion.*', 'ajustes', 'Configuración del portal', true],
         ['admin.usuarios.index', 'admin.usuarios.*', 'usuarios', 'Usuarios', true],
         ['admin.respaldos.index', 'admin.respaldos.*', 'escudo', 'Respaldos', true],
     ];

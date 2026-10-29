@@ -8,7 +8,7 @@ use App\Models\Configuracion;
  * Métodos de pago que acepta Rialto 7 y los datos que el cliente necesita para pagar.
  *
  * Los datos (banco, cuenta, teléfono, correo) los carga el personal administrativo en
- * Administración → Tasa, IVA y pagos. Todos los métodos se ofrecen mientras estén activos;
+ * Administración → Configuración del portal. Todos los métodos se ofrecen mientras estén activos;
  * si aún no tienen sus datos cargados, el cliente ve que la empresa se los envía por WhatsApp.
  *
  * - En línea (Pago Móvil, transferencia, Zelle): el cliente paga y reporta la referencia y el comprobante.

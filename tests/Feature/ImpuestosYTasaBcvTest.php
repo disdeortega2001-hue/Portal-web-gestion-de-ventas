@@ -63,13 +63,13 @@ class ImpuestosYTasaBcvTest extends TestCase
     {
         Http::fake(['www.bcv.org.ve/*' => Http::response(self::HTML_BCV)]);
 
-        $this->actingAs($this->crearUsuario('directivo'))
-            ->post(route('admin.configuracion.tasa-bcv'))
-            ->assertRedirect(route('admin.configuracion.edit'))
+        $this->actingAs($this->crearUsuario('administrativo'))
+            ->from(route('admin.tasa.edit'))->post(route('admin.configuracion.tasa-bcv'))
+            ->assertRedirect(route('admin.tasa.edit'))
             ->assertSessionHas('exito');
 
         $this->assertSame(888.1183, Configuracion::tasaCambio());
-        $this->actingAs($this->crearUsuario('administrativo'))->post(route('admin.configuracion.tasa-bcv'))->assertForbidden();
+        $this->actingAs($this->crearUsuario('vendedor'))->post(route('admin.configuracion.tasa-bcv'))->assertForbidden();
     }
 
     public function test_la_compra_en_dolares_lleva_igtf_y_en_bolivares_iva(): void

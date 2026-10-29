@@ -132,8 +132,21 @@ class ComprobanteYEntregaTest extends TestCase
         foreach (['vendedor', 'administrativo'] as $rol) {
             $this->actingAs($this->crearUsuario($rol))->put(route('admin.configuracion.update'), $datos)->assertForbidden();
         }
-        $this->actingAs($this->crearUsuario('administrativo'))->get(route('gestion.tablero'))->assertDontSee('Tasa del día');
         $this->actingAs($this->crearUsuario('directivo'))->get(route('admin.configuracion.edit'))->assertOk();
+    }
+
+    public function test_el_administrativo_actualiza_la_tasa_del_dia_pero_no_el_iva(): void
+    {
+        $administrativo = $this->crearUsuario('administrativo');
+
+        $this->actingAs($administrativo)->get(route('gestion.tablero'))->assertSee('Tasa del día');
+        $this->actingAs($administrativo)->from(route('admin.tasa.edit'))->put(route('admin.tasa.update'), ['tasa_cambio' => '41.2500', 'porcentaje_iva' => '50'])
+            ->assertRedirect(route('admin.tasa.edit'))->assertSessionHas('exito');
+
+        $this->assertSame(41.25, \App\Models\Configuracion::tasaCambio());
+        $this->assertSame('manual', \App\Models\Configuracion::valor('tasa_fuente'));
+        $this->assertSame(16.0, (float) \App\Models\Configuracion::porcentajeIva());   // El IVA no se toca desde aquí
+        $this->actingAs($this->crearUsuario('vendedor'))->put(route('admin.tasa.update'), ['tasa_cambio' => '1'])->assertForbidden();
     }
 
     public function test_solo_administrativo_y_directivo_modifican_el_inventario(): void

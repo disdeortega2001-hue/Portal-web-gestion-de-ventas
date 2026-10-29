@@ -25,8 +25,8 @@ use Illuminate\Support\Facades\Route;
 |   3. Compra (con o sin cuenta) y área del cliente con cuenta
 |   4. Panel, los tres perfiles: vendedor, administrativo y directivo
 |      (tablero, cotizaciones, pedidos y su entrega, clientes, consulta de existencias)
-|   5. Administrativo y directivo (cambios de inventario, pagos, reportes, productos y categorías)
-|   6. Solo directivo (configuración del portal: tasa, IVA, WhatsApp y métodos de pago; usuarios y respaldos)
+|   5. Administrativo y directivo (cambios de inventario, pagos, reportes, productos, categorías y tasa del día)
+|   6. Solo directivo (configuración del portal: IVA, IGTF, WhatsApp y métodos de pago; usuarios y respaldos)
 */
 
 // 1. PÚBLICAS ---------------------------------------------------------------
@@ -160,6 +160,11 @@ Route::middleware(['auth', 'rol:administrativo,directivo'])->prefix('admin')->na
     Route::resource('productos', Admin\ProductoController::class)->except('show');
     Route::post('productos/{id}/restaurar', [Admin\ProductoController::class, 'restaurar'])
         ->whereNumber('id')->name('productos.restaurar');
+
+    // La tasa del día la actualiza también el administrativo
+    Route::get('tasa', [Admin\ConfiguracionController::class, 'tasa'])->name('tasa.edit');
+    Route::put('tasa', [Admin\ConfiguracionController::class, 'actualizarTasa'])->name('tasa.update');
+    Route::post('configuracion/tasa-bcv', [Admin\ConfiguracionController::class, 'tasaBcv'])->middleware('throttle:10,1')->name('configuracion.tasa-bcv');
 });
 
 // 6. SOLO DIRECTIVO ---------------------------------------------------------
@@ -167,7 +172,6 @@ Route::middleware(['auth', 'rol:directivo'])->prefix('admin')->name('admin.')->g
     // Configuración del portal: solo el directivo la modifica
     Route::get('configuracion', [Admin\ConfiguracionController::class, 'edit'])->name('configuracion.edit');
     Route::put('configuracion', [Admin\ConfiguracionController::class, 'update'])->name('configuracion.update');
-    Route::post('configuracion/tasa-bcv', [Admin\ConfiguracionController::class, 'tasaBcv'])->middleware('throttle:10,1')->name('configuracion.tasa-bcv');
 
     Route::resource('usuarios', Admin\UsuarioController::class)->except('show');
 

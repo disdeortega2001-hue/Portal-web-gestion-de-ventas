@@ -14,9 +14,7 @@
         <a href="{{ route('gestion.pedidos.create') }}" class="btn btn-sol"><x-icono nombre="mas" class="size-4" /> Nueva venta</a>
         @if(auth()->user()->puedeAdministrar())
             <a href="{{ route('gestion.inventario.index') }}" class="btn btn-linea"><x-icono nombre="caja" class="size-4" /> Registrar entrada</a>
-        @endif
-        @if(auth()->user()->esDirectivo())
-            <a href="{{ route('admin.configuracion.edit') }}" class="btn btn-linea"><x-icono nombre="moneda" class="size-4" /> Tasa del día</a>
+            <a href="{{ route('admin.tasa.edit') }}" class="btn btn-linea"><x-icono nombre="moneda" class="size-4" /> Tasa del día</a>
         @endif
     </x-slot:acciones>
 </x-encabezado>
