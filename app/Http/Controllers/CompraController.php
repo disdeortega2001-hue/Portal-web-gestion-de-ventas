@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CompraRequest;
 use App\Models\Pedido;
 use App\Services\CarritoService;
+use App\Services\ComprobanteService;
 use App\Services\PagoService;
 use App\Services\PedidoService;
 use App\Support\ClienteInvitado;
@@ -12,6 +13,7 @@ use App\Support\ClienteRecordado;
 use App\Support\MetodosPago;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -97,6 +99,15 @@ class CompraController extends Controller
     public static function enlaceSeguimiento(Pedido $pedido, string $ruta = 'pedidos.seguimiento'): string
     {
         return URL::temporarySignedRoute($ruta, $pedido->fecha->copy()->addDays(90), ['pedido' => $pedido->id]);
+    }
+
+    /** Comprobante de pago en PDF: solo cuando el pago del pedido está verificado. */
+    public function comprobante(Request $request, Pedido $pedido, ComprobanteService $comprobantes): Response
+    {
+        $this->autorizar($request, $pedido);
+        abort_unless($pedido->tieneComprobante(), 404, 'El comprobante estará disponible cuando verifiquemos tu pago.');
+
+        return $comprobantes->pdf($pedido)->download($comprobantes->nombreArchivo($pedido));
     }
 
     /** El cliente reporta su pago a distancia con la referencia y el comprobante. */

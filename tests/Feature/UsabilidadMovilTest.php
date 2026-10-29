@@ -204,7 +204,7 @@ class UsabilidadMovilTest extends TestCase
             ->assertSee('Configurar WhatsApp');
 
         $this->actingAs($this->crearUsuario('vendedor'))->get(route('gestion.tablero'))
-            ->assertSee('Pídele al personal administrativo que lo configure.')
+            ->assertSee('Pídele al directivo que lo configure.')
             ->assertDontSee('Configurar WhatsApp');
 
         $this->configurar(['telefono_whatsapp' => '04141234567']);

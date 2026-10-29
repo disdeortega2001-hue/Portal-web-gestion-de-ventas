@@ -19,7 +19,11 @@
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div><a href="{{ route('cuenta.pedidos.show', $pedido) }}" class="font-extrabold text-tierra cifra hover:underline">{{ $pedido->codigo }}</a> <span class="apoyo text-sm cifra">· {{ $pedido->fecha->format('d/m/Y') }}</span></div>
                     <div class="flex flex-wrap items-center gap-2">
-                        <span class="estado estado-{{ $pedido->estado }}">{{ $pedido->estado === 'confirmado' ? 'Confirmado — listo para retirar' : ucfirst($pedido->estado) }}</span>
+                        @if($pedido->estaEntregado())
+                            <span class="estado estado-entregado">{{ $pedido->entrega === 'envio' ? 'Entregado' : 'Retirado' }} el <span class="cifra">{{ $pedido->entregado_en->format('d/m/Y') }}</span></span>
+                        @else
+                            <span class="estado estado-{{ $pedido->estado }}">{{ $pedido->estado === 'confirmado' ? 'Confirmado — listo para retirar' : ucfirst($pedido->estado) }}</span>
+                        @endif
                         <span class="estado estado-{{ $pedido->estado_pago }}">{{ $pedido->etiquetaPago() }}</span>
                         <strong class="text-lg cifra">@usd($pedido->total)</strong>
                     </div>

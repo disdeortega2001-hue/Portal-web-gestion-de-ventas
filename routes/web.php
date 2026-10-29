@@ -24,9 +24,9 @@ use Illuminate\Support\Facades\Route;
 |   2. Invitados (login / registro / recuperar contraseña)
 |   3. Compra (con o sin cuenta) y área del cliente con cuenta
 |   4. Panel, los tres perfiles: vendedor, administrativo y directivo
-|      (tablero, cotizaciones, pedidos, clientes, existencias)
-|   5. Administrativo y directivo (inventario, pagos, reportes, catálogo, tasa e IVA)
-|   6. Solo directivo (usuarios y respaldos)
+|      (tablero, cotizaciones, pedidos y su entrega, clientes, consulta de existencias)
+|   5. Administrativo y directivo (cambios de inventario, pagos, reportes, productos y categorías)
+|   6. Solo directivo (configuración del portal: tasa, IVA, WhatsApp y métodos de pago; usuarios y respaldos)
 */
 
 // 1. PÚBLICAS ---------------------------------------------------------------
@@ -91,6 +91,7 @@ Route::middleware(['auth', 'rol:cliente'])->prefix('mi-cuenta')->name('cuenta.')
     Route::get('/pedidos/{pedido}', [CuentaController::class, 'pedido'])->name('pedidos.show');
     Route::post('/pedidos/{pedido}/pago', [CompraController::class, 'reportarPago'])->middleware('throttle:10,1')->name('pedidos.pago');
     Route::post('/pedidos/{pedido}/devolucion', [CompraController::class, 'solicitarDevolucion'])->middleware('throttle:10,1')->name('pedidos.devolucion');
+    Route::get('/pedidos/{pedido}/comprobante', [CompraController::class, 'comprobante'])->name('pedidos.comprobante');
 });
 
 // Compra: crear cuenta es opcional. Sin cuenta, el pedido se sigue por un enlace firmado
@@ -100,6 +101,7 @@ Route::middleware('signed')->prefix('pedido/{pedido}')->name('pedidos.seguimient
     Route::get('/', [CompraController::class, 'seguimiento']);
     Route::post('/pago', [CompraController::class, 'reportarPago'])->middleware('throttle:10,1')->name('.pago');
     Route::post('/devolucion', [CompraController::class, 'solicitarDevolucion'])->middleware('throttle:10,1')->name('.devolucion');
+    Route::get('/comprobante', [CompraController::class, 'comprobante'])->name('.comprobante');
 });
 
 // 4. PANEL: VENDEDOR, ADMINISTRATIVO Y DIRECTIVO --------------------------
@@ -118,6 +120,8 @@ Route::middleware(['auth', 'rol:vendedor,administrativo,directivo'])->prefix('ge
     Route::get('/pedidos/{pedido}', [Gestion\PedidoController::class, 'show'])->name('pedidos.show');
     Route::post('/pedidos/{pedido}/confirmar', [Gestion\PedidoController::class, 'confirmar'])->name('pedidos.confirmar');
     Route::post('/pedidos/{pedido}/anular', [Gestion\PedidoController::class, 'anular'])->name('pedidos.anular');
+    Route::post('/pedidos/{pedido}/entregar', [Gestion\PedidoController::class, 'entregar'])->name('pedidos.entregar');
+    Route::get('/pedidos/{pedido}/comprobante', [Gestion\PedidoController::class, 'comprobante'])->name('pedidos.comprobante');
 
     Route::get('/clientes/buscar', [Gestion\ClienteController::class, 'buscar'])->middleware('throttle:120,1')->name('clientes.buscar');
     Route::resource('clientes', Gestion\ClienteController::class)->except('destroy');
@@ -128,12 +132,14 @@ Route::middleware(['auth', 'rol:vendedor,administrativo,directivo'])->prefix('ge
     Route::post('/verificaciones/{cliente}/aprobar', [Gestion\VerificacionController::class, 'aprobar'])->name('verificaciones.aprobar');
     Route::post('/verificaciones/{cliente}/rechazar', [Gestion\VerificacionController::class, 'rechazar'])->name('verificaciones.rechazar');
 
+    // El vendedor consulta las existencias; solo administrativo y directivo las modifican (bloque 5)
     Route::get('/inventario', [Gestion\InventarioController::class, 'index'])->name('inventario.index');
-    Route::post('/inventario/movimientos', [Gestion\InventarioController::class, 'store'])->name('inventario.store');
 });
 
 // 5. ADMINISTRATIVO Y DIRECTIVO ---------------------------------------------
 Route::middleware(['auth', 'rol:administrativo,directivo'])->prefix('gestion')->name('gestion.')->group(function () {
+    Route::post('/inventario/movimientos', [Gestion\InventarioController::class, 'store'])->name('inventario.store');
+
     Route::get('/pagos', [Gestion\PagoController::class, 'index'])->name('pagos.index');
     Route::post('/pagos/{pago}/verificar', [Gestion\PagoController::class, 'verificar'])->name('pagos.verificar');
     Route::post('/pagos/{pago}/rechazar', [Gestion\PagoController::class, 'rechazar'])->name('pagos.rechazar');
@@ -154,14 +160,15 @@ Route::middleware(['auth', 'rol:administrativo,directivo'])->prefix('admin')->na
     Route::resource('productos', Admin\ProductoController::class)->except('show');
     Route::post('productos/{id}/restaurar', [Admin\ProductoController::class, 'restaurar'])
         ->whereNumber('id')->name('productos.restaurar');
-
-    Route::get('configuracion', [Admin\ConfiguracionController::class, 'edit'])->name('configuracion.edit');
-    Route::put('configuracion', [Admin\ConfiguracionController::class, 'update'])->name('configuracion.update');
-    Route::post('configuracion/tasa-bcv', [Admin\ConfiguracionController::class, 'tasaBcv'])->middleware('throttle:10,1')->name('configuracion.tasa-bcv');
 });
 
 // 6. SOLO DIRECTIVO ---------------------------------------------------------
 Route::middleware(['auth', 'rol:directivo'])->prefix('admin')->name('admin.')->group(function () {
+    // Configuración del portal: solo el directivo la modifica
+    Route::get('configuracion', [Admin\ConfiguracionController::class, 'edit'])->name('configuracion.edit');
+    Route::put('configuracion', [Admin\ConfiguracionController::class, 'update'])->name('configuracion.update');
+    Route::post('configuracion/tasa-bcv', [Admin\ConfiguracionController::class, 'tasaBcv'])->middleware('throttle:10,1')->name('configuracion.tasa-bcv');
+
     Route::resource('usuarios', Admin\UsuarioController::class)->except('show');
 
     Route::get('respaldos', [Admin\RespaldoController::class, 'index'])->name('respaldos.index');

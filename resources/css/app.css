@@ -205,7 +205,7 @@
     .estado-por_verificar { @apply bg-sol-clara text-[#5f4400]; }
     .estado-sin_pago { @apply bg-lila-clara text-[#4c2a7a]; }
     .estado-rechazado { @apply bg-coral-clara text-coral-tinta; }
-    .estado-reembolsado { @apply bg-laguna-clara text-laguna-tinta; }
+    .estado-reembolsado, .estado-entregado { @apply bg-laguna-clara text-laguna-tinta; }
 
     /* ---- Avisos ---- */
     .aviso { @apply flex gap-3 rounded-[6px] px-4 py-3 text-[0.9375rem]; }

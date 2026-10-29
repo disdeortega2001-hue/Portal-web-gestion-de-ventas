@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Gestion;
 use App\Http\Controllers\Controller;
 use App\Models\Pago;
 use App\Models\Pedido;
+use App\Services\AvisoClienteService;
 use App\Services\PagoService;
 use App\Support\MetodosPago;
 use Illuminate\Http\RedirectResponse;
@@ -20,7 +21,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
  */
 class PagoController extends Controller
 {
-    public function __construct(private readonly PagoService $pagos)
+    public function __construct(private readonly PagoService $pagos, private readonly AvisoClienteService $avisos)
     {
     }
 
@@ -45,8 +46,10 @@ class PagoController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        return back()->with($aviso ? 'error' : 'exito', $aviso
-            ?? "Pago verificado. El pedido {$pago->pedido->codigo} quedó pagado y la venta confirmada.");
+        $pedido = $pago->pedido->fresh();
+
+        return $this->conAvisoAlCliente(back()->with($aviso ? 'error' : 'exito', $aviso
+            ?? "Pago verificado. El pedido {$pedido->codigo} quedó pagado y la venta confirmada."), $pedido);
     }
 
     public function rechazar(Request $request, Pago $pago): RedirectResponse
@@ -84,7 +87,15 @@ class PagoController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        return back()->with($aviso ? 'error' : 'exito', $aviso ?? "Pago registrado. El pedido {$pedido->codigo} quedó pagado.");
+        return $this->conAvisoAlCliente(back()->with($aviso ? 'error' : 'exito', $aviso ?? "Pago registrado. El pedido {$pedido->codigo} quedó pagado."), $pedido->fresh());
+    }
+
+    /** Avisa al cliente que su pago quedó verificado (correo con el comprobante y WhatsApp listo para enviar). */
+    private function conAvisoAlCliente(RedirectResponse $respuesta, Pedido $pedido): RedirectResponse
+    {
+        $envio = $this->avisos->enviar($pedido, AvisoClienteService::PAGO_VERIFICADO);
+
+        return $respuesta->with('aviso_cliente', $envio + ['texto' => 'Avisa al cliente que su pago fue verificado']);
     }
 
     public function comprobante(Pago $pago): BinaryFileResponse

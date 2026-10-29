@@ -7,6 +7,7 @@
     @if($pedido->cotizacion) · Desde <span class="cifra">{{ $pedido->cotizacion->codigo }}</span> @endif
     · <span class="estado estado-{{ $pedido->estado }}">{{ ucfirst($pedido->estado) }}</span>
     <span class="estado estado-{{ $pedido->estado_pago }}">{{ $pedido->etiquetaPago() }}</span>
+    @if($pedido->estaEntregado())<span class="estado estado-entregado">Entregado</span>@endif
 </x-encabezado>
 
 @if($pedido->devolucionPendiente())
@@ -123,6 +124,47 @@
 
     <div class="space-y-4 lg:sticky lg:top-6 lg:self-start">
         @include('partials.resumen', ['r' => $pedido])
+
+        @if($pedido->tieneComprobante())
+            @php($avisos = app(\App\Services\AvisoClienteService::class))
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('gestion.pedidos.comprobante', $pedido) }}" class="btn btn-linea btn-mini"><x-icono nombre="pdf" class="size-4" /> Comprobante de pago</a>
+                @if($wa = $avisos->whatsapp($pedido, $pedido->estaEntregado() ? 'entregado' : 'pago_verificado'))
+                    <a href="{{ $wa }}" target="_blank" rel="noopener" class="btn btn-linea btn-mini"><x-icono nombre="whatsapp" class="size-4" /> {{ $pedido->estaEntregado() ? 'Avisar la entrega' : 'Avisar el pago verificado' }}</a>
+                @endif
+            </div>
+        @endif
+
+        {{-- Entrega: quién retira (el titular o alguien autorizado con su cédula) --}}
+        @if($pedido->estaEntregado())
+            <div class="aviso aviso-exito" role="status"><x-icono nombre="check-circulo" class="size-5 shrink-0" />
+                <p><strong>{{ $pedido->entrega === 'envio' ? 'Entregado' : 'Retirado' }}</strong> el <span class="cifra">{{ $pedido->entregado_en->format('d/m/Y h:i a') }}</span> por {{ $pedido->recibido_por }}@if($pedido->recibido_por_identificacion) (<span class="cifra">{{ $pedido->recibido_por_identificacion }}</span>)@endif.@if($pedido->entregadoPor) Entregó: {{ $pedido->entregadoPor->nombre }}.@endif</p>
+            </div>
+        @elseif($pedido->puedeEntregarse())
+            <form method="POST" action="{{ route('gestion.pedidos.entregar', $pedido) }}" class="needs-validation lobulo space-y-3 p-4" novalidate
+                  x-data="{ recibe: @js(old('recibe', 'titular')) }" data-confirmar="¿Registrar la entrega del pedido {{ $pedido->codigo }}? Se le avisará al cliente.">
+                @csrf
+                <p class="etiqueta">{{ $pedido->entrega === 'envio' ? 'Registrar la entrega' : 'Registrar el retiro en la tienda' }}</p>
+                <label class="flex items-center gap-2"><input type="radio" name="recibe" value="titular" x-model="recibe"> Lo recibe el titular ({{ $pedido->cliente->nombre }})</label>
+                <label class="flex items-center gap-2"><input type="radio" name="recibe" value="otra" x-model="recibe"> Lo recibe otra persona</label>
+                <template x-if="recibe === 'otra'">
+                    <div class="space-y-3">
+                        <div>
+                            <label for="recibido_por" class="etiqueta">Nombre de quien recibe *</label>
+                            <input type="text" id="recibido_por" name="recibido_por" value="{{ old('recibido_por') }}" class="campo @error('recibido_por') is-invalid @enderror" required minlength="3" maxlength="120">
+                            <p class="error-campo">@error('recibido_por'){{ $message }}@else Escribe el nombre. @enderror</p>
+                        </div>
+                        <div>
+                            <label for="recibido_por_identificacion" class="etiqueta">Cédula *</label>
+                            <input type="text" id="recibido_por_identificacion" name="recibido_por_identificacion" value="{{ old('recibido_por_identificacion') }}" class="campo cifra @error('recibido_por_identificacion') is-invalid @enderror" required maxlength="12" inputmode="numeric" placeholder="V-12345678">
+                            <p class="error-campo">@error('recibido_por_identificacion'){{ $message }}@else Escribe la cédula. @enderror</p>
+                        </div>
+                    </div>
+                </template>
+                <button class="btn btn-tierra w-full">Marcar como entregado <span class="chip"><x-icono nombre="check" class="size-4" /></span></button>
+                <p class="ayuda">Se le avisa al cliente quién retiró el pedido.</p>
+            </form>
+        @endif
 
         @if($pedido->estaPendiente())
             <form method="POST" action="{{ route('gestion.pedidos.confirmar', $pedido) }}"

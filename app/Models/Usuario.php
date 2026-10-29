@@ -80,13 +80,13 @@ class Usuario extends Authenticatable
         return $this->tieneRol(...self::PERFILES_PANEL);
     }
 
-    /** Administrativo o directivo: catálogo, inventario, tasa e IVA, pagos y reportes. */
+    /** Administrativo o directivo: catálogo, inventario, pagos y reportes. */
     public function puedeAdministrar(): bool
     {
         return $this->tieneRol(self::ROL_ADMINISTRATIVO, self::ROL_DIRECTIVO);
     }
 
-    /** Solo el directivo: usuarios y respaldos. */
+    /** Solo el directivo: configuración del portal (tasa, IVA, WhatsApp, métodos de pago), usuarios y respaldos. */
     public function esDirectivo(): bool
     {
         return $this->rol === self::ROL_DIRECTIVO;

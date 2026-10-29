@@ -8,6 +8,7 @@
         <span class="cifra">{{ $pedido->fecha->format('d/m/Y h:i a') }}</span>
         <span class="estado estado-{{ $pedido->estado }}">{{ $pedido->estado === 'confirmado' ? 'Confirmado' : ucfirst($pedido->estado) }}</span>
         <span class="estado estado-{{ $pedido->estado_pago }}">{{ $pedido->etiquetaPago() }}</span>
+        @if($pedido->estaEntregado())<span class="estado estado-entregado">{{ $pedido->entrega === 'envio' ? 'Entregado' : 'Retirado' }}</span>@endif
     </p>
 @endsection
 
@@ -27,8 +28,25 @@
                 </div>
             </section>
         @endif
+        {{-- Pago verificado: el comprobante y, si ya se entregó, quién lo recibió --}}
+        @if($pedido->tieneComprobante())
+            <section aria-labelledby="t-comprobante" class="sobre-azul relative overflow-hidden rounded-[10px] bg-tierra-oscura p-6 text-white sm:p-8">
+                <x-arcos class="absolute inset-y-0 right-0 h-full w-80" />
+                <div class="relative">
+                    @if($pedido->estaEntregado())
+                        <h2 id="t-comprobante" class="titular text-3xl">Pedido <em>{{ $pedido->entrega === 'envio' ? 'entregado' : 'retirado' }}</em></h2>
+                        <p class="mt-3 max-w-[55ch] text-white/85">El <span class="cifra">{{ $pedido->entregado_en->format('d/m/Y') }}</span> a las <span class="cifra">{{ $pedido->entregado_en->format('h:i a') }}</span>. Lo recibió <strong>{{ $pedido->recibido_por }}</strong>@if($pedido->recibido_por_identificacion) (C.I. <span class="cifra">{{ $pedido->recibido_por_identificacion }}</span>)@endif. Si no reconoces esta entrega, comunícate con nosotros.</p>
+                    @else
+                        <h2 id="t-comprobante" class="titular text-3xl">Pago <em>verificado</em></h2>
+                        <p class="mt-3 max-w-[55ch] text-white/85">{{ $pedido->estado === 'confirmado'
+                            ? ($pedido->entrega === 'envio' ? 'Tu pedido está confirmado. Te contactamos para coordinar el envío.' : 'Tu pedido está confirmado y listo para retirar en la tienda: Av. Las Industrias, Edificio Campagna, Valle de la Pascua. Si lo retira otra persona, que lleve su cédula y este comprobante.')
+                            : 'Estamos preparando tu pedido y te avisamos cuando esté listo.' }}</p>
+                    @endif
+                    <a href="{{ $urlComprobante }}" class="btn btn-sol mt-5">Descargar comprobante de pago <span class="chip"><x-icono nombre="pdf" class="size-4" /></span></a>
+                </div>
+            </section>
         {{-- Pago reportado: ya no hace falta repetir las instrucciones --}}
-        @if($pedido->estado_pago === 'por_verificar')
+        @elseif($pedido->estado_pago === 'por_verificar')
             <section aria-labelledby="t-verificando" class="sobre-azul relative overflow-hidden rounded-[10px] bg-tierra-oscura p-6 text-white sm:p-8">
                 <x-arcos class="absolute inset-y-0 right-0 h-full w-80" />
                 <div class="relative">

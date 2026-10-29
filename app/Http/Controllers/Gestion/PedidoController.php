@@ -9,9 +9,12 @@ use App\Models\Cliente;
 use App\Models\Configuracion;
 use App\Models\Pedido;
 use App\Models\Producto;
+use App\Services\AvisoClienteService;
+use App\Services\ComprobanteService;
 use App\Services\PedidoService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 use LogicException;
 
@@ -78,7 +81,7 @@ class PedidoController extends Controller
 
     public function show(Pedido $pedido): View
     {
-        $pedido->load(['cliente', 'vendedor', 'cotizacion', 'detalles.producto', 'movimientos.usuario', 'pagos.registradoPor']);
+        $pedido->load(['cliente', 'vendedor', 'cotizacion', 'detalles.producto', 'movimientos.usuario', 'pagos.registradoPor', 'entregadoPor:id,nombre']);
 
         return view('gestion.pedidos.show', compact('pedido'));
     }
@@ -93,6 +96,47 @@ class PedidoController extends Controller
         }
 
         return back()->with('exito', "Venta procesada. El stock de los productos del pedido {$pedido->codigo} fue descontado.");
+    }
+
+    /**
+     * Entrega del pedido pagado: lo retira el titular o una persona autorizada (con su cédula),
+     * o se despacha. Queda quién lo recibió y quién lo entregó, y se avisa al cliente.
+     */
+    public function entregar(Request $request, Pedido $pedido, AvisoClienteService $avisos): RedirectResponse
+    {
+        $datos = $request->validate([
+            'recibe' => ['required', 'in:titular,otra'],
+            'recibido_por' => ['required_if:recibe,otra', 'nullable', 'string', 'min:3', 'max:120'],
+            'recibido_por_identificacion' => ['required_if:recibe,otra', 'nullable', 'string', 'regex:/^[VEJPGvejpg]?-?\d{5,10}$/'],
+        ], [
+            'recibido_por.required_if' => 'Escribe el nombre de quien retira el pedido.',
+            'recibido_por_identificacion.required_if' => 'Escribe la cédula de quien retira el pedido.',
+            'recibido_por_identificacion.regex' => 'Escribe la cédula con solo números (ej. 12345678 o V-12345678).',
+        ]);
+
+        if (! $pedido->puedeEntregarse()) {
+            return back()->with('error', "El pedido {$pedido->codigo} no se puede entregar: debe estar confirmado, pagado y sin entregar.");
+        }
+
+        $titular = $datos['recibe'] === 'titular';
+        $pedido->update([
+            'entregado_en' => now(),
+            'recibido_por' => $titular ? $pedido->cliente->nombre : trim($datos['recibido_por']),
+            'recibido_por_identificacion' => $titular ? $pedido->cliente->identificacion : strtoupper(trim($datos['recibido_por_identificacion'])),
+            'id_usuario_entrega' => $request->user()->id,
+        ]);
+        $envio = $avisos->enviar($pedido, AvisoClienteService::ENTREGADO);
+
+        return back()->with('exito', "Pedido {$pedido->codigo} entregado a {$pedido->recibido_por}.")
+            ->with('aviso_cliente', $envio + ['texto' => $titular ? 'Avisa al cliente que su pedido fue entregado' : 'Avisa al cliente quién retiró su pedido']);
+    }
+
+    /** Comprobante de pago en PDF (el mismo que descarga el cliente). */
+    public function comprobante(Pedido $pedido, ComprobanteService $comprobantes): Response
+    {
+        abort_unless($pedido->tieneComprobante(), 404, 'Este pedido todavía no tiene el pago verificado.');
+
+        return $comprobantes->pdf($pedido)->download($comprobantes->nombreArchivo($pedido));
     }
 
     /** Anula (o registra la devolución): repone la existencia si estaba confirmado; el motivo es obligatorio. */

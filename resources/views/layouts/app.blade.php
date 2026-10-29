@@ -46,7 +46,7 @@
     $menuAdmin = [
         ['admin.productos.index', 'admin.productos.*', 'etiqueta', 'Productos', false],
         ['admin.categorias.index', 'admin.categorias.*', 'rejilla', 'Categorías', false],
-        ['admin.configuracion.edit', 'admin.configuracion.*', 'moneda', 'Tasa, IVA y pagos', false],
+        ['admin.configuracion.edit', 'admin.configuracion.*', 'moneda', 'Tasa, IVA y pagos', true],
         ['admin.usuarios.index', 'admin.usuarios.*', 'usuarios', 'Usuarios', true],
         ['admin.respaldos.index', 'admin.respaldos.*', 'escudo', 'Respaldos', true],
     ];
@@ -234,6 +234,17 @@
     <div @class(['space-y-3 empty:hidden', 'mx-auto max-w-[1320px] px-4 has-[>*]:pt-6 sm:px-6 lg:px-8' => ! $personal && $__env->hasSection('ancho_completo')])>
         @if(session('exito'))
             <div class="aviso aviso-exito" role="status"><x-icono nombre="check-circulo" class="mt-0.5" /><div>{{ session('exito') }}</div></div>
+        @endif
+        @if($avisoCliente = session('aviso_cliente'))
+            <div class="aviso aviso-info flex-col sm:flex-row sm:items-center" role="status"><x-icono nombre="whatsapp" class="size-6 shrink-0" />
+                <div class="flex-1"><strong>{{ $avisoCliente['texto'] }}.</strong>
+                    {{ $avisoCliente['correo'] ? 'Ya le enviamos un correo; también puedes avisarle por WhatsApp.' : 'El cliente no tiene correo registrado: avísale por WhatsApp.' }}</div>
+                @if($avisoCliente['whatsapp'])
+                    <a href="{{ $avisoCliente['whatsapp'] }}" target="_blank" rel="noopener" class="btn btn-tierra btn-mini"><x-icono nombre="whatsapp" class="size-4" /> Enviar por WhatsApp</a>
+                @else
+                    <span class="text-sm font-semibold">El teléfono del cliente no es válido para WhatsApp.</span>
+                @endif
+            </div>
         @endif
         @if(session('error'))
             <div class="aviso aviso-error" role="alert"><x-icono nombre="alerta" class="mt-0.5" /><div>{{ session('error') }}</div></div>

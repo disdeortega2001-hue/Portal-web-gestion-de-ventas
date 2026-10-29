@@ -24,7 +24,7 @@ class ConfiguracionRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return $this->user()?->puedeAdministrar() ?? false;
+        return $this->user()?->esDirectivo() ?? false;
     }
 
     public function rules(): array

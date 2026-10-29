@@ -65,6 +65,7 @@ class CuentaController extends Controller
             'urlPedido' => $sinCuenta ? CompraController::enlaceSeguimiento($pedido) : null,
             'urlPago' => $sinCuenta ? CompraController::enlaceSeguimiento($pedido, 'pedidos.seguimiento.pago') : route('cuenta.pedidos.pago', $pedido),
             'urlDevolucion' => $sinCuenta ? CompraController::enlaceSeguimiento($pedido, 'pedidos.seguimiento.devolucion') : route('cuenta.pedidos.devolucion', $pedido),
+            'urlComprobante' => $sinCuenta ? CompraController::enlaceSeguimiento($pedido, 'pedidos.seguimiento.comprobante') : route('cuenta.pedidos.comprobante', $pedido),
         ]);
     }
 

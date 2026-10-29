@@ -36,7 +36,7 @@ class ControlAccesoTest extends TestCase
             'reportes' => ['gestion.reportes.index', 403, 403, 200, 200],
             'categorías' => ['admin.categorias.index', 403, 403, 200, 200],
             'productos (admin)' => ['admin.productos.index', 403, 403, 200, 200],
-            'configuración' => ['admin.configuracion.edit', 403, 403, 200, 200],
+            'configuración del portal' => ['admin.configuracion.edit', 403, 403, 403, 200],
             'usuarios' => ['admin.usuarios.index', 403, 403, 403, 200],
             'respaldos' => ['admin.respaldos.index', 403, 403, 403, 200],
             'mis cotizaciones' => ['cuenta.cotizaciones', 200, 403, 403, 403],

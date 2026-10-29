@@ -34,12 +34,14 @@ class Pedido extends Model
         'moneda_pago', 'tipo_impuesto', 'porcentaje_impuesto', 'impuesto', 'total', 'tasa_cambio', 'total_bs', 'estado', 'fecha_confirmacion',
         'origen', 'metodo_pago', 'estado_pago', 'entrega', 'observaciones',
         'devolucion_motivo', 'devolucion_solicitada_en', 'motivo_anulacion',
+        'entregado_en', 'recibido_por', 'recibido_por_identificacion', 'id_usuario_entrega',
     ];
 
     protected $casts = [
         'fecha' => 'datetime',
         'fecha_confirmacion' => 'datetime',
         'devolucion_solicitada_en' => 'datetime',
+        'entregado_en' => 'datetime',
         'subtotal' => 'decimal:2',
         'descuento' => 'decimal:2',
         'porcentaje_impuesto' => 'decimal:2',
@@ -57,6 +59,11 @@ class Pedido extends Model
     public function vendedor(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'id_usuario');
+    }
+
+    public function entregadoPor(): BelongsTo
+    {
+        return $this->belongsTo(Usuario::class, 'id_usuario_entrega');
     }
 
     public function cotizacion(): BelongsTo
@@ -87,6 +94,23 @@ class Pedido extends Model
     public function estaPagado(): bool
     {
         return $this->estado_pago === self::PAGADO;
+    }
+
+    public function estaEntregado(): bool
+    {
+        return $this->entregado_en !== null;
+    }
+
+    /** Venta confirmada y pagada que aún no se entrega: el personal registra el retiro (o el despacho). */
+    public function puedeEntregarse(): bool
+    {
+        return $this->estado === self::CONFIRMADO && $this->estaPagado() && ! $this->estaEntregado();
+    }
+
+    /** Con el pago verificado el cliente descarga su comprobante (también después de entregado). */
+    public function tieneComprobante(): bool
+    {
+        return $this->estado !== self::ANULADO && $this->estaPagado();
     }
 
     /** El cliente puede reportar un pago: pedido vigente, sin pagar y con un método a distancia. */
