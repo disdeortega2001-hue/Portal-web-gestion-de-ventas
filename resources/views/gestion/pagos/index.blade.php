@@ -35,7 +35,12 @@
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
                         @if($pago->comprobante)
-                            <a href="{{ route('gestion.pagos.comprobante', $pago) }}" target="_blank" rel="noopener" class="btn btn-linea btn-mini"><x-icono nombre="ojo" class="size-4" /> Comprobante</a>
+                            <a href="{{ route('gestion.pagos.comprobante', $pago) }}" target="_blank" rel="noopener" class="btn btn-linea btn-mini"><x-icono nombre="ojo" class="size-4" /> Captura del cliente</a>
+                        @endif
+                        @if($pago->estado === 'por_verificar')
+                            <a href="{{ route('gestion.pagos.vista-previa', $pago) }}" target="_blank" rel="noopener" class="btn btn-linea btn-mini"><x-icono nombre="pdf" class="size-4" /> Vista previa del comprobante</a>
+                        @elseif($pago->estado === 'verificado' && $pedido->tieneComprobante())
+                            <a href="{{ route('gestion.pedidos.comprobante', $pedido) }}" target="_blank" rel="noopener" class="btn btn-linea btn-mini"><x-icono nombre="pdf" class="size-4" /> Comprobante de pago</a>
                         @endif
                         @if($pago->estado === 'por_verificar')
                             <form method="POST" action="{{ route('gestion.pagos.verificar', $pago) }}" data-confirmar="¿Confirmas que el pago de {{ $pago->montoFormateado() }} está en la cuenta? El pedido {{ $pedido->codigo }} quedará pagado y se descontará la existencia.">

@@ -27,12 +27,18 @@ class AvisoClienteService
     {
     }
 
+    /** El correo de la ficha (opcional al comprar sin cuenta) o el de la cuenta del cliente. */
+    public function correo(Pedido $pedido): ?string
+    {
+        $pedido->loadMissing('cliente.usuario');
+
+        return $pedido->cliente->correo ?: $pedido->cliente->usuario?->correo;
+    }
+
     /** @return array{correo: bool, whatsapp: ?string} */
     public function enviar(Pedido $pedido, string $tipo): array
     {
-        $pedido->loadMissing('cliente.usuario');
-        // El correo de la ficha (opcional al comprar sin cuenta) o el de la cuenta del cliente
-        $correo = $pedido->cliente->correo ?: $pedido->cliente->usuario?->correo;
+        $correo = $this->correo($pedido);
         $correoEnviado = false;
 
         if ($correo) {

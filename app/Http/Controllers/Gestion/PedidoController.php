@@ -136,7 +136,7 @@ class PedidoController extends Controller
     {
         abort_unless($pedido->tieneComprobante(), 404, 'Este pedido todavía no tiene el pago verificado.');
 
-        return $comprobantes->pdf($pedido)->download($comprobantes->nombreArchivo($pedido));
+        return $comprobantes->pdf($pedido)->stream($comprobantes->nombreArchivo($pedido));
     }
 
     /** Anula (o registra la devolución): repone la existencia si estaba confirmado; el motivo es obligatorio. */

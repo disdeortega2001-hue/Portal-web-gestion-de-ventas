@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Pago;
 use App\Models\Pedido;
 use App\Services\AvisoClienteService;
+use App\Services\ComprobanteService;
 use App\Services\PagoService;
 use App\Support\MetodosPago;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use LogicException;
@@ -90,12 +92,41 @@ class PagoController extends Controller
         return $this->conAvisoAlCliente(back()->with($aviso ? 'error' : 'exito', $aviso ?? "Pago registrado. El pedido {$pedido->codigo} quedó pagado."), $pedido->fresh());
     }
 
-    /** Avisa al cliente que su pago quedó verificado (correo con el comprobante y WhatsApp listo para enviar). */
+    /**
+     * Tras verificar, nada sale solo: el personal revisa el comprobante y decide cuándo enviarlo
+     * (correo con el PDF adjunto o WhatsApp con el enlace del pedido).
+     */
     private function conAvisoAlCliente(RedirectResponse $respuesta, Pedido $pedido): RedirectResponse
     {
+        if (! $pedido->tieneComprobante()) {
+            return $respuesta;
+        }
+
+        return $respuesta->with('aviso_cliente', [
+            'texto' => "Revisa el comprobante del pedido {$pedido->codigo} y envíaselo al cliente",
+            'comprobante' => route('gestion.pedidos.comprobante', $pedido),
+            'enviar' => $this->avisos->correo($pedido) ? route('gestion.pedidos.enviar-comprobante', $pedido) : null,
+            'whatsapp' => $this->avisos->whatsapp($pedido, AvisoClienteService::PAGO_VERIFICADO),
+        ]);
+    }
+
+    /** Vista previa del comprobante antes de verificar el pago (solo para el personal). */
+    public function vistaPrevia(Pago $pago, ComprobanteService $comprobantes): Response
+    {
+        abort_unless($pago->estado === Pago::POR_VERIFICAR, 404, 'Este pago ya no está por verificar.');
+
+        return $comprobantes->pdf($pago->pedido, $pago)->stream("Vista previa {$pago->pedido->codigo}.pdf");
+    }
+
+    /** El personal ya revisó el comprobante: se lo envía al cliente por correo. */
+    public function enviarComprobante(Pedido $pedido): RedirectResponse
+    {
+        abort_unless($pedido->tieneComprobante(), 404, 'Este pedido todavía no tiene el pago verificado.');
         $envio = $this->avisos->enviar($pedido, AvisoClienteService::PAGO_VERIFICADO);
 
-        return $respuesta->with('aviso_cliente', $envio + ['texto' => 'Avisa al cliente que su pago fue verificado']);
+        return back()->with($envio['correo'] ? 'exito' : 'error', $envio['correo']
+            ? "Comprobante enviado por correo a {$this->avisos->correo($pedido)}."
+            : 'No se pudo enviar el correo. Revisa la configuración del correo o avísale por WhatsApp.');
     }
 
     public function comprobante(Pago $pago): BinaryFileResponse

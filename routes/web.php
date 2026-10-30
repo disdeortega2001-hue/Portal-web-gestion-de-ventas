@@ -144,6 +144,9 @@ Route::middleware(['auth', 'rol:administrativo,directivo'])->prefix('gestion')->
     Route::post('/pagos/{pago}/verificar', [Gestion\PagoController::class, 'verificar'])->name('pagos.verificar');
     Route::post('/pagos/{pago}/rechazar', [Gestion\PagoController::class, 'rechazar'])->name('pagos.rechazar');
     Route::get('/pagos/{pago}/comprobante', [Gestion\PagoController::class, 'comprobante'])->name('pagos.comprobante');
+    Route::get('/pagos/{pago}/vista-previa', [Gestion\PagoController::class, 'vistaPrevia'])->name('pagos.vista-previa');
+    Route::post('/pedidos/{pedido}/enviar-comprobante', [Gestion\PagoController::class, 'enviarComprobante'])
+        ->middleware('throttle:10,1')->name('pedidos.enviar-comprobante');
     Route::post('/pedidos/{pedido}/pagos', [Gestion\PagoController::class, 'registrar'])->name('pedidos.pagos.store');
 
     Route::get('/reportes', [Gestion\ReporteController::class, 'index'])->name('reportes.index');

@@ -58,8 +58,23 @@ class ComprobanteYEntregaTest extends TestCase
         // Sin verificar todavía no hay comprobante
         $this->actingAs($usuario)->get(route('cuenta.pedidos.comprobante', $pedido))->assertNotFound();
 
-        $this->verificar($pedido)->assertSessionHas('exito')->assertSessionHas('aviso_cliente', fn ($a) => $a['correo'] && str_starts_with($a['whatsapp'], 'https://wa.me/58414'));
+        // Antes de verificar, el personal ve una vista previa (marcada como tal) y el cliente nada
+        $administrativo = $this->crearUsuario('administrativo');
+        $pago = $pedido->pagos()->firstOrFail();
+        $this->actingAs($administrativo)->get(route('gestion.pagos.index'))->assertSee('Vista previa del comprobante');
+        $previa = $this->actingAs($administrativo)->get(route('gestion.pagos.vista-previa', $pago))->assertOk();
+        $this->assertSame('application/pdf', $previa->headers->get('content-type'));
+        $this->actingAs($this->crearUsuario('vendedor'))->get(route('gestion.pagos.vista-previa', $pago))->assertForbidden();
 
+        // Verificar no envía nada solo: el personal revisa el comprobante y decide enviarlo
+        $this->verificar($pedido)->assertSessionHas('exito')->assertSessionHas('aviso_cliente', fn ($a) => $a['enviar'] !== null
+            && $a['comprobante'] === route('gestion.pedidos.comprobante', $pedido) && str_starts_with($a['whatsapp'], 'https://wa.me/58414'));
+        Notification::assertNothingSent();
+        $this->actingAs($administrativo)->get(route('gestion.pedidos.comprobante', $pedido))->assertOk();
+        $this->actingAs($administrativo)->get(route('gestion.pagos.vista-previa', $pago))->assertNotFound();
+
+        $this->actingAs($administrativo)->post(route('gestion.pedidos.enviar-comprobante', $pedido))
+            ->assertSessionHas('exito', 'Comprobante enviado por correo a productor@prueba.test.');
         Notification::assertSentTo(new AnonymousNotifiable(), AvisoPedido::class, function (AvisoPedido $aviso, $canales, $notificable) use ($pedido) {
             return $notificable->routes['mail'] === 'productor@prueba.test'
                 && str_contains($aviso->asunto, $pedido->codigo) && $aviso->pdf !== null;
@@ -87,7 +102,7 @@ class ComprobanteYEntregaTest extends TestCase
         $pedido = Pedido::latest('id')->firstOrFail();
         $this->actingAs($this->crearUsuario('administrativo'))
             ->post(route('gestion.pedidos.pagos.store', $pedido), ['metodo' => 'efectivo', 'monto' => (string) $pedido->total])
-            ->assertSessionHas('aviso_cliente', fn ($a) => ! $a['correo'] && $a['whatsapp'] !== null);
+            ->assertSessionHas('aviso_cliente', fn ($a) => $a['enviar'] === null && $a['whatsapp'] !== null);
         Notification::assertNothingSent();   // Sin correo registrado: solo el WhatsApp
 
         auth()->logout();

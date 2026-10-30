@@ -238,8 +238,17 @@
         @endif
         @if($avisoCliente = session('aviso_cliente'))
             <div class="aviso aviso-info flex-col sm:flex-row sm:items-center" role="status"><x-icono nombre="whatsapp" class="size-6 shrink-0" />
-                <div class="flex-1"><strong>{{ $avisoCliente['texto'] }}.</strong>
-                    {{ $avisoCliente['correo'] ? 'Ya le enviamos un correo; también puedes avisarle por WhatsApp.' : 'El cliente no tiene correo registrado: avísale por WhatsApp.' }}</div>
+                @isset($avisoCliente['comprobante'])
+                    <div class="flex-1"><strong>{{ $avisoCliente['texto'] }}.</strong>
+                        {{ $avisoCliente['enviar'] ? 'Ábrelo, revísalo y envíalo por correo (con el PDF) o por WhatsApp.' : 'El cliente no tiene correo registrado: envíaselo por WhatsApp.' }}</div>
+                    <a href="{{ $avisoCliente['comprobante'] }}" target="_blank" rel="noopener" class="btn btn-linea btn-mini"><x-icono nombre="pdf" class="size-4" /> Ver comprobante</a>
+                    @if($avisoCliente['enviar'])
+                        <form method="POST" action="{{ $avisoCliente['enviar'] }}">@csrf<button class="btn btn-tierra btn-mini"><x-icono nombre="enviar" class="size-4" /> Enviar por correo</button></form>
+                    @endif
+                @else
+                    <div class="flex-1"><strong>{{ $avisoCliente['texto'] }}.</strong>
+                        {{ $avisoCliente['correo'] ? 'Ya le enviamos un correo; también puedes avisarle por WhatsApp.' : 'El cliente no tiene correo registrado: avísale por WhatsApp.' }}</div>
+                @endisset
                 @if($avisoCliente['whatsapp'])
                     <a href="{{ $avisoCliente['whatsapp'] }}" target="_blank" rel="noopener" class="btn btn-tierra btn-mini"><x-icono nombre="whatsapp" class="size-4" /> Enviar por WhatsApp</a>
                 @else

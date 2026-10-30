@@ -48,7 +48,10 @@
                     <div class="flex flex-wrap items-center gap-2">
                         <span class="estado estado-{{ $pago->estado }}">{{ $pago->etiquetaEstado() }}</span>
                         @if($pago->comprobante && auth()->user()->puedeAdministrar())
-                            <a href="{{ route('gestion.pagos.comprobante', $pago) }}" target="_blank" rel="noopener" class="btn btn-linea btn-mini"><x-icono nombre="ojo" class="size-4" /> Comprobante</a>
+                            <a href="{{ route('gestion.pagos.comprobante', $pago) }}" target="_blank" rel="noopener" class="btn btn-linea btn-mini"><x-icono nombre="ojo" class="size-4" /> Captura del cliente</a>
+                        @endif
+                        @if($pago->estado === 'por_verificar' && auth()->user()->puedeAdministrar())
+                            <a href="{{ route('gestion.pagos.vista-previa', $pago) }}" target="_blank" rel="noopener" class="btn btn-linea btn-mini"><x-icono nombre="pdf" class="size-4" /> Vista previa</a>
                         @endif
                         @if($pago->estado === 'por_verificar' && auth()->user()->puedeAdministrar())
                             <a href="{{ route('gestion.pagos.index') }}" class="btn btn-sol btn-mini">Verificar</a>
@@ -128,7 +131,12 @@
         @if($pedido->tieneComprobante())
             @php($avisos = app(\App\Services\AvisoClienteService::class))
             <div class="flex flex-wrap gap-2">
-                <a href="{{ route('gestion.pedidos.comprobante', $pedido) }}" class="btn btn-linea btn-mini"><x-icono nombre="pdf" class="size-4" /> Comprobante de pago</a>
+                <a href="{{ route('gestion.pedidos.comprobante', $pedido) }}" target="_blank" rel="noopener" class="btn btn-linea btn-mini"><x-icono nombre="pdf" class="size-4" /> Comprobante de pago</a>
+                @if(auth()->user()->puedeAdministrar() && $avisos->correo($pedido))
+                    <form method="POST" action="{{ route('gestion.pedidos.enviar-comprobante', $pedido) }}" data-confirmar="¿Enviar el comprobante a {{ $avisos->correo($pedido) }}?">
+                        @csrf<button class="btn btn-linea btn-mini"><x-icono nombre="enviar" class="size-4" /> Enviar por correo</button>
+                    </form>
+                @endif
                 @if($wa = $avisos->whatsapp($pedido, $pedido->estaEntregado() ? 'entregado' : 'pago_verificado'))
                     <a href="{{ $wa }}" target="_blank" rel="noopener" class="btn btn-linea btn-mini"><x-icono nombre="whatsapp" class="size-4" /> {{ $pedido->estaEntregado() ? 'Avisar la entrega' : 'Avisar el pago verificado' }}</a>
                 @endif

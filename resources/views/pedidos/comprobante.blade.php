@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Comprobante {{ $pedido->codigo }}</title>
+<title>{{ $vistaPrevia ? 'Vista previa · ' : '' }}Comprobante {{ $pedido->codigo }}</title>
 {{-- DomPDF solo entiende CSS 2.1 básico: sin flexbox ni variables CSS --}}
 <style>
     body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #0f1b2d; }
@@ -11,6 +11,8 @@
     .titulo { font-size: 15px; font-weight: bold; letter-spacing: 1px; }
     .muted { color: #4a5668; }
     .sello { border: 2px solid #1d7a46; color: #1d7a46; font-weight: bold; padding: 4px 10px; display: inline-block; }
+    .sello-previa { border-color: #b26b00; color: #b26b00; }
+    .aviso-previa { border: 2px dashed #b26b00; color: #7a4a00; padding: 8px 10px; margin-bottom: 12px; }
     table { width: 100%; border-collapse: collapse; }
     th { background: #0d5192; color: #fff; text-align: left; padding: 6px; }
     td { border-bottom: 1px solid #d3dbe5; padding: 6px; }
@@ -26,9 +28,13 @@
     <table><tr>
         <td style="border:none;padding:0"><span class="marca">Inversiones Rialto 7 C.A.</span><br>
             <span class="muted">Maquinaria agrícola y repuestos · Av. Las Industrias, Edificio Campagna, Valle de la Pascua, Guárico</span></td>
-        <td style="border:none;padding:0;width:34%;white-space:nowrap" class="der"><span class="titulo">COMPROBANTE DE PAGO</span><br><span class="sello">PAGO VERIFICADO</span></td>
+        <td style="border:none;padding:0;width:34%;white-space:nowrap" class="der"><span class="titulo">COMPROBANTE DE PAGO</span><br>@if($vistaPrevia)<span class="sello sello-previa">VISTA PREVIA</span>@else<span class="sello">PAGO VERIFICADO</span>@endif</td>
     </tr></table>
 </div>
+
+@if($vistaPrevia)
+    <div class="aviso-previa"><strong>Vista previa para el personal.</strong> El pago aún no está verificado: este documento no es válido para el cliente. Así quedará el comprobante al verificar el pago.</div>
+@endif
 
 <table style="margin-bottom:14px">
     <tr>
@@ -75,7 +81,13 @@
             <td>{{ $pago->nombreMetodo() }}</td>
             <td>{{ $pago->referencia ?: '—' }}</td>
             <td>{{ $pago->fecha_pago->format('d/m/Y') }}</td>
-            <td>{{ $pago->verificado_en?->format('d/m/Y') }}@if($pago->verificadoPor) · {{ $pago->verificadoPor->nombre }}@endif</td>
+            <td>
+                @if($pago->estado === 'por_verificar')
+                    Por verificar
+                @else
+                    {{ $pago->verificado_en?->format('d/m/Y') }}{{ $pago->verificadoPor ? ' · ' . $pago->verificadoPor->nombre : '' }}
+                @endif
+            </td>
             <td class="der">{{ $pago->montoFormateado() }}</td>
         </tr>
     @endforeach
@@ -89,6 +101,10 @@
         @if($pedido->entregadoPor) Entregó: {{ $pedido->entregadoPor->nombre }}.@endif</p>
 @endif
 
+@if($vistaPrevia)
+<p class="muted" style="margin-top:24px">Vista previa: al verificar el pago, aquí dirá que el pago fue recibido y verificado.</p>
+@else
 <p class="muted" style="margin-top:24px">Este comprobante certifica que el pago del pedido {{ $pedido->codigo }} fue recibido y verificado por Inversiones Rialto 7 C.A. No sustituye la factura fiscal. Preséntalo (impreso o en el teléfono) al retirar tu pedido.</p>
+@endif
 </body>
 </html>
