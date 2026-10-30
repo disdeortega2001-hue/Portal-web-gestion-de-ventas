@@ -37,7 +37,10 @@ class PagoController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('gestion.pagos.index', compact('pagos', 'estado'));
+        $conteos = Pago::selectRaw('estado, count(*) as n')->groupBy('estado')->pluck('n', 'estado')->all();
+        $conteos['todos'] = array_sum($conteos);
+
+        return view('gestion.pagos.index', compact('pagos', 'estado', 'conteos'));
     }
 
     public function verificar(Request $request, Pago $pago): RedirectResponse

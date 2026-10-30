@@ -3,7 +3,7 @@
 
 @section('contenido')
 <x-encabezado titulo="Cotizaciones">Las pendientes más antiguas primero: el cliente espera tu llamada.</x-encabezado>
-<x-pestanas :opciones="['pendiente' => 'Pendientes', 'convertida' => 'Convertidas', 'rechazada' => 'Rechazadas', 'todas' => 'Todas']" :actual="$estado" ruta="gestion.cotizaciones.index" />
+<x-pestanas :opciones="['pendiente' => 'Pendientes', 'convertida' => 'Convertidas', 'rechazada' => 'Rechazadas', 'todas' => 'Todas']" :actual="$estado" ruta="gestion.cotizaciones.index" :conteos="$conteos" :atencion="['pendiente']" />
 <x-buscador :accion="route('gestion.cotizaciones.index')" :valor="$busqueda" placeholder="Código, cliente, cédula o teléfono" :mantener="['estado' => $estado]" />
 
 <div class="lobulo overflow-x-auto">

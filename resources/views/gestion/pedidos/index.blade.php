@@ -7,7 +7,7 @@
         <a href="{{ route('gestion.pedidos.create') }}" class="btn btn-sol"><x-icono nombre="mas" class="size-4" /> Venta de mostrador</a>
     </x-slot:acciones>
 </x-encabezado>
-<x-pestanas :opciones="['todos' => 'Todos', 'pendiente' => 'Pendientes', 'confirmado' => 'Confirmados', 'devolucion' => 'Devoluciones', 'anulado' => 'Anulados']" :actual="$estado" ruta="gestion.pedidos.index" />
+<x-pestanas :opciones="['todos' => 'Todos', 'pendiente' => 'Pendientes', 'confirmado' => 'Confirmados', 'devolucion' => 'Devoluciones', 'anulado' => 'Anulados']" :actual="$estado" ruta="gestion.pedidos.index" :conteos="$conteos" :atencion="['pendiente', 'devolucion']" />
 <x-buscador :accion="route('gestion.pedidos.index')" :valor="$busqueda" placeholder="Código, cliente, cédula o teléfono" :mantener="['estado' => $estado]" />
 
 <div class="lobulo overflow-x-auto">

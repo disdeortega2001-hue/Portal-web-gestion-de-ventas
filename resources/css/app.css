@@ -155,6 +155,30 @@
     .capsula[aria-current] .conteo { @apply bg-sol text-tierra-oscura; }
     .capsula-quitar { @apply pr-3; }
 
+    /* ---- Pestañas de estado: control segmentado (riel claro, la activa en blanco elevada) ---- */
+    /* Se desliza con el dedo, sin la barra gruesa debajo */
+    .sin-barra { scrollbar-width: none; }
+    .sin-barra::-webkit-scrollbar { display: none; }
+    .segmentos { @apply inline-flex gap-1 rounded-[8px] border border-linea bg-agua-honda p-1; }
+    .segmento {
+        @apply inline-flex min-h-10 items-center gap-2 rounded-[6px] px-3.5 text-[0.875rem] font-bold text-tinta-suave whitespace-nowrap no-underline;
+        transition: background-color 0.2s, color 0.2s, box-shadow 0.2s, transform 0.25s var(--ease-rebote);
+        -webkit-tap-highlight-color: transparent;
+    }
+    @media (hover: hover) { .segmento:hover:not([aria-current]) { @apply bg-white/70 text-tinta; } }
+    .segmento:active { transform: scale(0.97); transition: transform 0.08s ease-out; }
+    .segmento[aria-current] { @apply bg-white text-tierra-oscura; box-shadow: 0 1px 2px rgb(5 43 112 / 0.12), 0 4px 12px -6px rgb(5 43 112 / 0.35); }
+    .segmento .punto { @apply size-2 shrink-0 rounded-full bg-tinta-suave/40; }
+    .segmento[data-estado="pendiente"] .punto, .segmento[data-estado="sin_pago"] .punto { background: #8a63c9; }
+    .segmento[data-estado="por_verificar"] .punto { background: #e0a800; }
+    .segmento[data-estado="convertida"] .punto, .segmento[data-estado="confirmado"] .punto, .segmento[data-estado="verificado"] .punto { background: var(--color-sabana); }
+    .segmento[data-estado="rechazada"] .punto, .segmento[data-estado="rechazado"] .punto, .segmento[data-estado="anulado"] .punto { background: var(--color-coral); }
+    .segmento[data-estado="devolucion"] .punto { background: var(--color-laguna); }
+    .segmento[data-estado="todas"] .punto, .segmento[data-estado="todos"] .punto { display: none; }
+    .segmento .conteo { @apply grid h-6 min-w-6 place-items-center rounded-[4px] bg-white/80 px-1.5 text-xs font-extrabold text-tinta-suave; }
+    .segmento[aria-current] .conteo { @apply bg-agua text-tierra-oscura; }
+    .segmento .conteo-atencion, .segmento[aria-current] .conteo-atencion { @apply bg-sol text-noche; }
+
     /* ---- Campos ---- */
     .etiqueta { @apply mb-1.5 block text-[0.9375rem] font-bold text-tinta; }
     .campo {

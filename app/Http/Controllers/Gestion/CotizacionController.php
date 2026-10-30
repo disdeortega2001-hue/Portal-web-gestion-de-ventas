@@ -35,7 +35,10 @@ class CotizacionController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('gestion.cotizaciones.index', compact('cotizaciones', 'estado', 'busqueda'));
+        $conteos = Cotizacion::selectRaw('estado, count(*) as n')->groupBy('estado')->pluck('n', 'estado')->all();
+        $conteos['todas'] = array_sum($conteos);
+
+        return view('gestion.cotizaciones.index', compact('cotizaciones', 'estado', 'busqueda', 'conteos'));
     }
 
     public function show(Cotizacion $cotizacion): View

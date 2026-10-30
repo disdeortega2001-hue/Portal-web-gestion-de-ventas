@@ -44,7 +44,11 @@ class PedidoController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('gestion.pedidos.index', compact('pedidos', 'estado', 'busqueda'));
+        $conteos = Pedido::selectRaw('estado, count(*) as n')->groupBy('estado')->pluck('n', 'estado')->all();
+        $conteos['todos'] = array_sum($conteos);
+        $conteos['devolucion'] = Pedido::whereNotNull('devolucion_solicitada_en')->where('estado', '!=', Pedido::ANULADO)->count();
+
+        return view('gestion.pedidos.index', compact('pedidos', 'estado', 'busqueda', 'conteos'));
     }
 
     /**

@@ -5,7 +5,7 @@
 <x-encabezado titulo="Pagos">
     Pagos que reportan los clientes desde el portal. Revisa la referencia en el banco y verifícalo: el pedido queda pagado y la venta se confirma.
 </x-encabezado>
-<x-pestanas :opciones="['por_verificar' => 'Por verificar', 'verificado' => 'Verificados', 'rechazado' => 'Rechazados', 'todos' => 'Todos']" :actual="$estado" ruta="gestion.pagos.index" />
+<x-pestanas :opciones="['por_verificar' => 'Por verificar', 'verificado' => 'Verificados', 'rechazado' => 'Rechazados', 'todos' => 'Todos']" :actual="$estado" ruta="gestion.pagos.index" :conteos="$conteos" :atencion="['por_verificar']" />
 
 @if($pagos->isEmpty())
     <div class="lobulo px-6 py-10 text-center">
