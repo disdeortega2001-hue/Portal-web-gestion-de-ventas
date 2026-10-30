@@ -9,11 +9,12 @@ class DetallePedido extends Model
 {
     protected $table = 'detalle_pedidos';
 
-    protected $fillable = ['id_pedido', 'id_producto', 'cantidad', 'precio_unitario', 'subtotal'];
+    protected $fillable = ['id_pedido', 'id_producto', 'cantidad', 'precio_unitario', 'exento_iva', 'subtotal'];
 
     protected $casts = [
         'cantidad' => 'integer',
         'precio_unitario' => 'decimal:2',
+        'exento_iva' => 'boolean',
         'subtotal' => 'decimal:2',
     ];
 

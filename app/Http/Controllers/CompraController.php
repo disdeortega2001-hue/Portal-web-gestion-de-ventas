@@ -10,11 +10,13 @@ use App\Services\PagoService;
 use App\Services\PedidoService;
 use App\Support\ClienteInvitado;
 use App\Support\ClienteRecordado;
+use App\Support\Credito;
 use App\Support\MetodosPago;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use LogicException;
@@ -37,12 +39,16 @@ class CompraController extends Controller
             return $redireccion;
         }
 
+        $cliente = $request->user()?->cliente;
+        // Un resumen por moneda: en dólares lleva IGTF y en bolívares IVA; el método elegido decide cuál aplica
+        $resumenes = ['USD' => $this->carrito->resumen('USD'), 'VES' => $this->carrito->resumen('VES')];
+
         return view('compra.create', [
-            // Un resumen por moneda: en dólares lleva IGTF y en bolívares IVA; el método elegido decide cuál aplica
-            'resumenes' => ['USD' => $this->carrito->resumen('USD'), 'VES' => $this->carrito->resumen('VES')],
-            'cliente' => $request->user()?->cliente,
+            'resumenes' => $resumenes,
+            'cliente' => $cliente,
             'recordado' => $request->user() ? [] : ClienteRecordado::leer(),
             'metodos' => MetodosPago::disponibles(),
+            'credito' => self::opcionesCredito($cliente, $resumenes),
         ]);
     }
 
@@ -53,6 +59,17 @@ class CompraController extends Controller
         }
 
         $datos = $request->validated();
+
+        // El crédito es solo para clientes autorizados y dentro de su límite
+        if (Credito::esOpcion($datos['metodo_pago'])) {
+            $cliente = $request->user()?->cliente;
+            $total = (float) $this->carrito->resumen(Credito::moneda($datos['metodo_pago']))['total'];
+            if (! $cliente || ! Credito::permite($cliente, $total)) {
+                throw ValidationException::withMessages(['metodo_pago' => $cliente?->credito_habilitado
+                    ? 'Este pedido pasa de tu crédito disponible (USD ' . number_format((float) Credito::disponibleUsd($cliente), 2, ',', '.') . '). Elige otro método o quita productos.'
+                    : 'Tu cuenta no tiene crédito autorizado. Pregúntanos por WhatsApp cómo solicitarlo.']);
+            }
+        }
 
         // Revalida la existencia al momento de comprar (pudo cambiar desde que se agregó)
         $lineas = $this->carrito->lineas();
@@ -77,13 +94,34 @@ class CompraController extends Controller
                 : ClienteRecordado::olvidar();
         }
 
-        $siguiente = MetodosPago::enLinea($pedido->metodo_pago)
-            ? 'Paga y repórtalo aquí mismo con la referencia.'
-            : 'Pagas al retirar en la tienda.';
+        $siguiente = match (true) {
+            $pedido->a_credito => 'Es a crédito: lo confirmamos y te avisamos para retirarlo. Abonas cuando quieras desde aquí.',
+            MetodosPago::enLinea($pedido->metodo_pago) => 'Paga y repórtalo aquí mismo con la referencia.',
+            default => 'Pagas al retirar en la tienda.',
+        };
 
         $destino = $conCuenta ? route('cuenta.pedidos.show', $pedido) : self::enlaceSeguimiento($pedido);
 
         return redirect($destino)->with('exito', "Recibimos tu pedido {$pedido->codigo}. {$siguiente}");
+    }
+
+    /**
+     * Opciones de crédito para un cliente autorizado: cada una dice si el pedido cabe en su límite.
+     *
+     * @return array{disponible: ?float, deuda: float, opciones: array}|null
+     */
+    private static function opcionesCredito(?\App\Models\Cliente $cliente, array $resumenes): ?array
+    {
+        if (! $cliente?->credito_habilitado) {
+            return null;
+        }
+
+        $opciones = [];
+        foreach (Credito::OPCIONES as $clave => $opcion) {
+            $opciones[$clave] = $opcion + ['alcanza' => Credito::permite($cliente, (float) $resumenes[$opcion['moneda']]['total'])];
+        }
+
+        return ['disponible' => Credito::disponibleUsd($cliente), 'deuda' => Credito::deudaUsd($cliente), 'opciones' => $opciones];
     }
 
     /** Pedido hecho sin cuenta: se consulta con el enlace firmado que recibió al comprar. */
@@ -116,11 +154,15 @@ class CompraController extends Controller
         $this->autorizar($request, $pedido);
 
         $datos = $request->validate([
+            'metodo' => [$pedido->a_credito ? 'required' : 'prohibited', 'nullable',
+                Rule::in(array_keys(array_filter(MetodosPago::disponibles(), fn ($m) => $m['en_linea'])))],
             'referencia' => ['required', 'string', 'min:4', 'max:60'],
             'fecha_pago' => ['required', 'date_format:Y-m-d', 'before_or_equal:today', 'after_or_equal:' . $pedido->fecha->toDateString()],
             'monto' => ['required', 'numeric', 'gt:0', 'max:999999999'],
             'comprobante' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'],
         ], [
+            'metodo.required' => 'Elige con qué pagaste.',
+            'metodo.in' => 'Ese método de pago no está disponible.',
             'referencia.required' => 'Escribe el número de referencia del pago.',
             'referencia.min' => 'La referencia debe tener al menos 4 caracteres.',
             'fecha_pago.required' => 'Indica la fecha del pago.',
@@ -138,7 +180,9 @@ class CompraController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        return back()->with('exito', 'Recibimos tu reporte de pago. Te avisamos cuando lo verifiquemos.');
+        return back()->with('exito', $pedido->a_credito
+            ? 'Recibimos tu abono. Cuando lo verifiquemos se descuenta de tu saldo.'
+            : 'Recibimos tu reporte de pago. Te avisamos cuando lo verifiquemos.');
     }
 
     /**

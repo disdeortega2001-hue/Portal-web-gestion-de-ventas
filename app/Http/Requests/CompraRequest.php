@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\Credito;
 use App\Support\MetodosPago;
 use Illuminate\Validation\Rule;
 
@@ -15,7 +16,11 @@ class CompraRequest extends ClienteRequest
     public function rules(): array
     {
         $reglas = [
-            'metodo_pago' => ['required', Rule::in(array_keys(MetodosPago::disponibles()))],
+            // El crédito se ofrece solo a clientes autorizados; el límite lo revisa CompraController
+            'metodo_pago' => ['required', Rule::in(array_merge(
+                array_keys(MetodosPago::disponibles()),
+                $this->user()?->cliente?->credito_habilitado ? array_keys(Credito::OPCIONES) : [],
+            ))],
             'entrega' => ['required', 'in:retiro,envio'],
             'observaciones' => ['nullable', 'string', 'max:500'],
         ];

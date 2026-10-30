@@ -45,6 +45,29 @@
                     <a href="{{ $urlComprobante }}" class="btn btn-sol mt-5">Descargar comprobante de pago <span class="chip"><x-icono nombre="pdf" class="size-4" /></span></a>
                 </div>
             </section>
+        {{-- Compra a crédito: lo que debe, lo abonado y cuándo le recordamos --}}
+        @elseif($pedido->a_credito && $pedido->estado !== 'anulado')
+            <section aria-labelledby="t-credito" class="sobre-azul relative overflow-hidden rounded-[10px] bg-tierra-oscura p-6 text-white sm:p-8">
+                <x-arcos class="absolute inset-y-0 right-0 h-full w-80" />
+                <div class="relative">
+                    <h2 id="t-credito" class="titular text-3xl">Compra a <em>crédito</em></h2>
+                    @if($pedido->estaPendiente())
+                        <p class="mt-3 max-w-[55ch] text-white/85">Estamos revisando tu pedido. Te escribimos al {{ $pedido->cliente->telefono }} cuando esté listo para {{ $pedido->entrega === 'envio' ? 'coordinar el envío' : 'retirar en la tienda' }}.</p>
+                    @endif
+                    <p class="mt-4 text-white/80">Saldo pendiente</p>
+                    <p class="titular text-4xl text-sol cifra sm:text-5xl">@usd($pedido->saldoUsd())</p>
+                    <p class="mt-1 text-white/75 cifra">@bs($pedido->saldoBs()) a la tasa de hoy · abonado @usd($pedido->abonadoUsd()) de @usd($pedido->total)</p>
+                    @if($pedido->estado_pago === 'por_verificar')
+                        <p class="mt-4 rounded-[8px] bg-white/10 px-4 py-3">Estamos verificando tu último abono; al confirmarlo se descuenta del saldo.</p>
+                    @endif
+                    @if($proximo = $pedido->proximoRecordatorio())
+                        <p class="mt-4 text-sm text-white/75">Abona cuando quieras. Te recordamos el saldo cada 30 días; el próximo aviso es el <span class="cifra">{{ $proximo->format('d/m/Y') }}</span>.</p>
+                    @endif
+                    @if($pedido->estaEntregado())
+                        <p class="mt-3 text-sm text-white/75">{{ $pedido->entrega === 'envio' ? 'Entregado' : 'Retirado' }} el <span class="cifra">{{ $pedido->entregado_en->format('d/m/Y') }}</span> por {{ $pedido->recibido_por }}.</p>
+                    @endif
+                </div>
+            </section>
         {{-- Pago reportado: ya no hace falta repetir las instrucciones --}}
         @elseif($pedido->estado_pago === 'por_verificar')
             <section aria-labelledby="t-verificando" class="sobre-azul relative overflow-hidden rounded-[10px] bg-tierra-oscura p-6 text-white sm:p-8">
@@ -83,10 +106,33 @@
 
         {{-- Reportar el pago --}}
         @if($pedido->aceptaReporteDePago())
+            @php($credito = $pedido->a_credito)
             <section aria-labelledby="t-reporte">
-                <h2 id="t-reporte" class="titular subrayado text-3xl text-tierra-oscura">Reporta tu pago</h2>
-                <form method="POST" action="{{ $urlPago }}" enctype="multipart/form-data" class="needs-validation lobulo mt-8 grid gap-4 p-5 sm:grid-cols-2 sm:p-6" novalidate>
+                <h2 id="t-reporte" class="titular subrayado text-3xl text-tierra-oscura">{{ $credito ? 'Reporta un abono' : 'Reporta tu pago' }}</h2>
+                <form method="POST" action="{{ $urlPago }}" enctype="multipart/form-data" class="needs-validation lobulo mt-8 grid gap-4 p-5 sm:grid-cols-2 sm:p-6" novalidate
+                      @if($credito) x-data="{ metodo: @js(old('metodo', array_key_first($metodosAbono))), metodos: @js($metodosAbono), usd: @js($pedido->saldoUsd()), bs: @js($pedido->saldoBs()) }" @endif>
                     @csrf
+                    {{-- A crédito elige con qué abonó y ve los datos para pagar --}}
+                    @if($credito)
+                        <div class="sm:col-span-2">
+                            <label for="metodo" class="etiqueta">¿Con qué pagaste? *</label>
+                            <select id="metodo" name="metodo" class="campo @error('metodo') is-invalid @enderror" required x-model="metodo" @change="$refs.monto.value = metodos[metodo].moneda === 'USD' ? usd : bs">
+                                @foreach($metodosAbono as $clave => $metodo)
+                                    <option value="{{ $clave }}" @selected(old('metodo') === $clave)>{{ $metodo['nombre'] }} ({{ $metodo['moneda'] === 'USD' ? 'USD' : 'Bs.' }})</option>
+                                @endforeach
+                            </select>
+                            <p class="error-campo">@error('metodo'){{ $message }}@else Elige el método. @enderror</p>
+                            @foreach($metodosAbono as $clave => $metodo)
+                                <dl class="mt-3 grid gap-2 sm:grid-cols-3" x-show="metodo === @js($clave)" @if($loop->index) x-cloak @endif>
+                                    @forelse($metodo['datos'] as $etiqueta => $valor)
+                                        <div class="rounded-[6px] bg-agua-honda px-3 py-2"><dt class="text-xs font-extrabold uppercase tracking-[0.08em] text-tinta-suave">{{ $etiqueta }}</dt><dd class="font-bold cifra">{{ $valor }}</dd></div>
+                                    @empty
+                                        <p class="apoyo text-sm sm:col-span-3">Te enviamos los datos de la cuenta por WhatsApp.</p>
+                                    @endforelse
+                                </dl>
+                            @endforeach
+                        </div>
+                    @endif
                     <div>
                         <label for="referencia" class="etiqueta">Número de referencia *</label>
                         <input type="text" id="referencia" name="referencia" value="{{ old('referencia') }}" class="campo cifra @error('referencia') is-invalid @enderror" required minlength="4" maxlength="60" autocomplete="off">
@@ -98,12 +144,13 @@
                         <p class="error-campo">@error('fecha_pago'){{ $message }}@else Indica la fecha del pago. @enderror</p>
                     </div>
                     <div>
-                        @php($moneda = \App\Support\MetodosPago::moneda($pedido->metodo_pago))
+                        @php($moneda = $credito ? \App\Support\MetodosPago::moneda(old('metodo', array_key_first($metodosAbono))) : \App\Support\MetodosPago::moneda($pedido->metodo_pago))
                         <label for="monto" class="etiqueta">Monto pagado *</label>
                         <div class="grupo-campo">
-                            <span class="unidad">{{ $moneda === 'USD' ? 'USD' : 'Bs.' }}</span>
-                            <input type="number" id="monto" name="monto" value="{{ old('monto', \App\Support\MetodosPago::montoEnMoneda($moneda, $pedido->total, $pedido->total_bs)) }}" class="campo cifra @error('monto') is-invalid @enderror" required min="0.01" step="0.01">
+                            <span class="unidad" @if($credito) x-text="metodos[metodo].moneda === 'USD' ? 'USD' : 'Bs.'" @endif>{{ $moneda === 'USD' ? 'USD' : 'Bs.' }}</span>
+                            <input type="number" id="monto" name="monto" x-ref="monto" value="{{ old('monto', $credito ? ($moneda === 'USD' ? $pedido->saldoUsd() : $pedido->saldoBs()) : \App\Support\MetodosPago::montoEnMoneda($moneda, $pedido->total, $pedido->total_bs)) }}" class="campo cifra @error('monto') is-invalid @enderror" required min="0.01" step="0.01">
                         </div>
+                        @if($credito)<p class="ayuda">Puedes abonar una parte; se propone el saldo completo.</p>@endif
                         <p class="error-campo">@error('monto'){{ $message }}@else Indica el monto. @enderror</p>
                     </div>
                     <div>
@@ -112,7 +159,7 @@
                         <p class="error-campo">@error('comprobante'){{ $message }}@enderror</p>
                         <p class="ayuda">Captura o PDF, hasta 5 MB.</p>
                     </div>
-                    <button class="btn btn-sol btn-grande sm:col-span-2 sm:justify-self-start" data-cargando="Enviando…">Reportar pago <span class="chip"><x-icono nombre="enviar" class="size-4" /></span></button>
+                    <button class="btn btn-sol btn-grande sm:col-span-2 sm:justify-self-start" data-cargando="Enviando…">{{ $credito ? 'Reportar abono' : 'Reportar pago' }} <span class="chip"><x-icono nombre="enviar" class="size-4" /></span></button>
                 </form>
             </section>
         @endif

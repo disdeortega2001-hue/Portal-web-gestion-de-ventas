@@ -54,7 +54,7 @@
     @foreach($pedido->detalles as $detalle)
         <tr>
             <td>{{ $detalle->producto->codigo_fabrica }}</td>
-            <td>{{ $detalle->producto->nombre }}</td>
+            <td>{{ $detalle->producto->nombre }}@if($detalle->exento_iva) <span style="font-size:8px;color:#5b6b7f">(E)</span>@endif</td>
             <td class="der">{{ $detalle->cantidad }}</td>
             <td class="der">{{ number_format($detalle->precio_unitario, 2, ',', '.') }}</td>
             <td class="der">{{ number_format($detalle->subtotal, 2, ',', '.') }}</td>
@@ -65,6 +65,9 @@
 
 <table class="totales">
     <tr><td>Subtotal</td><td class="der">USD {{ number_format($pedido->subtotal, 2, ',', '.') }}</td></tr>
+    @if((float) $pedido->monto_exento > 0 && $pedido->tipo_impuesto === 'IVA')
+    <tr><td>Exento de IVA (E)</td><td class="der">USD {{ number_format($pedido->monto_exento, 2, ',', '.') }}</td></tr>
+    @endif
     @if((float) $pedido->descuento > 0)
         <tr><td>Descuento</td><td class="der">USD -{{ number_format($pedido->descuento, 2, ',', '.') }}</td></tr>
     @endif

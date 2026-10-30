@@ -2,7 +2,7 @@
 @section('titulo', 'Venta de mostrador')
 
 @php
-    $catalogo = $productos->map(fn ($p) => ['id' => $p->id, 'codigo' => $p->codigo_fabrica, 'nombre' => $p->nombre, 'marca' => $p->marca, 'precio' => (float) $p->precio, 'stock' => $p->stock])->values();
+    $catalogo = $productos->map(fn ($p) => ['id' => $p->id, 'codigo' => $p->codigo_fabrica, 'nombre' => $p->nombre, 'marca' => $p->marca, 'precio' => (float) $p->precio, 'exento' => $p->exento_iva, 'stock' => $p->stock])->values();
     $lineasPrevias = collect(old('items', []))->map(fn ($i) => ['id' => (int) ($i['id_producto'] ?? 0), 'cantidad' => (int) ($i['cantidad'] ?? 1)])->values();
 @endphp
 
@@ -97,6 +97,12 @@
                     @endforeach
                 </div>
             </fieldset>
+            {{-- Solo para clientes con crédito autorizado: se lleva la mercancía y abona después --}}
+            <label class="mt-4 flex cursor-pointer items-start gap-3 rounded-[6px] border border-white/30 px-3 py-2.5" x-show="cliente && cliente.credito_habilitado" x-cloak>
+                <input type="checkbox" name="a_credito" value="1" class="mt-1" @checked(old('a_credito'))>
+                <span><span class="font-bold">Venta a crédito</span>
+                    <span class="block text-sm text-white/75">Se lleva la mercancía y abona después; le recordamos el saldo cada 30 días.</span></span>
+            </label>
             <dl class="mt-4 space-y-2 cifra">
                 <div class="flex justify-between"><dt class="text-white/80">Subtotal</dt><dd x-text="usd(t.subtotal)"></dd></div>
                 <div class="flex justify-between"><dt class="text-white/80" x-text="(moneda === 'USD' ? 'IGTF (' + p.igtf : 'IVA (' + p.iva) + ' %)'"></dt><dd x-text="usd(t.impuesto)"></dd></div>
@@ -126,7 +132,9 @@
             },
             get t() {
                 const sub = this.lineas.reduce((s, l) => s + Math.round(l.p.precio * 100) * (parseInt(l.cantidad) || 0), 0);
-                const impuesto = Math.round(sub * (this.moneda === 'USD' ? p.igtf : p.iva) / 100);
+                // Los exentos de IVA (Marchesan Tatu) no suman a la base del IVA; el IGTF sí grava todo
+                const exento = this.lineas.reduce((s, l) => s + (l.p.exento ? Math.round(l.p.precio * 100) * (parseInt(l.cantidad) || 0) : 0), 0);
+                const impuesto = Math.round((this.moneda === 'USD' ? sub : sub - exento) * (this.moneda === 'USD' ? p.igtf : p.iva) / 100);
                 return { subtotal: sub / 100, impuesto: impuesto / 100, total: (sub + impuesto) / 100 };
             },
             agregar(prod) {

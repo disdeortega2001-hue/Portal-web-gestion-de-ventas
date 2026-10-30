@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Notification;
 use Throwable;
 
 /**
- * Avisos al cliente cuando su pago queda verificado o cuando su pedido se entrega.
+ * Avisos al cliente cuando su pago queda verificado, cuando su pedido se entrega y, en las compras
+ * a crédito, cuando se registra un abono o se cumplen 30 días sin saldar (recordatorio de pago).
  *
  * - Si el cliente dejó correo, se le envía en el momento (con el comprobante adjunto si es el pago).
  * - Para WhatsApp se prepara el mensaje: el personal lo envía con un toque desde el panel
@@ -22,6 +23,8 @@ class AvisoClienteService
 {
     public const PAGO_VERIFICADO = 'pago_verificado';
     public const ENTREGADO = 'entregado';
+    public const ABONO = 'abono';
+    public const RECORDATORIO_CREDITO = 'recordatorio_credito';
 
     public function __construct(private readonly ComprobanteService $comprobantes)
     {
@@ -45,7 +48,12 @@ class AvisoClienteService
             try {
                 $pdf = $tipo === self::PAGO_VERIFICADO ? $this->comprobantes->pdf($pedido)->output() : null;
                 Notification::route('mail', $correo)->notify(new AvisoPedido(
-                    $tipo === self::PAGO_VERIFICADO ? "Pago verificado del pedido {$pedido->codigo}" : "Pedido {$pedido->codigo} entregado",
+                    match ($tipo) {
+                        self::PAGO_VERIFICADO => "Pago verificado del pedido {$pedido->codigo}",
+                        self::ABONO => "Recibimos tu abono al pedido {$pedido->codigo}",
+                        self::RECORDATORIO_CREDITO => "Recordatorio de pago del pedido {$pedido->codigo}",
+                        default => "Pedido {$pedido->codigo} entregado",
+                    },
                     'Hola, ' . $pedido->cliente->nombre,
                     $this->lineas($pedido, $tipo),
                     $this->enlacePedido($pedido),
@@ -75,6 +83,23 @@ class AvisoClienteService
     /** @return list<string> */
     private function lineas(Pedido $pedido, string $tipo): array
     {
+        if ($tipo === self::RECORDATORIO_CREDITO || $tipo === self::ABONO) {
+            $pedido->loadMissing('pagos');
+            $saldo = 'USD ' . number_format((float) $pedido->saldoUsd(), 2, ',', '.')
+                . ' (Bs. ' . number_format((float) $pedido->saldoBs(), 2, ',', '.') . ' a la tasa de hoy)';
+            $abono = $pedido->pagos->firstWhere('estado', \App\Models\Pago::VERIFICADO);
+
+            return $tipo === self::ABONO
+                ? array_values(array_filter([
+                    $abono ? "Recibimos tu abono de {$abono->montoFormateado()} al pedido {$pedido->codigo}. ¡Gracias!" : null,
+                    $pedido->estaPagado() ? 'Con este pago tu crédito quedó saldado.' : "Tu saldo pendiente es {$saldo}.",
+                ]))
+                : [
+                    "Te recordamos que tu compra a crédito {$pedido->codigo} del {$pedido->fecha->format('d/m/Y')} tiene un saldo pendiente de {$saldo}.",
+                    'Puedes abonar por Pago Móvil, transferencia o Zelle y reportarlo desde tu pedido, o pagar en la tienda.',
+                ];
+        }
+
         if ($tipo === self::PAGO_VERIFICADO) {
             $siguiente = match (true) {
                 $pedido->estaEntregado() => 'Tu pedido ya fue entregado.',

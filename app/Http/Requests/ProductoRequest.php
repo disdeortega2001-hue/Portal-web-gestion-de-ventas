@@ -33,6 +33,7 @@ class ProductoRequest extends FormRequest
             'imagen' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'stock' => [$idProducto ? 'prohibited' : 'required', 'integer', 'min:0'],  // Al editar, el stock solo cambia por movimientos
             'activo' => ['boolean'],
+            'exento_iva' => ['boolean'],
         ];
     }
 

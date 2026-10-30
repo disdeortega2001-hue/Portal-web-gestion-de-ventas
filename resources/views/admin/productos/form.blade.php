@@ -107,6 +107,18 @@
                 </label>
             </div>
 
+            <div class="lobulo p-5">
+                <input type="hidden" name="exento_iva" value="0">
+                <label class="flex cursor-pointer items-center justify-between gap-4 font-semibold" for="exento_iva">
+                    <span>Exento de IVA <span class="ayuda !mt-0.5 block font-normal">Como los implementos Marchesan Tatu. El IGTF se cobra igual si paga en dólares.</span></span>
+                    <span class="relative inline-flex">
+                        <input type="checkbox" role="switch" name="exento_iva" value="1" id="exento_iva" class="peer sr-only" @checked(old('exento_iva', $producto->exento_iva))>
+                        <span class="h-7 w-12 rounded-full bg-linea transition-colors peer-checked:bg-tierra peer-focus-visible:outline-3 peer-focus-visible:outline-laguna"></span>
+                        <span class="absolute left-1 top-1 size-5 rounded-full bg-white transition-transform duration-300 ease-[var(--ease-rebote)] peer-checked:translate-x-5"></span>
+                    </span>
+                </label>
+            </div>
+
             <button class="btn btn-sol btn-grande w-full">{{ $producto->exists ? 'Guardar cambios' : 'Crear producto' }}</button>
         </div>
     </div>

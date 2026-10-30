@@ -40,6 +40,47 @@
             @endforeach
             <div class="bg-tierra-clara p-4"><dt class="text-sm text-tierra">Total comprado</dt><dd class="font-rotulo text-2xl font-extrabold text-tierra cifra">@usd($resumen['total'])</dd></div>
         </dl>
+
+        {{-- Crédito: lo autorizan el administrativo y el directivo; la deuda se lleva en dólares --}}
+        <section class="lobulo p-5" aria-labelledby="t-credito">
+            <h2 id="t-credito" class="seccion-titulo">Crédito</h2>
+            <p class="mt-2 text-sm">
+                @if($cliente->credito_habilitado)
+                    <span class="estado estado-confirmado">Autorizado</span>
+                    {{ $cliente->limite_credito !== null ? 'Límite USD ' . number_format((float) $cliente->limite_credito, 2, ',', '.') : 'Sin límite' }}
+                @else
+                    <span class="estado estado-sin_pago">Sin crédito</span> Solo compra de contado.
+                @endif
+            </p>
+            @if($credito['deuda'] > 0 || $cliente->credito_habilitado)
+                <dl class="mt-3 grid grid-cols-2 gap-3 text-sm">
+                    <div><dt class="apoyo">Debe</dt><dd class="font-rotulo text-2xl font-extrabold text-tierra cifra">@usd($credito['deuda'])</dd></div>
+                    @if($cliente->credito_habilitado)
+                        <div><dt class="apoyo">Disponible</dt><dd class="font-rotulo text-2xl font-extrabold cifra">{{ $credito['disponible'] === null ? 'Sin límite' : 'USD ' . number_format($credito['disponible'], 2, ',', '.') }}</dd></div>
+                    @endif
+                </dl>
+            @endif
+            @if(auth()->user()->puedeAdministrar())
+                <form method="POST" action="{{ route('gestion.clientes.credito', $cliente) }}" class="needs-validation mt-4 space-y-3 border-t border-linea pt-4" novalidate
+                      x-data="{ activo: @js((bool) old('credito_habilitado', $cliente->credito_habilitado)) }">
+                    @csrf @method('PUT')
+                    <input type="hidden" name="credito_habilitado" value="0">
+                    <label class="flex cursor-pointer items-center gap-3 font-semibold">
+                        <input type="checkbox" name="credito_habilitado" value="1" x-model="activo"> Puede comprar a crédito
+                    </label>
+                    <div x-show="activo" x-cloak>
+                        <label for="limite_credito" class="etiqueta">Límite de crédito</label>
+                        <div class="grupo-campo">
+                            <span class="unidad">USD</span>
+                            <input type="number" id="limite_credito" name="limite_credito" value="{{ old('limite_credito', $cliente->limite_credito) }}" class="campo cifra @error('limite_credito') is-invalid @enderror" min="0" step="0.01" placeholder="Sin límite">
+                        </div>
+                        <p class="error-campo">@error('limite_credito'){{ $message }}@enderror</p>
+                        <p class="ayuda">Vacío: sin límite. Al llegar al límite ya no puede comprar a crédito hasta que abone.</p>
+                    </div>
+                    <button class="btn btn-tierra btn-mini">Guardar crédito</button>
+                </form>
+            @endif
+        </section>
     </aside>
 
     <div class="space-y-6">

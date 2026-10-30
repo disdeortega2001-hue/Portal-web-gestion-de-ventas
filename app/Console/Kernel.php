@@ -18,6 +18,10 @@ class Kernel extends ConsoleKernel
         // Tasa oficial del BCV: cada hora de 6:00 a 20:00, así no se pierde aunque la computadora
         // se encienda tarde (el BCV publica la del día siguiente en la tarde)
         $schedule->command('tasa:bcv')->hourly()->between('6:00', '20:00')->withoutOverlapping();
+
+        // Recordatorio de pago a los clientes a crédito: cada 30 días desde la compra o el último aviso.
+        // Corre cada hora en horario de oficina para no perderlo si la computadora se enciende tarde.
+        $schedule->command('credito:recordatorios')->hourly()->between('8:00', '18:00')->withoutOverlapping();
     }
 
     /**

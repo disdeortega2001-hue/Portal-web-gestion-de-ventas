@@ -66,7 +66,12 @@
         <div class="mt-5 border-y border-linea py-5 cifra">
             <div class="font-rotulo text-5xl font-extrabold leading-none">@usd($producto->precio)</div>
             <div class="apoyo mt-2 text-lg">@bs($producto->precioBolivares()) a la tasa BCV del día</div>
-            <p class="apoyo mt-1 text-sm">El impuesto se calcula en tu cotización según cómo pagues.</p>
+            @if($producto->exento_iva)
+                <p class="mt-2"><span class="estado estado-confirmado">Exento de IVA</span></p>
+                <p class="apoyo mt-1 text-sm">Si pagas en dólares se cobra el IGTF; en bolívares no lleva IVA.</p>
+            @else
+                <p class="apoyo mt-1 text-sm">El impuesto se calcula en tu cotización según cómo pagues.</p>
+            @endif
         </div>
 
         <div class="mt-6">

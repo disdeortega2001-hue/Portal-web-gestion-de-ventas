@@ -173,7 +173,9 @@
     .segmento[data-estado="por_verificar"] .punto { background: #e0a800; }
     .segmento[data-estado="convertida"] .punto, .segmento[data-estado="confirmado"] .punto, .segmento[data-estado="verificado"] .punto { background: var(--color-sabana); }
     .segmento[data-estado="rechazada"] .punto, .segmento[data-estado="rechazado"] .punto, .segmento[data-estado="anulado"] .punto { background: var(--color-coral); }
-    .segmento[data-estado="devolucion"] .punto { background: var(--color-laguna); }
+    .segmento[data-estado="devolucion"] .punto, .segmento[data-estado="vigentes"] .punto { background: var(--color-laguna); }
+    .segmento[data-estado="por_recordar"] .punto { background: #e0a800; }
+    .segmento[data-estado="saldados"] .punto { background: var(--color-sabana); }
     .segmento[data-estado="todas"] .punto, .segmento[data-estado="todos"] .punto { display: none; }
     .segmento .conteo { @apply grid h-6 min-w-6 place-items-center rounded-[4px] bg-white/80 px-1.5 text-xs font-extrabold text-tinta-suave; }
     .segmento[aria-current] .conteo { @apply bg-agua text-tierra-oscura; }
@@ -237,6 +239,7 @@
     .estado-pagado, .estado-verificado { @apply bg-sabana-clara text-[#14613a]; }
     .estado-por_verificar { @apply bg-sol-clara text-[#5f4400]; }
     .estado-sin_pago { @apply bg-lila-clara text-[#4c2a7a]; }
+    .estado-parcial { @apply bg-laguna-clara text-laguna-tinta; }
     .estado-rechazado { @apply bg-coral-clara text-coral-tinta; }
     .estado-reembolsado, .estado-entregado { @apply bg-laguna-clara text-laguna-tinta; }
 

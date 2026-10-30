@@ -44,7 +44,7 @@
     @foreach($cotizacion->detalles as $detalle)
         <tr>
             <td>{{ $detalle->producto->codigo_fabrica }}</td>
-            <td>{{ $detalle->producto->nombre }}</td>
+            <td>{{ $detalle->producto->nombre }}@if($detalle->exento_iva) <span style="font-size:8px;color:#5b6b7f">(E)</span>@endif</td>
             <td class="der">{{ $detalle->cantidad }}</td>
             <td class="der">{{ number_format($detalle->precio_unitario, 2, ',', '.') }}</td>
             <td class="der">{{ number_format($detalle->subtotal, 2, ',', '.') }}</td>
@@ -55,6 +55,9 @@
 
 <table class="totales">
     <tr><td>Subtotal</td><td class="der">USD {{ number_format($cotizacion->subtotal, 2, ',', '.') }}</td></tr>
+    @if((float) $cotizacion->monto_exento > 0 && $cotizacion->tipo_impuesto === 'IVA')
+    <tr><td>Exento de IVA (E)</td><td class="der">USD {{ number_format($cotizacion->monto_exento, 2, ',', '.') }}</td></tr>
+    @endif
     <tr><td>{{ $cotizacion->tipo_impuesto }} ({{ (float) $cotizacion->porcentaje_impuesto }}%) · {{ $cotizacion->tipo_impuesto === 'IGTF' ? 'pago en dólares' : 'pago en bolívares' }}</td><td class="der">USD {{ number_format($cotizacion->impuesto, 2, ',', '.') }}</td></tr>
     <tr><td class="total">Total</td><td class="der total">USD {{ number_format($cotizacion->total, 2, ',', '.') }}</td></tr>
     <tr><td class="muted">Total en Bs. (tasa BCV {{ number_format($cotizacion->tasa_cambio, 2, ',', '.') }})</td><td class="der muted">Bs. {{ number_format($cotizacion->total_bs, 2, ',', '.') }}</td></tr>

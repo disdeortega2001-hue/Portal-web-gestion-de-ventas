@@ -57,13 +57,46 @@
                     </label>
                 @endforeach
             </div>
+            {{-- Crédito: solo para clientes autorizados por la empresa, dentro de su límite --}}
+            @if($credito)
+                <div class="mt-5">
+                    <p class="flex flex-wrap items-baseline justify-between gap-2 text-sm font-extrabold uppercase tracking-[0.06em] text-tierra-oscura">
+                        Tu crédito con Rialto 7
+                        <span class="apoyo font-semibold normal-case tracking-normal cifra">
+                            @if($credito['disponible'] === null) Sin límite@else Disponible: USD {{ number_format($credito['disponible'], 2, ',', '.') }}@endif
+                            @if($credito['deuda'] > 0) · debes USD {{ number_format($credito['deuda'], 2, ',', '.') }}@endif
+                        </span>
+                    </p>
+                    <div class="mt-2 grid gap-3 sm:grid-cols-2">
+                        @foreach($credito['opciones'] as $clave => $opcion)
+                            @php($r = $resumenes[$opcion['moneda']])
+                            <label @class(['lobulo tarjeta-viva flex gap-3 p-4 has-[:checked]:border-tierra has-[:checked]:shadow-[0_0_0_1px_var(--color-tierra)]', 'cursor-pointer' => $opcion['alcanza'], 'opacity-60' => ! $opcion['alcanza']])>
+                                <input type="radio" name="metodo_pago" value="{{ $clave }}" x-model="metodo" class="mt-1" required @disabled(! $opcion['alcanza'])>
+                                <span>
+                                    <span class="block font-extrabold uppercase">{{ $opcion['nombre'] }}</span>
+                                    <span class="apoyo block text-sm">{{ $opcion['descripcion'] }}</span>
+                                    <span class="mt-2 block text-sm font-bold text-tierra cifra">
+                                        {{ $opcion['moneda'] === 'USD' ? 'Debes USD ' . number_format((float) $r['total'], 2, ',', '.') . ' (con IGTF)' : 'Debes Bs. ' . number_format((float) $r['total_bs'], 2, ',', '.') . ' (con IVA)' }}
+                                    </span>
+                                    @unless($opcion['alcanza'])<span class="mt-1 block text-sm font-semibold text-coral-tinta">Pasa de tu crédito disponible.</span>@endunless
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
             {{-- Qué pasa después, según el método elegido --}}
             <div class="aviso aviso-info mt-4" aria-live="polite">
                 <x-icono nombre="info" class="size-5 shrink-0" />
+                @if($credito)
+                    <p x-show="metodo.startsWith('credito')" x-cloak>
+                        Confirmamos tu pedido y te avisamos para retirarlo. Abonas cuando quieras, desde tu pedido o en la tienda, y cada 30 días te recordamos el saldo.
+                    </p>
+                @endif
                 <p x-show="@js(collect($metodos)->filter(fn ($m) => $m['en_linea'])->keys()->values()).includes(metodo)">
                     Al confirmar te mostramos los datos para pagar. Luego reportas la referencia y el comprobante desde tu pedido; lo verificamos y te avisamos por teléfono.
                 </p>
-                <p x-show="! @js(collect($metodos)->filter(fn ($m) => $m['en_linea'])->keys()->values()).includes(metodo)" x-cloak>
+                <p x-show="! metodo.startsWith('credito') && ! @js(collect($metodos)->filter(fn ($m) => $m['en_linea'])->keys()->values()).includes(metodo)" x-cloak>
                     Pagas al retirar en el Edificio Campagna. Te escribimos por WhatsApp cuando tu pedido esté listo.
                 </p>
             </div>
@@ -103,7 +136,7 @@
             <a href="{{ route('carrito.index') }}" class="enlace mt-2 inline-block text-sm">Cambiar cantidades</a>
         </section>
         {{-- El resumen sigue al método elegido: IGTF si paga en dólares, IVA si paga en bolívares --}}
-        @php($monedas = collect($metodos)->map(fn ($m) => $m['moneda']))
+        @php($monedas = collect($metodos)->map(fn ($m) => $m['moneda'])->merge(collect(\App\Support\Credito::OPCIONES)->map(fn ($m) => $m['moneda'])))
         <div x-show="@js($monedas)[metodo] !== 'VES'">@include('partials.resumen', ['r' => $resumenes['USD']])</div>
         <div x-show="@js($monedas)[metodo] === 'VES'" x-cloak>@include('partials.resumen', ['r' => $resumenes['VES']])</div>
         <button class="btn btn-sol btn-grande w-full" data-cargando="Registrando tu pedido…">Confirmar compra <span class="chip"><x-icono nombre="check" class="size-4" /></span></button>

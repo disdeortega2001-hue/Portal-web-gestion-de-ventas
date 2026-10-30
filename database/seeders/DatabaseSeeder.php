@@ -98,6 +98,8 @@ class DatabaseSeeder extends Seeder
         }
 
         $importador->importar($lectura['filas'], $responsable, false);
+        // Los implementos Marchesan Tatu están exentos de IVA
+        Producto::where('marca', 'like', '%Tatu%')->update(['exento_iva' => true]);
 
         return Producto::all()->keyBy('codigo_fabrica')->all();
     }

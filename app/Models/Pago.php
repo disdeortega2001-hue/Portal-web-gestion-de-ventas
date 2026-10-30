@@ -19,12 +19,14 @@ class Pago extends Model
     protected $table = 'pagos';
 
     protected $fillable = [
-        'id_pedido', 'metodo', 'moneda', 'monto', 'referencia', 'fecha_pago', 'comprobante', 'estado',
+        'id_pedido', 'metodo', 'moneda', 'monto', 'tasa_cambio', 'monto_usd', 'referencia', 'fecha_pago', 'comprobante', 'estado',
         'motivo_rechazo', 'id_usuario_registro', 'id_usuario_verifica', 'verificado_en',
     ];
 
     protected $casts = [
         'monto' => 'decimal:2',
+        'tasa_cambio' => 'decimal:4',
+        'monto_usd' => 'decimal:2',
         'fecha_pago' => 'date',
         'verificado_en' => 'datetime',
     ];
@@ -47,6 +49,20 @@ class Pago extends Model
     public function nombreMetodo(): string
     {
         return MetodosPago::nombre($this->metodo);
+    }
+
+    /** Equivalente en USD (los pagos anteriores al crédito no lo guardaban: se usa la tasa del pedido). */
+    public function montoEnUsd(): float
+    {
+        if ($this->monto_usd !== null) {
+            return (float) $this->monto_usd;
+        }
+        if ($this->moneda === 'USD') {
+            return (float) $this->monto;
+        }
+        $tasa = (float) ($this->tasa_cambio ?: $this->pedido?->tasa_cambio);
+
+        return $tasa > 0 ? round((float) $this->monto / $tasa, 2) : 0.0;
     }
 
     public function montoFormateado(): string

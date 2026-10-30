@@ -12,6 +12,9 @@ use App\Models\Configuracion;
  * - en dólares (USD): IGTF, 3 % por defecto, sin IVA;
  * - en bolívares (VES): IVA, 16 % por defecto.
  *
+ * Los productos exentos de IVA (los implementos Marchesan Tatu) no suman a la base del IVA;
+ * el IGTF sí se cobra sobre todo el monto, porque grava el pago en divisas y no el producto.
+ *
  * Trabaja en centavos (enteros) para evitar errores de redondeo de punto
  * flotante: 0.1 + 0.2 no da 0.3 en float, pero 10 + 20 sí da 30 en enteros.
  */
@@ -21,9 +24,11 @@ class CalculadoraComercial
     public const VES = 'VES';
 
     /**
-     * @param  iterable<array{precio: string|float, cantidad: int}>  $lineas
+     * Cada línea puede indicar 'exento' (true/false); si no, se toma del producto de la línea.
+     *
+     * @param  iterable<array{precio: string|float, cantidad: int, exento?: bool}>  $lineas
      * @param  string  $moneda  moneda de pago: USD (IGTF) o VES (IVA)
-     * @return array{lineas: array, subtotal: string, descuento: string, moneda_pago: string, tipo_impuesto: string,
+     * @return array{lineas: array, subtotal: string, monto_exento: string, descuento: string, moneda_pago: string, tipo_impuesto: string,
      *               porcentaje_impuesto: float, impuesto: string, total: string, tasa_cambio: float, total_bs: string}
      */
     public function calcular(iterable $lineas, string $moneda = self::USD): array
@@ -33,26 +38,34 @@ class CalculadoraComercial
 
         $lineasCalculadas = [];
         $subtotal = 0;
+        $exento = 0;
 
         foreach ($lineas as $clave => $linea) {
             $precio = $this->aCentavos($linea['precio']);
             $cantidad = (int) $linea['cantidad'];
             $importe = $precio * $cantidad;
             $subtotal += $importe;
+            $esExento = (bool) ($linea['exento'] ?? ($linea['producto']->exento_iva ?? false));
+            if ($esExento) {
+                $exento += $importe;
+            }
 
             $lineasCalculadas[$clave] = $linea + [
+                'exento' => $esExento,
                 'precio_unitario' => $this->aDecimal($precio),
                 'subtotal' => $this->aDecimal($importe),
             ];
         }
 
-        $impuesto = (int) round($subtotal * $porcentaje / 100);
+        $base = $tipo === 'IVA' ? $subtotal - $exento : $subtotal;
+        $impuesto = (int) round($base * $porcentaje / 100);
         $total = $subtotal + $impuesto;
         $totalBs = (int) round($total * $tasa);
 
         return [
             'lineas' => $lineasCalculadas,
             'subtotal' => $this->aDecimal($subtotal),
+            'monto_exento' => $this->aDecimal($exento),
             'descuento' => '0.00',
             'moneda_pago' => $moneda === self::VES ? self::VES : self::USD,
             'tipo_impuesto' => $tipo,

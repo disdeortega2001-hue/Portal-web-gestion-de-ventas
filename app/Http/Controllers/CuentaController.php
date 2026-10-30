@@ -61,6 +61,8 @@ class CuentaController extends Controller
         return view('cuenta.pedido', [
             'pedido' => $pedido,
             'datosPago' => $pedido->metodo_pago ? (MetodosPago::disponibles()[$pedido->metodo_pago]['datos'] ?? []) : [],
+            // A crédito abona con cualquier método a distancia
+            'metodosAbono' => $pedido->a_credito ? array_filter(MetodosPago::disponibles(), fn ($m) => $m['en_linea']) : [],
             'sinCuenta' => $sinCuenta,
             'urlPedido' => $sinCuenta ? CompraController::enlaceSeguimiento($pedido) : null,
             'urlPago' => $sinCuenta ? CompraController::enlaceSeguimiento($pedido, 'pedidos.seguimiento.pago') : route('cuenta.pedidos.pago', $pedido),

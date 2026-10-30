@@ -12,6 +12,7 @@ use App\Models\Producto;
 use App\Services\AvisoClienteService;
 use App\Services\ComprobanteService;
 use App\Services\PedidoService;
+use App\Support\Credito;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -60,9 +61,9 @@ class PedidoController extends Controller
         $idCliente = old('id_cliente', $request->query('cliente'));
 
         return view('gestion.pedidos.create', [
-            'clienteElegido' => $idCliente ? Cliente::find($idCliente, ['id', 'identificacion', 'nombre', 'telefono']) : null,
+            'clienteElegido' => $idCliente ? Cliente::find($idCliente, ['id', 'identificacion', 'nombre', 'telefono', 'credito_habilitado']) : null,
             'productos' => Producto::activos()->where('stock', '>', 0)->orderBy('nombre')
-                ->get(['id', 'codigo_fabrica', 'nombre', 'marca', 'precio', 'stock']),
+                ->get(['id', 'codigo_fabrica', 'nombre', 'marca', 'precio', 'exento_iva', 'stock']),
             'parametros' => [
                 'tasa' => (float) Configuracion::valor('tasa_cambio', 0),
                 'iva' => Configuracion::porcentajeIva(),
@@ -73,12 +74,17 @@ class PedidoController extends Controller
 
     public function store(PedidoRequest $request): RedirectResponse
     {
-        $pedido = $this->pedidos->crearDirecto(
-            Cliente::findOrFail($request->integer('id_cliente')),
-            $request->input('items'),
-            $request->user(),
-            $request->input('moneda_pago', 'USD')
-        );
+        $cliente = Cliente::findOrFail($request->integer('id_cliente'));
+        $aCredito = $request->boolean('a_credito');
+        if ($aCredito && ! $cliente->credito_habilitado) {
+            return back()->withInput()->with('error', "{$cliente->nombre} no tiene crédito autorizado. Habilítalo en su ficha de cliente.");
+        }
+
+        try {
+            $pedido = $this->pedidos->crearDirecto($cliente, $request->input('items'), $request->user(), $request->input('moneda_pago', 'USD'), $aCredito);
+        } catch (LogicException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
 
         return redirect()->route('gestion.pedidos.show', $pedido)->with('exito', "Pedido {$pedido->codigo} creado.");
     }

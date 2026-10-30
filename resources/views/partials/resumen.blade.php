@@ -10,6 +10,9 @@
 <div class="lobulo-tierra panel-tapa p-5 pt-7 sm:p-6 sm:pt-8">
     <dl class="space-y-2 text-white/85 cifra">
         <div class="flex justify-between gap-4"><dt>Subtotal</dt><dd>@usd($r['subtotal'])</dd></div>
+        @if((float) ($r['monto_exento'] ?? 0) > 0 && $tipo === 'IVA')
+            <div class="flex justify-between gap-4 text-sm"><dt>Exento de IVA <span class="text-xs text-white/60">implementos Tatu</span></dt><dd>@usd($r['monto_exento'])</dd></div>
+        @endif
         <div class="flex justify-between gap-4"><dt>{{ $tipo }} ({{ $porcentaje }}%) <span class="text-xs text-white/60">{{ $tipo === 'IGTF' ? 'pago en dólares' : 'pago en bolívares' }}</span></dt><dd>@usd($r['impuesto'])</dd></div>
     </dl>
     <div class="mt-4 border-t border-white/25 pt-4">

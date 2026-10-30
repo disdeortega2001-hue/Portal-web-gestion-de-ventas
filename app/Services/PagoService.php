@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\StockInsuficienteException;
+use App\Models\Configuracion;
 use App\Models\Pago;
 use App\Models\Pedido;
 use App\Models\Usuario;
@@ -22,6 +23,8 @@ use LogicException;
  *   la venta se confirma después.
  * - Si lo rechaza (la referencia no aparece en el banco), el cliente puede reportarlo de nuevo.
  * - En la tienda (efectivo o punto de venta) el personal registra el pago ya verificado.
+ * - A crédito, cada pago es un abono: el pedido queda «abonado» hasta que el saldo llega a cero.
+ *   Cada abono guarda la tasa del día y su equivalente en USD, que es lo que se descuenta del saldo.
  *
  * Los comprobantes se guardan en el disco privado (storage/app/comprobantes): solo el personal los ve.
  */
@@ -33,19 +36,26 @@ class PagoService
     {
     }
 
-    /** @param  array{referencia: string, fecha_pago: string, monto: string}  $datos */
+    /**
+     * A crédito el cliente indica con qué método abonó ($datos['metodo']); de contado, es el del pedido.
+     *
+     * @param  array{referencia: string, fecha_pago: string, monto: string, metodo?: string}  $datos
+     */
     public function reportar(Pedido $pedido, array $datos, ?UploadedFile $comprobante): Pago
     {
         if (! $pedido->aceptaReporteDePago()) {
             throw new LogicException("El pedido {$pedido->codigo} no espera un pago en este momento.");
         }
 
+        $metodo = $pedido->a_credito ? $datos['metodo'] : $pedido->metodo_pago;
+        $moneda = MetodosPago::moneda($metodo);
+        $this->validarAbono($pedido, $moneda, $datos['monto']);
         $ruta = $comprobante?->store(self::CARPETA, 'local');
 
-        return DB::transaction(function () use ($pedido, $datos, $ruta) {
-            $pago = $pedido->pagos()->create([
-                'metodo' => $pedido->metodo_pago,
-                'moneda' => MetodosPago::moneda($pedido->metodo_pago),
+        return DB::transaction(function () use ($pedido, $datos, $ruta, $metodo, $moneda) {
+            $pago = $pedido->pagos()->create($this->equivalencia($moneda, $datos['monto']) + [
+                'metodo' => $metodo,
+                'moneda' => $moneda,
                 'monto' => $datos['monto'],
                 'referencia' => $datos['referencia'],
                 'fecha_pago' => $datos['fecha_pago'],
@@ -70,7 +80,8 @@ class PagoService
             }
 
             $pago->update(['estado' => Pago::VERIFICADO, 'id_usuario_verifica' => $usuario->id, 'verificado_en' => now()]);
-            $pago->pedido->update(['estado_pago' => Pedido::PAGADO]);
+            $pedido = $pago->pedido;
+            $pedido->update(['estado_pago' => $pedido->a_credito ? $this->estadoCredito($pedido) : Pedido::PAGADO]);
         });
 
         return $this->confirmarSiPendiente($pago->pedido->fresh(), $usuario);
@@ -92,7 +103,7 @@ class PagoService
             // Sin otro pago en revisión, el cliente puede reportarlo de nuevo
             $pedido = $pago->pedido;
             if (! $pedido->pagos()->where('estado', Pago::POR_VERIFICAR)->exists()) {
-                $pedido->update(['estado_pago' => Pedido::SIN_PAGO]);
+                $pedido->update(['estado_pago' => $pedido->a_credito ? $this->estadoCredito($pedido) : Pedido::SIN_PAGO]);
             }
         });
     }
@@ -107,9 +118,13 @@ class PagoService
         if ($pedido->estado === Pedido::ANULADO || $pedido->estaPagado()) {
             throw new LogicException("El pedido {$pedido->codigo} no admite más pagos.");
         }
+        $moneda = MetodosPago::moneda($datos['metodo']);
+        if ($pedido->a_credito) {
+            $this->validarAbono($pedido, $moneda, $datos['monto']);
+        }
 
-        DB::transaction(function () use ($pedido, $datos, $usuario) {
-            $pedido->pagos()->create([
+        DB::transaction(function () use ($pedido, $datos, $usuario, $moneda) {
+            $pedido->pagos()->create($this->equivalencia($moneda, $datos['monto']) + [
                 'metodo' => $datos['metodo'],
                 'moneda' => MetodosPago::moneda($datos['metodo']),
                 'monto' => $datos['monto'],
@@ -120,7 +135,9 @@ class PagoService
                 'id_usuario_verifica' => $usuario->id,
                 'verificado_en' => now(),
             ]);
-            $pedido->update(['estado_pago' => Pedido::PAGADO, 'metodo_pago' => $pedido->metodo_pago ?? $datos['metodo']]);
+            $pedido->update($pedido->a_credito
+                ? ['estado_pago' => $this->estadoCredito($pedido)]
+                : ['estado_pago' => Pedido::PAGADO, 'metodo_pago' => $pedido->metodo_pago ?? $datos['metodo']]);
         });
 
         return $this->confirmarSiPendiente($pedido->fresh(), $usuario);
@@ -131,6 +148,44 @@ class PagoService
         return $pago->comprobante && Storage::disk('local')->exists($pago->comprobante)
             ? Storage::disk('local')->path($pago->comprobante)
             : null;
+    }
+
+    /**
+     * Estado del pago de un crédito según sus abonos: en revisión, saldado, abonado o sin abonos.
+     */
+    private function estadoCredito(Pedido $pedido): string
+    {
+        $pedido->load('pagos');
+
+        return match (true) {
+            $pedido->pagos->contains('estado', Pago::POR_VERIFICAR) => Pedido::PAGO_POR_VERIFICAR,
+            (float) $pedido->saldoUsd() <= 0 => Pedido::PAGADO,
+            $pedido->pagos->contains('estado', Pago::VERIFICADO) => Pedido::PAGO_PARCIAL,
+            default => Pedido::SIN_PAGO,
+        };
+    }
+
+    /** Un abono no puede pasar del saldo (con un margen de un centavo por el redondeo de la tasa). */
+    private function validarAbono(Pedido $pedido, string $moneda, string|float $monto): void
+    {
+        if (! $pedido->a_credito) {
+            return;
+        }
+        $pedido->load('pagos');
+        $usd = $this->equivalencia($moneda, $monto)['monto_usd'];
+        if ((float) $usd > (float) $pedido->saldoUsd() + 0.01) {
+            $saldo = $moneda === 'USD' ? 'USD ' . number_format((float) $pedido->saldoUsd(), 2, ',', '.') : 'Bs. ' . number_format((float) $pedido->saldoBs(), 2, ',', '.');
+            throw new LogicException("El abono pasa del saldo pendiente del pedido {$pedido->codigo}: {$saldo}.");
+        }
+    }
+
+    /** @return array{tasa_cambio: float, monto_usd: string} tasa del día y equivalente en USD del pago */
+    private function equivalencia(string $moneda, string|float $monto): array
+    {
+        $tasa = Configuracion::tasaCambio();
+        $usd = $moneda === 'USD' ? (float) $monto : ($tasa > 0 ? (float) $monto / $tasa : 0);
+
+        return ['tasa_cambio' => $tasa, 'monto_usd' => number_format(round($usd, 2), 2, '.', '')];
     }
 
     private function confirmarSiPendiente(Pedido $pedido, Usuario $usuario): ?string

@@ -28,6 +28,7 @@ class CotizacionService
                 'id_cliente' => $cliente->id,
                 'fecha' => now(),
                 'subtotal' => $calculo['subtotal'],
+                'monto_exento' => $calculo['monto_exento'],
                 'descuento' => $calculo['descuento'],
                 'moneda_pago' => $calculo['moneda_pago'],
                 'tipo_impuesto' => $calculo['tipo_impuesto'],
@@ -45,6 +46,7 @@ class CotizacionService
                     'id_producto' => $linea['producto']->id,
                     'cantidad' => $linea['cantidad'],
                     'precio_unitario' => $linea['precio_unitario'],
+                    'exento_iva' => $linea['exento'],
                     'subtotal' => $linea['subtotal'],
                 ]);
             }

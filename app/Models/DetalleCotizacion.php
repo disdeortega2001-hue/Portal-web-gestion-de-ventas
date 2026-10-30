@@ -9,11 +9,12 @@ class DetalleCotizacion extends Model
 {
     protected $table = 'detalle_cotizaciones';
 
-    protected $fillable = ['id_cotizacion', 'id_producto', 'cantidad', 'precio_unitario', 'subtotal'];
+    protected $fillable = ['id_cotizacion', 'id_producto', 'cantidad', 'precio_unitario', 'exento_iva', 'subtotal'];
 
     protected $casts = [
         'cantidad' => 'integer',
         'precio_unitario' => 'decimal:2',
+        'exento_iva' => 'boolean',
         'subtotal' => 'decimal:2',
     ];
 

@@ -32,6 +32,7 @@
         ['gestion.inventario.index', 'gestion.inventario.*', 'caja', 'Inventario', false],
         ['gestion.verificaciones.index', 'gestion.verificaciones.*', 'usuario-check', 'Verificar cuentas', false],
         ['gestion.pagos.index', 'gestion.pagos.*', 'moneda', 'Pagos', true],
+        ['gestion.creditos.index', 'gestion.creditos.*', 'tabla', 'Créditos', true],
         ['gestion.reportes.index', 'gestion.reportes.*', 'reporte', 'Reportes', true],
     ];
     // Lo que espera atención, a la vista en el menú (conteos sobre columnas indexadas)
@@ -41,6 +42,7 @@
             + \App\Models\Pedido::whereNotNull('devolucion_solicitada_en')->where('estado', '!=', \App\Models\Pedido::ANULADO)->count(),
         'gestion.verificaciones.index' => \App\Models\Cliente::whereNotNull('id_usuario_solicitante')->count(),
         'gestion.pagos.index' => $usuario->puedeAdministrar() ? \App\Models\Pago::where('estado', \App\Models\Pago::POR_VERIFICAR)->count() : 0,
+        'gestion.creditos.index' => $usuario->puedeAdministrar() ? \App\Http\Controllers\Gestion\CreditoController::porRecordar() : 0,
     ]) : [];
     // Administración: [ruta, patrón activo, ícono, texto, solo directivo]
     $menuAdmin = [

@@ -19,13 +19,14 @@ class Cotizacion extends Model
     protected $table = 'cotizaciones';
 
     protected $fillable = [
-        'codigo', 'id_cliente', 'id_usuario', 'fecha', 'subtotal', 'descuento',
+        'codigo', 'id_cliente', 'id_usuario', 'fecha', 'subtotal', 'monto_exento', 'descuento',
         'moneda_pago', 'tipo_impuesto', 'porcentaje_impuesto', 'impuesto', 'total', 'tasa_cambio', 'total_bs', 'estado', 'observaciones',
     ];
 
     protected $casts = [
         'fecha' => 'datetime',
         'subtotal' => 'decimal:2',
+        'monto_exento' => 'decimal:2',
         'descuento' => 'decimal:2',
         'porcentaje_impuesto' => 'decimal:2',
         'impuesto' => 'decimal:2',

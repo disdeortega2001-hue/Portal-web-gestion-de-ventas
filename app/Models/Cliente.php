@@ -19,6 +19,8 @@ class Cliente extends Model
 
     protected $casts = [
         'solicitud_vinculacion_en' => 'datetime',
+        'credito_habilitado' => 'boolean',
+        'limite_credito' => 'decimal:2',
     ];
 
     /** ¿Tiene cotizaciones o pedidos? Una ficha con historial no se asocia a una cuenta sin verificar. */

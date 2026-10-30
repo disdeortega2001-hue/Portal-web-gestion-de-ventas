@@ -27,12 +27,29 @@
             <p class="apoyo">{{ $pedido->cliente->direccion }}</p>
             @if($pedido->metodo_pago || $pedido->entrega)
                 <p class="mt-3 border-t border-linea pt-3 text-sm">
-                    @if($pedido->metodo_pago)<strong>Paga con:</strong> {{ $pedido->nombreMetodoPago() }} ({{ $pedido->montoAPagar() }})@endif
+                    @if($pedido->metodo_pago || $pedido->a_credito)<strong>Paga con:</strong> {{ $pedido->nombreMetodoPago() }} ({{ $pedido->montoAPagar() }})@endif
                     @if($pedido->entrega) · <strong>Entrega:</strong> {{ $pedido->entrega === 'envio' ? 'envío a coordinar' : 'retiro en la tienda' }}@endif
                 </p>
             @endif
             @if($pedido->observaciones)<p class="apoyo mt-1 text-sm">«{{ $pedido->observaciones }}»</p>@endif
         </section>
+
+        {{-- Venta a crédito: lo abonado, el saldo y cuándo toca recordarle el pago --}}
+        @if($pedido->a_credito && $pedido->estado !== 'anulado')
+            @php($proximo = $pedido->proximoRecordatorio())
+            <section class="lobulo p-5" aria-labelledby="t-credito">
+                <h2 id="t-credito" class="seccion-titulo">Venta a crédito</h2>
+                <dl class="mt-3 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
+                    <div><dt class="apoyo">Total</dt><dd class="font-bold cifra">@usd($pedido->total)</dd></div>
+                    <div><dt class="apoyo">Abonado</dt><dd class="font-bold cifra">@usd($pedido->abonadoUsd())</dd></div>
+                    <div><dt class="apoyo">Saldo</dt><dd class="font-rotulo text-2xl font-extrabold text-tierra cifra">@usd($pedido->saldoUsd())</dd>
+                        @if((float) $pedido->saldoUsd() > 0)<dd class="apoyo cifra">@bs($pedido->saldoBs()) hoy</dd>@endif</div>
+                    <div><dt class="apoyo">Próximo recordatorio</dt>
+                        <dd class="font-bold cifra">{{ $proximo ? ($proximo->isPast() ? 'Vencido' : $proximo->format('d/m/Y')) : ($pedido->estaPendiente() ? 'Al confirmar la venta' : '—') }}</dd></div>
+                </dl>
+                <p class="apoyo mt-3 text-sm">La deuda está en dólares: cada abono en bolívares se descuenta a la tasa del día en que se paga. Puede retirar la mercancía sin haber pagado todo.</p>
+            </section>
+        @endif
 
         {{-- Pagos del pedido: reportados por el cliente o cobrados en la tienda --}}
         <section aria-labelledby="t-pagos">
@@ -64,7 +81,7 @@
 
             @if(auth()->user()->puedeAdministrar() && $pedido->estado !== 'anulado' && ! $pedido->estaPagado())
                 <form method="POST" action="{{ route('gestion.pedidos.pagos.store', $pedido) }}" class="needs-validation lobulo mt-4 grid gap-4 p-4 sm:grid-cols-2 sm:items-end" novalidate
-                      x-data="{ metodo: @js(old('metodo', $pedido->metodo_pago ?? 'efectivo')), monedas: @js(collect(\App\Support\MetodosPago::METODOS)->map(fn ($m) => $m['moneda'])), usd: @js(number_format((float) $pedido->total, 2, '.', '')), bs: @js(number_format((float) $pedido->total_bs, 2, '.', '')) }">
+                      x-data="{ metodo: @js(old('metodo', $pedido->metodo_pago ?? 'efectivo')), monedas: @js(collect(\App\Support\MetodosPago::METODOS)->map(fn ($m) => $m['moneda'])), usd: @js($pedido->a_credito ? $pedido->saldoUsd() : number_format((float) $pedido->total, 2, '.', '')), bs: @js($pedido->a_credito ? $pedido->saldoBs() : number_format((float) $pedido->total_bs, 2, '.', '')) }">
                     @csrf
                     <div>
                         <label for="metodo" class="etiqueta">Cobrado con</label>
@@ -85,8 +102,8 @@
                         <label for="referencia" class="etiqueta">Referencia (opcional)</label>
                         <input type="text" id="referencia" name="referencia" value="{{ old('referencia') }}" class="campo cifra" maxlength="60">
                     </div>
-                    <button class="btn btn-tierra">Registrar pago</button>
-                    <p class="ayuda sm:col-span-2">Para cobros en la tienda o pagos ya confirmados con el banco: quedan verificados al registrarlos{{ $pedido->estaPendiente() ? ' y la venta se confirma' : '' }}.</p>
+                    <button class="btn btn-tierra">{{ $pedido->a_credito ? 'Registrar abono' : 'Registrar pago' }}</button>
+                    <p class="ayuda sm:col-span-2">@if($pedido->a_credito)Abono a la deuda: se propone el saldo completo, cámbialo por lo que pagó. Los bolívares se cuentan a la tasa de hoy.@else Para cobros en la tienda o pagos ya confirmados con el banco: quedan verificados al registrarlos{{ $pedido->estaPendiente() ? ' y la venta se confirma' : '' }}.@endif</p>
                 </form>
             @endif
         </section>

@@ -9,6 +9,7 @@ use App\Models\MovimientoInventario;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Usuario;
+use App\Support\Credito;
 use App\Support\MetodosPago;
 use Illuminate\Support\Facades\DB;
 use LogicException;
@@ -47,6 +48,7 @@ class PedidoService
                     'id_producto' => $d->id_producto,
                     'precio' => (string) $d->precio_unitario,
                     'cantidad' => $d->cantidad,
+                    'exento' => $d->exento_iva,
                 ]),
                 $cotizacion->id,
                 ['origen' => Pedido::DESDE_COTIZACION],
@@ -60,28 +62,41 @@ class PedidoService
     }
 
     /**
-     * Pedido de mostrador creado directamente por el vendedor.
+     * Pedido de mostrador creado directamente por el vendedor. A crédito, solo si el cliente lo tiene
+     * autorizado y el pedido cabe en su límite (si no, se deshace todo).
      *
      * @param  array<int, array{id_producto: int, cantidad: int}>  $items
      */
-    public function crearDirecto(Cliente $cliente, array $items, Usuario $vendedor, string $moneda = CalculadoraComercial::USD): Pedido
+    public function crearDirecto(Cliente $cliente, array $items, Usuario $vendedor, string $moneda = CalculadoraComercial::USD, bool $aCredito = false): Pedido
     {
-        return DB::transaction(function () use ($cliente, $items, $vendedor, $moneda) {
+        return DB::transaction(function () use ($cliente, $items, $vendedor, $moneda, $aCredito) {
             $productos = Producto::whereIn('id', array_column($items, 'id_producto'))->get()->keyBy('id');
 
             $lineas = collect($items)->map(fn ($item) => [
                 'id_producto' => (int) $item['id_producto'],
                 'precio' => (string) $productos[$item['id_producto']]->precio,
                 'cantidad' => (int) $item['cantidad'],
+                'exento' => $productos[$item['id_producto']]->exento_iva,
             ]);
 
-            return $this->registrarPedido($cliente->id, $vendedor, $lineas, null, [], $moneda);
+            $pedido = $this->registrarPedido($cliente->id, $vendedor, $lineas, null, ['a_credito' => $aCredito], $moneda);
+
+            // La deuda ya incluye este pedido: si pasa del límite, la excepción hace ROLLBACK
+            if ($aCredito && ($cliente->limite_credito !== null) && Credito::deudaUsd($cliente) > (float) $cliente->limite_credito + 0.005) {
+                throw new LogicException('El pedido pasa del crédito disponible de ' . $cliente->nombre
+                    . ' (límite USD ' . number_format((float) $cliente->limite_credito, 2, ',', '.') . ').');
+            }
+
+            return $pedido;
         }, self::REINTENTOS);
     }
 
     /**
      * Compra del cliente en el portal: queda pendiente, sin vendedor asignado y sin tocar el stock,
      * hasta que el personal verifica el pago y confirma la venta.
+     *
+     * A crédito ($metodoPago 'credito_usd' o 'credito_ves') no lleva método: el cliente abona después
+     * con el que prefiera, y la moneda elegida decide el impuesto, igual que en una compra de contado.
      *
      * @param  iterable<array{producto: Producto, precio: string, cantidad: int}>  $lineas  las del carrito
      */
@@ -92,14 +107,18 @@ class PedidoService
                 'id_producto' => $l['producto']->id,
                 'precio' => (string) $l['producto']->precio,
                 'cantidad' => (int) $l['cantidad'],
+                'exento' => $l['producto']->exento_iva,
             ])->values();
+
+            $credito = Credito::esOpcion($metodoPago);
 
             return $this->registrarPedido($cliente->id, null, $items, null, [
                 'origen' => Pedido::PORTAL,
-                'metodo_pago' => $metodoPago,
+                'metodo_pago' => $credito ? null : $metodoPago,
+                'a_credito' => $credito,
                 'entrega' => $entrega,
                 'observaciones' => $observaciones,
-            ], MetodosPago::moneda($metodoPago));
+            ], $credito ? Credito::moneda($metodoPago) : MetodosPago::moneda($metodoPago));
         }, self::REINTENTOS);
     }
 
@@ -232,6 +251,7 @@ class PedidoService
             'id_cotizacion' => $idCotizacion,
             'fecha' => now(),
             'subtotal' => $calculo['subtotal'],
+            'monto_exento' => $calculo['monto_exento'],
             'descuento' => $calculo['descuento'],
             'moneda_pago' => $calculo['moneda_pago'],
             'tipo_impuesto' => $calculo['tipo_impuesto'],
@@ -250,6 +270,7 @@ class PedidoService
                 'id_producto' => $linea['id_producto'],
                 'cantidad' => $linea['cantidad'],
                 'precio_unitario' => $linea['precio_unitario'],
+                'exento_iva' => $linea['exento'],
                 'subtotal' => $linea['subtotal'],
             ]);
         }

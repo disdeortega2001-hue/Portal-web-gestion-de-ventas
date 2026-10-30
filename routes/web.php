@@ -149,6 +149,10 @@ Route::middleware(['auth', 'rol:administrativo,directivo'])->prefix('gestion')->
         ->middleware('throttle:10,1')->name('pedidos.enviar-comprobante');
     Route::post('/pedidos/{pedido}/pagos', [Gestion\PagoController::class, 'registrar'])->name('pedidos.pagos.store');
 
+    Route::get('/creditos', [Gestion\CreditoController::class, 'index'])->name('creditos.index');
+    Route::post('/creditos/{pedido}/recordar', [Gestion\CreditoController::class, 'recordar'])->middleware('throttle:30,1')->name('creditos.recordar');
+    Route::put('/clientes/{cliente}/credito', [Gestion\CreditoController::class, 'actualizarCliente'])->name('clientes.credito');
+
     Route::get('/reportes', [Gestion\ReporteController::class, 'index'])->name('reportes.index');
     Route::get('/reportes/exportar', [Gestion\ReporteController::class, 'exportar'])
         ->middleware('throttle:20,1')->name('reportes.exportar');

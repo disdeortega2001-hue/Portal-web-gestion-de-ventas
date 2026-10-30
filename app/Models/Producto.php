@@ -21,13 +21,14 @@ class Producto extends Model
 
     protected $fillable = [
         'codigo_fabrica', 'nombre', 'descripcion', 'compatibilidad', 'marca',
-        'precio', 'costo', 'id_categoria', 'imagen', 'stock', 'activo',
+        'precio', 'exento_iva', 'costo', 'id_categoria', 'imagen', 'stock', 'activo',
     ];
 
     protected $hidden = ['costo'];
 
     protected $casts = [
         'precio' => 'decimal:2',
+        'exento_iva' => 'boolean',
         'costo' => 'decimal:2',
         'stock' => 'integer',
         'activo' => 'boolean',

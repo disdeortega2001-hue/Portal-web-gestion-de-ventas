@@ -53,8 +53,11 @@ class PagoController extends Controller
 
         $pedido = $pago->pedido->fresh();
 
-        return $this->conAvisoAlCliente(back()->with($aviso ? 'error' : 'exito', $aviso
-            ?? "Pago verificado. El pedido {$pedido->codigo} quedó pagado y la venta confirmada."), $pedido);
+        $mensaje = $pedido->a_credito && ! $pedido->estaPagado()
+            ? "Abono verificado. Al pedido {$pedido->codigo} le quedan USD " . number_format((float) $pedido->saldoUsd(), 2, ',', '.') . '.'
+            : "Pago verificado. El pedido {$pedido->codigo} quedó pagado y la venta confirmada.";
+
+        return $this->conAvisoAlCliente(back()->with($aviso ? 'error' : 'exito', $aviso ?? $mensaje), $pedido);
     }
 
     public function rechazar(Request $request, Pago $pago): RedirectResponse
@@ -92,7 +95,12 @@ class PagoController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        return $this->conAvisoAlCliente(back()->with($aviso ? 'error' : 'exito', $aviso ?? "Pago registrado. El pedido {$pedido->codigo} quedó pagado."), $pedido->fresh());
+        $pedido = $pedido->fresh();
+        $mensaje = $pedido->a_credito && ! $pedido->estaPagado()
+            ? "Abono registrado. Al pedido {$pedido->codigo} le quedan USD " . number_format((float) $pedido->saldoUsd(), 2, ',', '.') . '.'
+            : "Pago registrado. El pedido {$pedido->codigo} quedó pagado.";
+
+        return $this->conAvisoAlCliente(back()->with($aviso ? 'error' : 'exito', $aviso ?? $mensaje), $pedido);
     }
 
     /**
@@ -101,6 +109,15 @@ class PagoController extends Controller
      */
     private function conAvisoAlCliente(RedirectResponse $respuesta, Pedido $pedido): RedirectResponse
     {
+        // Abono a un crédito que aún tiene saldo: se le avisa cuánto falta (el comprobante sale al saldar)
+        if ($pedido->a_credito && ! $pedido->estaPagado()) {
+            return $respuesta->with('aviso_cliente', [
+                'texto' => "Avisa al cliente su nuevo saldo del pedido {$pedido->codigo}: USD " . number_format((float) $pedido->saldoUsd(), 2, ',', '.'),
+                'correo' => false,
+                'whatsapp' => $this->avisos->whatsapp($pedido, AvisoClienteService::ABONO),
+            ]);
+        }
+
         if (! $pedido->tieneComprobante()) {
             return $respuesta;
         }

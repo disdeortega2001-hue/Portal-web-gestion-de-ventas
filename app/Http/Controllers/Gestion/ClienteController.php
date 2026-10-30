@@ -44,7 +44,7 @@ class ClienteController extends Controller
 
         return response()->json(
             Cliente::query()->buscar($busqueda)->orderBy('nombre')->limit(8)
-                ->get(['id', 'identificacion', 'nombre', 'telefono'])
+                ->get(['id', 'identificacion', 'nombre', 'telefono', 'credito_habilitado'])
         );
     }
 
@@ -79,7 +79,9 @@ class ClienteController extends Controller
             'pendientes' => $cliente->cotizaciones()->where('estado', 'pendiente')->count(),
         ];
 
-        return view('gestion.clientes.show', compact('cliente', 'cotizaciones', 'pedidos', 'resumen'));
+        $credito = CreditoController::resumenCliente($cliente);
+
+        return view('gestion.clientes.show', compact('cliente', 'cotizaciones', 'pedidos', 'resumen', 'credito'));
     }
 
     public function edit(Cliente $cliente): View
