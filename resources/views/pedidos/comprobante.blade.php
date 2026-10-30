@@ -26,9 +26,10 @@
 <body>
 <div class="encabezado">
     <table><tr>
-        <td style="border:none;padding:0"><span class="marca">Inversiones Rialto 7 C.A.</span><br>
+        <td style="border:none;padding:0 12px 0 0;width:78px;vertical-align:middle"><img src="{{ public_path('img/logo-documento.png') }}" alt="Inversiones Rialto 7" style="width:72px;height:72px"></td>
+        <td style="border:none;padding:0;vertical-align:middle"><span class="marca">Inversiones Rialto 7 C.A.</span> <span class="muted">RIF J-50668510-8</span><br>
             <span class="muted">Maquinaria agrícola y repuestos · Av. Las Industrias, Edificio Campagna, Valle de la Pascua, Guárico</span></td>
-        <td style="border:none;padding:0;width:34%;white-space:nowrap" class="der"><span class="titulo">COMPROBANTE DE PAGO</span><br>@if($vistaPrevia)<span class="sello sello-previa">VISTA PREVIA</span>@else<span class="sello">PAGO VERIFICADO</span>@endif</td>
+        <td style="border:none;padding:0;width:30%;white-space:nowrap;vertical-align:middle" class="der"><span class="titulo">COMPROBANTE DE PAGO</span><br>@if($vistaPrevia)<span class="sello sello-previa">VISTA PREVIA</span>@else<span class="sello">PAGO VERIFICADO</span>@endif</td>
     </tr></table>
 </div>
 
