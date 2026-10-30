@@ -43,18 +43,18 @@
             <h1 id="t-portada" class="titular mt-6 text-[2.6rem] sm:text-6xl lg:text-7xl" data-entrar style="--orden:1">El campo no se detiene, <em>nosotros tampoco</em></h1>
             <p class="mt-5 max-w-xl text-lg text-white/85 sm:text-xl" data-entrar style="--orden:2">Desde 1963 llevamos maquinaria y repuestos al productor guariqueño, temporada tras temporada.</p>
 
-            <form method="GET" action="{{ route('catalogo.index') }}" role="search" class="mt-8 flex max-w-xl gap-2" data-entrar style="--orden:3">
+            <form method="GET" action="{{ route('catalogo.index') }}" role="search" class="mt-8 flex max-w-xl gap-2">
                 <label for="q-inicio" class="sr-only">Buscar por código de fábrica, pieza o modelo</label>
                 <input type="search" id="q-inicio" name="q" placeholder="Código de fábrica, pieza o modelo" maxlength="100" enterkeyhint="search" autocomplete="off"
                        class="campo !min-h-14 flex-1 !border-transparent !text-lg">
                 <button class="btn btn-sol btn-grande !min-h-14" type="submit"><x-icono nombre="buscar" class="size-5" /><span class="sr-only sm:not-sr-only">Buscar</span></button>
             </form>
-            <div class="mt-4 flex flex-wrap gap-3" data-entrar style="--orden:4">
+            <div class="mt-4 flex flex-wrap gap-3" data-entrar style="--orden:3">
                 <a href="{{ route('catalogo.index') }}" class="btn btn-linea-clara">Ver el catálogo <span class="chip"><x-icono nombre="flecha" class="size-4" /></span></a>
                 @if($whatsapp)<a href="{{ $whatsapp }}" target="_blank" rel="noopener" class="btn btn-linea-clara"><x-icono nombre="whatsapp" class="size-5" /> Escríbenos</a>@endif
             </div>
 
-            <dl class="mt-12 grid max-w-2xl grid-cols-2 gap-x-6 gap-y-6 border-t border-white/15 pt-8 sm:grid-cols-4" data-entrar style="--orden:5">
+            <dl class="mt-12 grid max-w-2xl grid-cols-2 gap-x-6 gap-y-6 border-t border-white/15 pt-8 sm:grid-cols-4" data-entrar style="--orden:4">
                 @foreach($cifras as [$numero, $extra, $etiqueta])
                     <div>
                         <dt class="sr-only">{{ $etiqueta }}</dt>

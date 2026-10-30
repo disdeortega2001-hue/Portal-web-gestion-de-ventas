@@ -20,8 +20,21 @@ function mostrarAviso(html, esError) {
     aviso.querySelector('[data-texto]').innerHTML = html;
     aviso.dataset.tipo = esError ? 'error' : 'exito';
     aviso.setAttribute('data-visible', '');
+    aviso.dataset.espera = esError ? 6000 : 4000;
+    programarCierre(aviso);
+}
+
+// El aviso se cierra solo, pero no mientras el dedo, el cursor o el foco están sobre él
+function programarCierre(aviso) {
     clearTimeout(temporizador);
-    temporizador = setTimeout(() => aviso.removeAttribute('data-visible'), esError ? 6000 : 4000);
+    temporizador = setTimeout(() => aviso.removeAttribute('data-visible'), Number(aviso.dataset.espera || 4000));
+}
+const avisoFlotante = document.getElementById('aviso');
+if (avisoFlotante) {
+    ['pointerenter', 'pointerdown', 'focusin'].forEach((ev) => avisoFlotante.addEventListener(ev, () => clearTimeout(temporizador)));
+    ['pointerleave', 'focusout'].forEach((ev) => avisoFlotante.addEventListener(ev, () => {
+        if (avisoFlotante.hasAttribute('data-visible') && !avisoFlotante.contains(document.activeElement)) programarCierre(avisoFlotante);
+    }));
 }
 
 // Bloquea un botón mientras espera al servidor: evita el doble envío con señal lenta
@@ -160,6 +173,67 @@ if (sinMovimiento) {
     }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
     document.querySelectorAll('[data-revelar], [data-contar]').forEach((el) => observador.observe(el));
 }
+
+/*
+ * Hoja inferior que se arrastra (panel de filtros en el celular). Sigue al dedo 1:1 desde donde se agarró,
+ * se resiste al subir más allá de su lugar y, al soltar, proyecta el impulso: si el gesto la lleva más allá
+ * de la mitad, se cierra continuando a la velocidad del dedo; si no, vuelve a su sitio.
+ */
+const proyectar = (v, d = 0.998) => (v / 1000) * d / (1 - d);
+const elastico = (x, alto, c = 0.55) => (x * alto * c) / (alto + c * Math.abs(x));
+
+document.querySelectorAll('[data-hoja]').forEach((hoja) => {
+    let inicioY = null, desde = 0, historial = [];
+
+    // La clase abre/cierra con la propiedad translate de Tailwind 4; el dedo mueve con transform encima.
+    // La posición en pantalla es la suma de las dos.
+    const posicionActual = () => {
+        const estilo = getComputedStyle(hoja);
+        const y = (estilo.translate.split(' ')[1] || '0').trim();
+        const desdeClase = y.endsWith('%') ? (parseFloat(y) / 100) * hoja.offsetHeight : parseFloat(y) || 0;
+        return new DOMMatrixReadOnly(estilo.transform).m42 + desdeClase;
+    };
+
+    hoja.addEventListener('pointerdown', (e) => {
+        if (!hoja.hasAttribute('data-abierto') || !e.target.closest('[data-arrastre]') || e.target.closest('button, a, input, select') || matchMedia('(min-width: 64rem)').matches) return;
+        hoja.setPointerCapture(e.pointerId);
+        desde = posicionActual();               // si estaba en movimiento, se agarra donde está
+        inicioY = e.clientY;
+        historial = [{ y: e.clientY, t: e.timeStamp }];
+        hoja.style.transition = 'none';
+        hoja.style.transform = `translateY(${desde}px)`;
+    });
+
+    hoja.addEventListener('pointermove', (e) => {
+        if (inicioY === null) return;
+        const dy = desde + e.clientY - inicioY;
+        hoja.style.transform = `translateY(${dy < 0 ? elastico(dy, hoja.offsetHeight) : dy}px)`;
+        historial.push({ y: e.clientY, t: e.timeStamp });
+        if (historial.length > 5) historial.shift();
+    });
+
+    const soltar = (e) => {
+        if (inicioY === null) return;
+        const dy = Math.max(0, desde + e.clientY - inicioY);
+        const [a, b] = [historial[0], historial[historial.length - 1]];
+        const velocidad = b.t > a.t ? ((b.y - a.y) / (b.t - a.t)) * 1000 : 0;   // px/s, positiva hacia abajo
+        const alto = hoja.offsetHeight;
+        const cerrar = dy + proyectar(velocidad) > alto / 2;
+        inicioY = null;
+
+        // Continúa a la velocidad del dedo: la duración sale de la distancia que falta y la velocidad al soltar
+        const falta = cerrar ? alto - dy : dy;
+        const duracion = Math.min(0.35, Math.max(0.16, Math.abs(velocidad) > 50 ? (falta / Math.abs(velocidad)) * 1.6 : 0.3));
+        // transform vuelve a 0 y, si se cierra, translate va a 100 % con la misma curva: juntas trazan un solo recorrido
+        const curva = `${duracion}s cubic-bezier(0.2, 0.8, 0.3, 1)`;
+        hoja.style.transition = `transform ${curva}, translate ${curva}`;
+        hoja.style.transform = '';
+        if (cerrar) window.dispatchEvent(new CustomEvent('cerrar-hoja'));
+        setTimeout(() => { hoja.style.transition = ''; }, duracion * 1000 + 50);
+    };
+    hoja.addEventListener('pointerup', soltar);
+    hoja.addEventListener('pointercancel', soltar);
+});
 
 // Portada: las fotos se relevan solas cada 6 s con zoom lento; los puntos llevan la barra de avance
 Alpine.data('portada', (total, duracion = 6000) => ({

@@ -66,18 +66,20 @@
 {{-- lg: en escritorio el panel es una barra lateral siempre visible; en el celular es una hoja que se abre --}}
 <div x-data="{ panel: false, lg: window.matchMedia('(min-width: 1024px)').matches }"
      x-init="window.matchMedia('(min-width: 1024px)').addEventListener('change', e => lg = e.matches)"
-     @keydown.escape.window="panel = false">
+     @keydown.escape.window="panel = false" @cerrar-hoja.window="panel = false">
 
 
     <div class="grid grid-cols-1 gap-8 lg:grid-cols-[16rem_minmax(0,1fr)]">
         {{-- Panel "Ajustar búsqueda": hoja inferior en el celular, barra lateral desde escritorio --}}
         <div x-show="panel" x-cloak x-transition.opacity class="fixed inset-0 z-40 bg-tinta/50 lg:hidden" @click="panel = false"></div>
         <aside id="panel-filtros" aria-labelledby="titulo-filtros" :inert="!panel && !lg"
-               class="fixed inset-x-0 bottom-0 z-50 max-h-[85dvh] translate-y-full overflow-y-auto bg-white p-6 transition-transform duration-300 ease-[var(--ease-salida)] lg:static lg:z-auto lg:max-h-none lg:translate-y-0 lg:overflow-visible lg:bg-transparent lg:p-0"
-               :class="panel && '!translate-y-0'">
+               data-hoja class="panel-movil fixed inset-x-0 bottom-0 z-50 max-h-[85dvh] translate-y-full overflow-y-auto bg-white p-6 transition-transform duration-300 ease-[var(--ease-salida)] lg:static lg:z-auto lg:max-h-none lg:translate-y-0 lg:overflow-visible lg:bg-transparent lg:p-0"
+               :class="panel && '!translate-y-0'" :data-abierto="panel">
             <div class="franja franja-fina absolute inset-x-0 top-0 lg:hidden" aria-hidden="true"></div>
+            {{-- Agarradera: arrastrar hacia abajo cierra la hoja --}}
+            <div class="agarradera -mx-6 -mt-6 mb-1 flex justify-center pb-2 pt-4 lg:hidden" data-arrastre aria-hidden="true"><span class="h-1.5 w-12 rounded-full bg-linea"></span></div>
             <div class="space-y-5 lg:sticky lg:top-28">
-                <div class="flex items-center justify-between">
+                <div class="agarradera flex items-center justify-between lg:cursor-auto lg:touch-auto" data-arrastre>
                     <h2 id="titulo-filtros" class="seccion-titulo">Ajustar búsqueda</h2>
                     <button type="button" class="grid size-11 place-items-center hover:bg-agua lg:hidden" @click="panel = false" aria-label="Cerrar"><x-icono nombre="x" /></button>
                 </div>

@@ -75,6 +75,10 @@
         html { scroll-behavior: auto; }
         *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-delay: 0ms !important; }
     }
+    /* Menos transparencias: los botones de vidrio pasan a sólidos */
+    @media (prefers-reduced-transparency: reduce) {
+        .btn-linea-clara { background: var(--color-noche) !important; backdrop-filter: none; }
+    }
 }
 
 @layer components {
@@ -121,9 +125,11 @@
         @apply relative inline-flex items-center justify-center gap-2.5 rounded-[6px] font-extrabold uppercase whitespace-nowrap select-none
                min-h-12 px-6 text-[0.9375rem] leading-none tracking-[0.06em] cursor-pointer border-2 border-transparent;
         transition: transform 0.25s var(--ease-rebote), background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+        -webkit-tap-highlight-color: transparent;
     }
-    .btn:hover:not(:disabled) { transform: translateY(-2px); }
-    .btn:active:not(:disabled) { transform: translateY(0); }
+    @media (hover: hover) { .btn:hover:not(:disabled) { transform: translateY(-2px); } }
+    /* La respuesta está en el toque, no al soltar: rápida y sin rebote */
+    .btn:active:not(:disabled) { transform: scale(0.97); transition: transform 0.08s ease-out; }
     .btn:disabled, .btn[aria-disabled="true"] { @apply opacity-55 cursor-not-allowed; }
     /* Contraste alto: texto azul noche sobre amarillo, bordes de 2 px en los botones de contorno */
     .btn-sol { @apply bg-sol text-noche hover:bg-[#ffdf33]; border: 2px solid #e0b800; box-shadow: 0 6px 18px -8px rgb(160 120 0 / 0.75); }
@@ -133,7 +139,7 @@
     .btn-grande { @apply min-h-14 px-8 text-base; }
     .btn-mini { @apply min-h-10 px-4 text-[0.8125rem]; }
     .btn .chip { @apply -mr-1 grid size-6 place-items-center; transition: transform 0.25s var(--ease-rebote); }
-    .btn:hover .chip { transform: translateX(4px); }
+    @media (hover: hover) { .btn:hover .chip { transform: translateX(4px); } }
     .enlace { @apply font-semibold text-tierra underline hover:text-tierra-oscura; }
     .enlace-peligro { @apply font-semibold text-coral-tinta underline hover:text-[#7e1d14] cursor-pointer; }
 
@@ -177,7 +183,10 @@
     .lobulo-tierra { @apply rounded-lobulo bg-tierra text-white; }
     /* Tarjeta que se eleva al pasar el cursor */
     .tarjeta-viva { transition: transform 0.35s var(--ease-salida), box-shadow 0.35s var(--ease-salida), border-color 0.2s; }
-    .tarjeta-viva:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -22px rgb(5 43 112 / 0.45); border-color: var(--color-tierra); }
+    @media (hover: hover) {
+        .tarjeta-viva:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -22px rgb(5 43 112 / 0.45); border-color: var(--color-tierra); }
+    }
+    .tarjeta-viva:active { transform: scale(0.985); transition: transform 0.08s ease-out; }
 
     /*
      * Plantilla de producto: verde del logo, claro y semitransparente, sobre las fotos de fondo.
@@ -186,10 +195,10 @@
     .tarjeta-producto {
         border-radius: var(--radius-lobulo);
         border: 1px solid rgb(11 74 59 / 0.35);
-        background: linear-gradient(160deg, rgb(11 74 59 / 0.30), rgb(42 157 111 / 0.16)), rgb(255 255 255 / 0.55);
-        backdrop-filter: blur(6px);
+        background: linear-gradient(160deg, rgb(11 74 59 / 0.30), rgb(42 157 111 / 0.16)), rgb(255 255 255 / 0.68);
     }
-    .tarjeta-producto.tarjeta-viva:hover { border-color: var(--color-rialto); box-shadow: 0 18px 40px -22px rgb(11 74 59 / 0.55); }
+    @media (prefers-reduced-transparency: reduce) { .tarjeta-producto { background-color: #fff; } }
+    @media (hover: hover) { .tarjeta-producto.tarjeta-viva:hover { border-color: var(--color-rialto); box-shadow: 0 18px 40px -22px rgb(11 74 59 / 0.55); } }
     .foto-producto { background: #fff; }
 
     /* ---- Estados ---- */
@@ -259,13 +268,13 @@
  * Con JavaScript, lo marcado con data-revelar entra subiendo al aparecer en pantalla; sin JavaScript
  * (o con «reducir movimiento») todo se ve desde el principio.
  */
-@keyframes subir { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
-.js [data-entrar] { animation: subir 0.9s var(--ease-salida) both; animation-delay: calc(var(--orden, 0) * 120ms + 150ms); }
-.js [data-revelar] { opacity: 0; transform: translateY(32px); transition: opacity 0.8s var(--ease-salida), transform 0.8s var(--ease-salida); transition-delay: calc(var(--orden, 0) * 90ms); }
+@keyframes subir { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+.js [data-entrar] { animation: subir 0.45s var(--ease-salida) both; animation-delay: calc(var(--orden, 0) * 60ms); }
+.js [data-revelar] { opacity: 0; transform: translateY(20px); transition: opacity 0.5s var(--ease-salida), transform 0.5s var(--ease-salida); transition-delay: calc(var(--orden, 0) * 60ms); }
 .js [data-revelar].visible { opacity: 1; transform: none; }
 
 /* Portada: las fotos se relevan con un zoom lento (efecto Ken Burns) */
-.diapositiva { opacity: 0; transform: scale(1.12); transition: opacity 1.4s ease, transform 7s linear; }
+.diapositiva { opacity: 0; transform: scale(1.05); transition: opacity 1.2s ease, transform 7s linear; }
 .diapositiva.activa { opacity: 1; transform: scale(1); }
 /* Barra de avance del punto activo */
 @keyframes avanzar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
@@ -283,6 +292,19 @@
     transition: transform 0.35s var(--ease-salida), opacity 0.2s;
 }
 .toast[data-visible] { transform: translate(-50%, 0); opacity: 1; }
+
+/* Hoja que se arrastra con el dedo (panel de filtros en el celular): agarradera visible */
+.agarradera { touch-action: none; cursor: grab; }
+.agarradera:active { cursor: grabbing; }
+
+@media (prefers-reduced-motion: reduce) {
+    .toast { transform: translate(-50%, 0); pointer-events: none; transition: opacity 0.2s ease !important; }
+    .toast[data-visible] { pointer-events: auto; }
+}
+@media (prefers-reduced-motion: reduce) and (max-width: 63.98rem) {
+    .panel-movil { transform: none !important; translate: none !important; transition: opacity 0.2s ease !important; }
+    .panel-movil:not([data-abierto]) { opacity: 0; visibility: hidden; }
+}
 
 /* Spinner de los botones en espera */
 .girando { width: 1em; height: 1em; border-radius: 999px; border: 2.5px solid currentColor; border-right-color: transparent; animation: girar 0.7s linear infinite; }

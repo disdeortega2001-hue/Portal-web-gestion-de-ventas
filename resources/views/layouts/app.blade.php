@@ -84,8 +84,8 @@
         <div x-show="abierto" x-cloak x-transition.opacity class="fixed inset-0 z-40 bg-tinta/50 lg:hidden" @click="abierto = false"></div>
 
         <nav id="riel" aria-label="Menú del personal"
-             class="fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col bg-tierra text-white transition-transform duration-300 ease-[var(--ease-salida)] lg:translate-x-0"
-             :class="abierto && 'translate-x-0'">
+             class="panel-movil fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col bg-tierra text-white transition-transform duration-300 ease-[var(--ease-salida)] lg:translate-x-0"
+             :class="abierto && 'translate-x-0'" :data-abierto="abierto">
             <span class="franja-v pointer-events-none absolute inset-y-0 right-0" aria-hidden="true"></span>
             <div class="relative flex items-center gap-3 px-5 pb-4 pt-5">
                 <x-logo tamano="size-12" />
