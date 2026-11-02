@@ -107,7 +107,7 @@ class CreditoYExencionTest extends TestCase
     public function test_el_cliente_compra_a_credito_y_abona_hasta_saldar(): void
     {
         [$usuario] = $this->clienteACredito();
-        $this->get(route('compra.create'))->assertSee('Crédito en dólares')->assertSee('Sin límite');
+        $this->get(route('compra.create'))->assertSee('Crédito en dólares')->assertSee('Sin límite')->assertDontSee('@else');
 
         $pedido = $this->comprarACredito($usuario);
         $this->assertTrue($pedido->a_credito);

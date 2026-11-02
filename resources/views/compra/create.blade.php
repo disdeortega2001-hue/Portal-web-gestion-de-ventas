@@ -63,7 +63,7 @@
                     <p class="flex flex-wrap items-baseline justify-between gap-2 text-sm font-extrabold uppercase tracking-[0.06em] text-tierra-oscura">
                         Tu crédito con Rialto 7
                         <span class="apoyo font-semibold normal-case tracking-normal cifra">
-                            @if($credito['disponible'] === null) Sin límite@else Disponible: USD {{ number_format($credito['disponible'], 2, ',', '.') }}@endif
+                            {{ $credito['disponible'] === null ? 'Sin límite' : 'Disponible: USD ' . number_format($credito['disponible'], 2, ',', '.') }}
                             @if($credito['deuda'] > 0) · debes USD {{ number_format($credito['deuda'], 2, ',', '.') }}@endif
                         </span>
                     </p>

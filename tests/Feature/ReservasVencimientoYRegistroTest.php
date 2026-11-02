@@ -164,6 +164,30 @@ class ReservasVencimientoYRegistroTest extends TestCase
         $this->assertSame(1, Pedido::count());
     }
 
+    public function test_las_fichas_del_pedido_muestran_el_vencimiento(): void
+    {
+        [$usuario, , $pedido] = $this->creditoConfirmado();
+        $vence = $pedido->credito_vence_en->format('d/m/Y');
+
+        $this->actingAs($this->crearUsuario('vendedor'))->get(route('gestion.pedidos.show', $pedido))->assertOk()->assertSee('Vence')->assertSee($vence);
+        $this->actingAs($usuario)->get(route('cuenta.pedidos.show', $pedido))->assertOk()->assertSee($vence)->assertSee('Estado de cuenta');
+
+        $this->travel(31)->days();
+        $this->actingAs($this->crearUsuario('vendedor'))->get(route('gestion.pedidos.show', $pedido))->assertOk()->assertSee('días de atraso');
+    }
+
+    /** Compila todas las vistas: un error de sintaxis rompe la pantalla aunque ninguna otra prueba la abra. */
+    public function test_todas_las_vistas_compilan_sin_errores(): void
+    {
+        $vistas = collect(\Illuminate\Support\Facades\File::allFiles(resource_path('views')))
+            ->filter(fn ($f) => str_ends_with($f->getFilename(), '.blade.php'));
+
+        $this->assertGreaterThan(50, $vistas->count());
+        foreach ($vistas as $vista) {
+            token_get_all(app('blade.compiler')->compileString($vista->getContents()), TOKEN_PARSE);   // Lanza ParseError si algo falla
+        }
+    }
+
     /* ---------- Documentos ---------- */
 
     public function test_estado_de_cuenta_y_cuentas_por_cobrar_en_pdf(): void
