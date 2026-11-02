@@ -15,6 +15,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Una sola instancia por petición para que todas las vistas lean el mismo carrito
         $this->app->scoped(CarritoService::class);
+        $this->app->scoped(\App\Support\Reservas::class);
     }
 
     public function boot(): void

@@ -164,9 +164,9 @@ class CarritoService
             ]);
         }
 
-        if ($cantidad > $producto->stock) {
+        if ($cantidad > $producto->disponible()) {
             throw ValidationException::withMessages([
-                'cantidad' => "Solo hay {$producto->stock} unidades disponibles de {$producto->codigo_fabrica}.",
+                'cantidad' => "Solo hay {$producto->disponible()} unidades disponibles de {$producto->codigo_fabrica}.",
             ]);
         }
     }

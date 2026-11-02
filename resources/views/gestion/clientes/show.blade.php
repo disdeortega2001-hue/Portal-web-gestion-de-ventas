@@ -60,6 +60,9 @@
                     @endif
                 </dl>
             @endif
+            @if($credito['deuda'] > 0 && auth()->user()->puedeAdministrar())
+                <a href="{{ route('gestion.clientes.estado-cuenta', $cliente) }}" target="_blank" rel="noopener" class="btn btn-linea btn-mini mt-3"><x-icono nombre="pdf" class="size-4" /> Estado de cuenta</a>
+            @endif
             @if(auth()->user()->puedeAdministrar())
                 <form method="POST" action="{{ route('gestion.clientes.credito', $cliente) }}" class="needs-validation mt-4 space-y-3 border-t border-linea pt-4" novalidate
                       x-data="{ activo: @js((bool) old('credito_habilitado', $cliente->credito_habilitado)) }">
@@ -76,6 +79,13 @@
                         </div>
                         <p class="error-campo">@error('limite_credito'){{ $message }}@enderror</p>
                         <p class="ayuda">Vacío: sin límite. Al llegar al límite ya no puede comprar a crédito hasta que abone.</p>
+                        <label for="plazo_credito_dias" class="etiqueta mt-3">Plazo de pago</label>
+                        <div class="grupo-campo">
+                            <input type="number" id="plazo_credito_dias" name="plazo_credito_dias" value="{{ old('plazo_credito_dias', $cliente->plazo_credito_dias ?? 30) }}" class="campo cifra @error('plazo_credito_dias') is-invalid @enderror" min="1" max="365" step="1">
+                            <span class="unidad">días</span>
+                        </div>
+                        <p class="error-campo">@error('plazo_credito_dias'){{ $message }}@enderror</p>
+                        <p class="ayuda">Cuenta desde que se confirma la venta. Con una compra vencida no puede comprar otra vez a crédito.</p>
                     </div>
                     <button class="btn btn-tierra btn-mini">Guardar crédito</button>
                 </form>

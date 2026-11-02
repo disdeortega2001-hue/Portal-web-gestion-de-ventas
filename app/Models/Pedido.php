@@ -35,7 +35,7 @@ class Pedido extends Model
     protected $fillable = [
         'codigo', 'id_cliente', 'id_usuario', 'id_cotizacion', 'fecha', 'subtotal', 'monto_exento', 'descuento',
         'moneda_pago', 'tipo_impuesto', 'porcentaje_impuesto', 'impuesto', 'total', 'tasa_cambio', 'total_bs', 'estado', 'fecha_confirmacion',
-        'origen', 'metodo_pago', 'a_credito', 'ultimo_recordatorio_en', 'recordatorios_enviados', 'estado_pago', 'entrega', 'observaciones',
+        'origen', 'metodo_pago', 'a_credito', 'credito_vence_en', 'ultimo_recordatorio_en', 'recordatorios_enviados', 'estado_pago', 'entrega', 'observaciones',
         'devolucion_motivo', 'devolucion_solicitada_en', 'motivo_anulacion',
         'entregado_en', 'recibido_por', 'recibido_por_identificacion', 'id_usuario_entrega',
     ];
@@ -47,6 +47,7 @@ class Pedido extends Model
         'entregado_en' => 'datetime',
         'ultimo_recordatorio_en' => 'datetime',
         'a_credito' => 'boolean',
+        'credito_vence_en' => 'date',
         'recordatorios_enviados' => 'integer',
         'subtotal' => 'decimal:2',
         'monto_exento' => 'decimal:2',
@@ -91,6 +92,14 @@ class Pedido extends Model
     public function movimientos(): HasMany
     {
         return $this->hasMany(MovimientoInventario::class, 'id_pedido');
+    }
+
+    /** Cambian lo reservado: una venta que se confirma o se anula deja de apartar existencia. */
+    protected static function booted(): void
+    {
+        $olvidar = fn () => app(\App\Support\Reservas::class)->olvidar();
+        static::saved($olvidar);
+        static::deleted($olvidar);
     }
 
     public function estaPendiente(): bool
@@ -142,6 +151,17 @@ class Pedido extends Model
     public function creditoVigente(): bool
     {
         return $this->a_credito && $this->estado === self::CONFIRMADO && ! $this->estaPagado() && (float) $this->saldoUsd() > 0;
+    }
+
+    /** Pasó la fecha de vencimiento y todavía debe algo. */
+    public function creditoVencido(): bool
+    {
+        return $this->creditoVigente() && $this->credito_vence_en !== null && $this->credito_vence_en->lt(today());
+    }
+
+    public function diasDeAtraso(): int
+    {
+        return $this->creditoVencido() ? (int) $this->credito_vence_en->diffInDays(today()) : 0;
     }
 
     /** Fecha del próximo recordatorio: 30 días después de la venta o del último aviso. */

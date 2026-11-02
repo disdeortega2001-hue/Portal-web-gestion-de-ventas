@@ -163,6 +163,12 @@
     .capsula[aria-current] .conteo { @apply bg-white text-tierra-oscura; }
     .capsula-quitar { @apply pr-3; }
 
+    /* ---- Tablero: lista «Por atender»; el número se pinta de amarillo solo si algo espera ---- */
+    .fila-atender { @apply flex min-h-16 items-center gap-3.5 px-5 py-3 text-white no-underline transition-colors; }
+    @media (hover: hover) { .fila-atender:hover { @apply bg-white/10; } }
+    .cuenta-atender { @apply grid h-10 min-w-10 shrink-0 place-items-center rounded-[6px] bg-white/15 px-2 text-lg font-extrabold text-white/80 cifra; }
+    .cuenta-atender.con-pendientes { @apply bg-sol text-noche; }
+
     /* ---- Pestañas de estado: control segmentado (riel claro, la activa en blanco elevada) ---- */
     /* Se desliza con el dedo, sin la barra gruesa debajo */
     .sin-barra { scrollbar-width: none; }
@@ -182,6 +188,7 @@
     .segmento[data-estado="convertida"] .punto, .segmento[data-estado="confirmado"] .punto, .segmento[data-estado="verificado"] .punto { background: var(--color-sabana); }
     .segmento[data-estado="rechazada"] .punto, .segmento[data-estado="rechazado"] .punto, .segmento[data-estado="anulado"] .punto { background: var(--color-coral); }
     .segmento[data-estado="devolucion"] .punto, .segmento[data-estado="vigentes"] .punto { background: var(--color-laguna); }
+    .segmento[data-estado="vencidos"] .punto { background: var(--color-coral); }
     .segmento[data-estado="por_recordar"] .punto { background: var(--color-sol-oscura); }
     .segmento[data-estado="saldados"] .punto { background: var(--color-sabana); }
     .segmento[data-estado="todas"] .punto, .segmento[data-estado="todos"] .punto { display: none; }

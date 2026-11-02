@@ -7,10 +7,12 @@
         <a href="{{ route('gestion.pedidos.create') }}" class="btn btn-sol"><x-icono nombre="mas" class="size-4" /> Venta de mostrador</a>
     </x-slot:acciones>
 </x-encabezado>
-<x-pestanas :opciones="['todos' => 'Todos', 'pendiente' => 'Pendientes', 'confirmado' => 'Confirmados', 'devolucion' => 'Devoluciones', 'anulado' => 'Anulados']" :actual="$estado" ruta="gestion.pedidos.index" :conteos="$conteos" :atencion="['pendiente', 'devolucion']" />
-<x-buscador :accion="route('gestion.pedidos.index')" :valor="$busqueda" placeholder="Código, cliente, cédula o teléfono" :mantener="['estado' => $estado]" />
-
-<div class="lobulo overflow-x-auto">
+<div class="lobulo overflow-hidden">
+    <div class="border-b border-linea px-4 pt-4 sm:px-5 sm:pt-5 [&>*:last-child]:!mb-4">
+        <x-pestanas :opciones="['todos' => 'Todos', 'pendiente' => 'Pendientes', 'confirmado' => 'Confirmados', 'devolucion' => 'Devoluciones', 'anulado' => 'Anulados']" :actual="$estado" ruta="gestion.pedidos.index" :conteos="$conteos" :atencion="['pendiente', 'devolucion']" />
+        <x-buscador :accion="route('gestion.pedidos.index')" :valor="$busqueda" placeholder="Código, cliente, cédula o teléfono" :mantener="['estado' => $estado]" />
+    </div>
+    <div class="overflow-x-auto">
     <table class="tabla">
         <thead><tr><th>Código</th><th>Fecha</th><th>Cliente</th><th>Vendedor</th><th class="!text-right">Total</th><th>Estado</th><th>Pago</th><th class="!text-right"><span class="sr-only">Contactar</span></th></tr></thead>
         <tbody>
@@ -34,6 +36,7 @@
         @endforelse
         </tbody>
     </table>
+    </div>
 </div>
 {{ $pedidos->links() }}
 @endsection

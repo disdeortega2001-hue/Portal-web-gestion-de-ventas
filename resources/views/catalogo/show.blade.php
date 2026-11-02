@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('titulo', $producto->nombre)
-@section('descripcion', "{$producto->nombre} ({$producto->codigo_fabrica}), {$producto->marca}. " . ($producto->stock > 0 ? "Disponible: {$producto->stock}." : 'Agotado por ahora.') . ' Precio en USD y Bs. y cotización en línea en Inversiones Rialto 7.')
+@section('descripcion', "{$producto->nombre} ({$producto->codigo_fabrica}), {$producto->marca}. " . ($producto->disponible() > 0 ? "Disponible: {$producto->disponible()}." : 'Agotado por ahora.') . ' Precio en USD y Bs. y cotización en línea en Inversiones Rialto 7.')
 @section('imagen_og', $producto->urlImagen())
 @section('tipo_og', 'product')
 
@@ -19,7 +19,7 @@
         '@type' => 'Offer',
         'priceCurrency' => 'USD',
         'price' => number_format((float) $producto->precio, 2, '.', ''),
-        'availability' => $producto->stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+        'availability' => $producto->disponible() > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
         'url' => route('catalogo.show', $producto),
         'seller' => ['@type' => 'Organization', 'name' => 'Inversiones Rialto 7 C.A.'],
     ],
@@ -85,19 +85,19 @@
                 @endif
             @else
                 <form method="POST" action="{{ route('carrito.agregar', $producto) }}" class="needs-validation" novalidate data-agregar
-                      x-data="{ n: 1, max: {{ (int) $producto->stock }} }">
+                      x-data="{ n: 1, max: {{ (int) $producto->disponible() }} }">
                     @csrf
                     <label for="cantidad" class="etiqueta">Cantidad</label>
                     <div class="flex flex-wrap gap-3">
                         <div class="flex h-14 items-stretch border-[1.5px] border-tinta bg-white">
                             <button type="button" class="grid w-12 place-items-center hover:bg-agua disabled:opacity-40" @click="n = Math.max(1, n - 1)" :disabled="n <= 1" aria-label="Una unidad menos"><x-icono nombre="menos" /></button>
-                            <input type="number" id="cantidad" name="cantidad" x-model.number="n" value="1" min="1" max="{{ $producto->stock }}" inputmode="numeric" required
+                            <input type="number" id="cantidad" name="cantidad" x-model.number="n" value="1" min="1" max="{{ $producto->disponible() }}" inputmode="numeric" required
                                    class="w-16 border-x border-linea bg-transparent text-center font-rotulo text-2xl font-extrabold cifra focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
                             <button type="button" class="grid w-12 place-items-center hover:bg-agua disabled:opacity-40" @click="n = Math.min(max, n + 1)" :disabled="n >= max" aria-label="Una unidad más"><x-icono nombre="mas" /></button>
                         </div>
                         <button class="btn btn-sol btn-grande !min-h-14 flex-1" data-cargando="Agregando…">Agregar a cotización <span class="chip"><x-icono nombre="mas" class="size-4" /></span></button>
                     </div>
-                    <p class="ayuda">Máximo {{ $producto->stock }} {{ $producto->stock === 1 ? 'unidad' : 'unidades' }}.</p>
+                    <p class="ayuda">Máximo {{ $producto->disponible() }} {{ $producto->disponible() === 1 ? 'unidad' : 'unidades' }}.</p>
                 </form>
             @endif
             <a href="{{ $compartir }}" target="_blank" rel="noopener" class="enlace mt-4 inline-flex items-center gap-1.5 text-[0.9375rem]"><x-icono nombre="whatsapp" class="size-4" /> Compartir por WhatsApp</a>

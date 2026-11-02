@@ -56,10 +56,10 @@ class PedidoRequest extends FormRequest
 
                 foreach ($items as $i => $item) {
                     $producto = $productos[$item['id_producto'] ?? 0] ?? null;
-                    if ($producto && (int) ($item['cantidad'] ?? 0) > $producto->stock) {
+                    if ($producto && (int) ($item['cantidad'] ?? 0) > $producto->disponible()) {
                         $validator->errors()->add(
                             "items.{$i}.cantidad",
-                            "Solo hay {$producto->stock} unidades de {$producto->codigo_fabrica}."
+                            "Solo hay {$producto->disponible()} unidades de {$producto->codigo_fabrica}."
                         );
                     }
                 }

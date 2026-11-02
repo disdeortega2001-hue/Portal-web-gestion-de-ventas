@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Categoria;
 use App\Models\Configuracion;
 use App\Models\DetallePedido;
 use App\Models\Producto;
 use Illuminate\View\View;
 
 /**
- * Página de inicio: presenta la empresa, sus marcas exclusivas y las categorías,
+ * Página de inicio: presenta la empresa, sus marcas exclusivas
  * y muestra los productos más pedidos con existencia, para entrar al catálogo con un toque.
  */
 class InicioController extends Controller
@@ -37,13 +36,6 @@ class InicioController extends Controller
             'productos' => $productos->where('marca', $nombre)->count(),
         ])->values();
 
-        $categorias = Categoria::withCount(['productos' => fn ($q) => $q->activos()])
-            ->orderBy('nombre')
-            ->get()
-            ->where('productos_count', '>', 0)
-            ->each(fn ($c) => $c->muestra = $productos->where('id_categoria', $c->id)->whereNotNull('imagen')->sortByDesc('precio')->first())
-            ->values();
-
         // La foto de la portada: el equipo de mayor valor con foto y existencia
         $estrella = $productos->whereNotNull('imagen')->where('stock', '>', 0)->sortByDesc('precio')->first();
 
@@ -52,7 +44,6 @@ class InicioController extends Controller
         return view('inicio', [
             'destacados' => $destacados,
             'marcas' => $marcas,
-            'categorias' => $categorias,
             'estrella' => $estrella,
             'anios' => now()->year - NosotrosController::FUNDACION,
             'disponibles' => $productos->where('stock', '>', 0)->count(),

@@ -35,10 +35,7 @@
 
     <div class="mx-auto w-full max-w-[1320px] px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
         <div class="max-w-3xl">
-            <p class="inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] backdrop-blur-sm" data-entrar style="--orden:0">
-                Valle de la Pascua desde 1963
-            </p>
-            <h1 id="t-portada" class="titular mt-6 text-[2.6rem] sm:text-6xl lg:text-7xl" data-entrar style="--orden:1">El campo no se detiene, <em>nosotros tampoco</em></h1>
+            <h1 id="t-portada" class="titular text-[2.6rem] sm:text-6xl lg:text-7xl" data-entrar style="--orden:1">El campo no se detiene, <em>nosotros tampoco</em></h1>
             <p class="mt-5 max-w-xl text-lg text-white/85 sm:text-xl" data-entrar style="--orden:2">Desde 1963 llevamos maquinaria y repuestos al productor guariqueño, temporada tras temporada.</p>
 
             <form method="GET" action="{{ route('catalogo.index') }}" role="search" class="mt-8 flex max-w-xl gap-2">
@@ -107,7 +104,7 @@
                 <dl class="mt-6 flex flex-wrap gap-x-10 gap-y-4">
                     <div><dt class="text-sm font-semibold text-tinta-suave">Código de fábrica</dt><dd class="text-xl font-black text-tierra cifra">{{ $estrella->codigo_fabrica }}</dd></div>
                     <div><dt class="text-sm font-semibold text-tinta-suave">Precio</dt><dd class="text-xl font-black cifra">@usd($estrella->precio)</dd></div>
-                    <div><dt class="text-sm font-semibold text-tinta-suave">Disponibles</dt><dd class="text-xl font-black cifra">{{ $estrella->stock }}</dd></div>
+                    <div><dt class="text-sm font-semibold text-tinta-suave">Disponibles</dt><dd class="text-xl font-black cifra">{{ $estrella->disponible() }}</dd></div>
                 </dl>
                 <a href="{{ route('catalogo.show', $estrella) }}" class="btn btn-tierra mt-8">Saber más <span class="chip"><x-icono nombre="flecha" class="size-4" /></span></a>
             </div>
@@ -121,35 +118,6 @@
         </div>
     </section>
 @endif
-
-{{-- ======== Por tipo de repuesto: carrusel de tarjetas con pestaña azul ======== --}}
-<section aria-labelledby="t-categorias" class="fondo-foto fondo-foto-verde py-16 lg:py-24" style="--foto: url('{{ asset('img/portada/campo-4.webp') }}')" x-data="{ mover(d) { const p = this.$refs.pista; p.scrollBy({ left: d * p.clientWidth * 0.8, behavior: 'smooth' }); } }">
-    <div class="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-wrap items-end justify-between gap-4" data-revelar>
-            <h2 id="t-categorias" class="titular subrayado text-4xl text-rialto sm:text-5xl">Por tipo de repuesto</h2>
-            <div class="flex gap-2">
-                <button type="button" class="grid size-12 place-items-center rounded-full border-2 border-tierra text-tierra hover:bg-tierra hover:text-white" @click="mover(-1)" aria-label="Anteriores"><x-icono nombre="flecha-izq" /></button>
-                <button type="button" class="grid size-12 place-items-center rounded-full bg-tierra text-white hover:bg-tierra-oscura" @click="mover(1)" aria-label="Siguientes"><x-icono nombre="flecha" /></button>
-            </div>
-        </div>
-        <ul x-ref="pista" class="-mx-4 mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-px-4 px-4 pb-4 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
-            @foreach($categorias as $k => $categoria)
-                <li class="w-[72%] shrink-0 snap-start sm:w-[42%] lg:w-[calc((100%-3.75rem)/4)]" data-revelar style="--orden:{{ $k }}">
-                    <a href="{{ route('catalogo.index', ['categoria' => $categoria->id]) }}" class="lobulo tarjeta-viva group block overflow-hidden">
-                        <p class="flex items-center justify-between gap-2 bg-rialto px-4 py-3 text-sm font-black uppercase tracking-[0.04em] text-white">
-                            {{ $categoria->nombre }} <span class="rounded-[4px] bg-white px-2 py-0.5 text-tierra-oscura cifra">{{ $categoria->productos_count }}</span>
-                        </p>
-                        <div class="aspect-[4/5] bg-agua">
-                            @if($categoria->muestra)
-                                <img src="{{ $categoria->muestra->urlImagen() }}" alt="" class="size-full object-contain p-6 mix-blend-multiply grayscale transition duration-500 group-hover:scale-105 group-hover:grayscale-0" loading="lazy">
-                            @endif
-                        </div>
-                    </a>
-                </li>
-            @endforeach
-        </ul>
-    </div>
-</section>
 
 {{-- ======== Los más pedidos ======== --}}
 @if($destacados->isNotEmpty())

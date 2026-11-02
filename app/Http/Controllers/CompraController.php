@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\StockInsuficienteException;
 use App\Http\Requests\CompraRequest;
 use App\Models\Pedido;
 use App\Services\CarritoService;
@@ -65,18 +66,20 @@ class CompraController extends Controller
             $cliente = $request->user()?->cliente;
             $total = (float) $this->carrito->resumen(Credito::moneda($datos['metodo_pago']))['total'];
             if (! $cliente || ! Credito::permite($cliente, $total)) {
-                throw ValidationException::withMessages(['metodo_pago' => $cliente?->credito_habilitado
+                throw ValidationException::withMessages(['metodo_pago' => $cliente && Credito::tieneVencido($cliente)
+                    ? 'Tienes un crédito vencido. Abona lo que debes para volver a comprar a crédito.'
+                    : ($cliente?->credito_habilitado
                     ? 'Este pedido pasa de tu crédito disponible (USD ' . number_format((float) Credito::disponibleUsd($cliente), 2, ',', '.') . '). Elige otro método o quita productos.'
-                    : 'Tu cuenta no tiene crédito autorizado. Pregúntanos por WhatsApp cómo solicitarlo.']);
+                    : 'Tu cuenta no tiene crédito autorizado. Pregúntanos por WhatsApp cómo solicitarlo.')]);
             }
         }
 
         // Revalida la existencia al momento de comprar (pudo cambiar desde que se agregó)
         $lineas = $this->carrito->lineas();
         foreach ($lineas as $linea) {
-            if ($linea['cantidad'] > $linea['producto']->stock) {
+            if ($linea['cantidad'] > $linea['producto']->disponible()) {
                 throw ValidationException::withMessages([
-                    'carrito' => "Ya no hay suficiente existencia de {$linea['producto']->codigo_fabrica} (quedan {$linea['producto']->stock}). Ajusta la cantidad.",
+                    'carrito' => "Ya no hay suficiente existencia de {$linea['producto']->codigo_fabrica} (quedan {$linea['producto']->disponible()}). Ajusta la cantidad.",
                 ]);
             }
         }
@@ -85,7 +88,11 @@ class CompraController extends Controller
         [$cliente, $notaContacto] = $conCuenta ? [$request->user()->cliente, null] : ClienteInvitado::resolver($request);
         $observaciones = implode("\n", array_filter([$datos['observaciones'] ?? null, $notaContacto])) ?: null;
 
-        $pedido = $pedidos->crearEnLinea($cliente, $lineas, $datos['metodo_pago'], $datos['entrega'], $observaciones);
+        try {
+            $pedido = $pedidos->crearEnLinea($cliente, $lineas, $datos['metodo_pago'], $datos['entrega'], $observaciones);
+        } catch (StockInsuficienteException $e) {
+            throw ValidationException::withMessages(['carrito' => $e->getMessage()]);
+        }
         $this->carrito->vaciar();
 
         if (! $conCuenta) {
@@ -121,7 +128,7 @@ class CompraController extends Controller
             $opciones[$clave] = $opcion + ['alcanza' => Credito::permite($cliente, (float) $resumenes[$opcion['moneda']]['total'])];
         }
 
-        return ['disponible' => Credito::disponibleUsd($cliente), 'deuda' => Credito::deudaUsd($cliente), 'opciones' => $opciones];
+        return ['disponible' => Credito::disponibleUsd($cliente), 'deuda' => Credito::deudaUsd($cliente), 'vencido' => Credito::tieneVencido($cliente), 'opciones' => $opciones];
     }
 
     /** Pedido hecho sin cuenta: se consulta con el enlace firmado que recibió al comprar. */

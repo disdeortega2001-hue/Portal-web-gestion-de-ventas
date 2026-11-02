@@ -51,6 +51,7 @@
         ['admin.tasa.edit', 'admin.tasa.*', 'moneda', 'Tasa del día', false],
         ['admin.configuracion.edit', 'admin.configuracion.*', 'ajustes', 'Configuración del portal', true],
         ['admin.usuarios.index', 'admin.usuarios.*', 'usuarios', 'Usuarios', true],
+        ['admin.registro.index', 'admin.registro.*', 'reporte', 'Registro de cambios', true],
         ['admin.respaldos.index', 'admin.respaldos.*', 'escudo', 'Respaldos', true],
     ];
 @endphp
@@ -285,7 +286,7 @@
                         <p class="text-sm">RIF J-50668510-8 · Valle de la Pascua desde 1963</p>
                     </div>
                 </div>
-                <p class="mt-5 max-w-md text-[0.9375rem]">Agente autorizado exclusivo en Venezuela de Marchesan Tatu, Colombo Aemco, Vicon y Lumagi. Precios en USD; en bolívares a la tasa oficial del BCV. Pagos en dólares con IGTF y en bolívares con IVA.</p>
+                <p class="mt-5 max-w-md text-[0.9375rem]">Agente autorizado exclusivo en Venezuela de Marchesan Tatu, Colombo Aemco, Vicon y Lumagi.</p>
             </div>
             <nav aria-label="Pie de página">
                 <p class="text-xs font-extrabold uppercase tracking-[0.14em] text-white/70">El portal</p>

@@ -34,7 +34,7 @@
                         <div class="min-w-0">
                             <span class="font-rotulo text-xl font-extrabold uppercase text-tierra cifra">{{ $producto->codigo_fabrica }}</span>
                             <div class="mt-0.5 text-[1.0625rem] font-semibold">{{ $producto->nombre }}</div>
-                            <div class="apoyo text-sm cifra">@usd($linea['precio_unitario']) c/u · hay {{ $producto->stock }}</div>
+                            <div class="apoyo text-sm cifra">@usd($linea['precio_unitario']) c/u · hay {{ $producto->disponible() }}</div>
                         </div>
                         <div class="font-rotulo text-2xl font-extrabold whitespace-nowrap cifra">@usd($linea['subtotal'])</div>
                     </div>
@@ -48,13 +48,13 @@
                                 <x-icono :nombre="$linea['cantidad'] === 1 ? 'papelera' : 'menos'" />
                             </button>
                             <label class="sr-only" for="cant-{{ $producto->id }}">Cantidad de {{ $producto->nombre }}</label>
-                            <input type="number" id="cant-{{ $producto->id }}" name="cantidad" value="{{ $linea['cantidad'] }}" min="1" max="{{ $producto->stock }}" inputmode="numeric"
+                            <input type="number" id="cant-{{ $producto->id }}" name="cantidad" value="{{ $linea['cantidad'] }}" min="1" max="{{ $producto->disponible() }}" inputmode="numeric"
                                    class="w-14 border-x border-linea bg-transparent text-center font-rotulo text-xl font-extrabold cifra focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
-                            <button type="submit" name="ajuste" value="1" class="grid w-11 place-items-center hover:bg-agua disabled:opacity-40" aria-label="Una unidad más de {{ $producto->nombre }}" @disabled($linea['cantidad'] >= $producto->stock)>
+                            <button type="submit" name="ajuste" value="1" class="grid w-11 place-items-center hover:bg-agua disabled:opacity-40" aria-label="Una unidad más de {{ $producto->nombre }}" @disabled($linea['cantidad'] >= $producto->disponible())>
                                 <x-icono nombre="mas" />
                             </button>
                         </form>
-                        <span class="apoyo hidden text-sm sm:inline cifra">de {{ $producto->stock }} disponibles</span>
+                        <span class="apoyo hidden text-sm sm:inline cifra">de {{ $producto->disponible() }} disponibles</span>
                         @if($linea['cantidad'] > 1)
                             <form method="POST" action="{{ route('carrito.quitar', $producto) }}" class="ml-auto sm:ml-0">
                                 @csrf @method('DELETE')

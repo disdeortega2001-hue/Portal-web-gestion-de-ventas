@@ -95,7 +95,7 @@ class CatalogoController extends Controller
             'nombre' => $p->nombre,
             'marca' => $p->marca,
             'precio' => 'USD ' . number_format((float) $p->precio, 2, ',', '.'),
-            'stock' => $p->stock,
+            'stock' => $p->disponible(),
             'imagen' => $p->urlImagen('mini'),
             'url' => route('catalogo.show', $p),
         ]));
@@ -107,8 +107,8 @@ class CatalogoController extends Controller
         abort_unless($producto->activo, 404);   // Igual que la ficha: un producto oculto no expone su stock
 
         return response()->json([
-            'stock' => $producto->stock,
-            'estado' => $producto->estadoStock(),
+            'stock' => $producto->disponible(),
+            'estado' => $producto->estadoDisponible(),
         ]);
     }
 }

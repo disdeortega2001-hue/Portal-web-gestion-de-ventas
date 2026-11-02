@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RegistraCambios;
+use App\Support\Reservas;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +17,7 @@ use Illuminate\Support\Facades\Cache;
  */
 class Producto extends Model
 {
-    use SoftDeletes;
+    use RegistraCambios, SoftDeletes;
 
     protected $table = 'productos';
 
@@ -107,19 +109,58 @@ class Producto extends Model
 
     /* ---------- Reglas de stock ---------- */
 
-    public function estaAgotado(): bool
+    /** Unidades apartadas por pedidos que aún no se confirman (ver Reservas). */
+    public function reservado(): int
     {
-        return $this->stock <= 0;
+        return app(Reservas::class)->de($this->id);
     }
 
-    /** disponible | bajo | agotado, según el umbral configurado. */
-    public function estadoStock(): string
+    /** Lo que se le puede ofrecer a un cliente: la existencia menos lo reservado. */
+    public function disponible(): int
+    {
+        return max(0, $this->stock - $this->reservado());
+    }
+
+    public function estaAgotado(): bool
+    {
+        return $this->disponible() <= 0;
+    }
+
+    /** Como estadoStock(), pero sobre lo disponible: es lo que ve el cliente. */
+    public function estadoDisponible(): string
     {
         if ($this->estaAgotado()) {
             return 'agotado';
         }
 
+        return $this->disponible() <= Configuracion::umbralStockBajo() ? 'bajo' : 'disponible';
+    }
+
+    /** disponible | bajo | agotado, según el umbral configurado. */
+    public function estadoStock(): string
+    {
+        if ($this->stock <= 0) {
+            return 'agotado';
+        }
+
         return $this->stock <= Configuracion::umbralStockBajo() ? 'bajo' : 'disponible';
+    }
+
+    /* ---------- Registro de cambios ---------- */
+
+    public function camposRegistrados(): array
+    {
+        return ['precio' => 'Precio (USD)', 'exento_iva' => 'Exento de IVA', 'activo' => 'Visible en el catálogo'];
+    }
+
+    public function entidadRegistro(): string
+    {
+        return 'Producto';
+    }
+
+    public function referenciaRegistro(): string
+    {
+        return "{$this->codigo_fabrica} · {$this->nombre}";
     }
 
     /** Precio en Bs. con la tasa vigente (solo para mostrar; los totales los calcula el servicio). */

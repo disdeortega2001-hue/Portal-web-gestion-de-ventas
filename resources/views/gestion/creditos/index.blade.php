@@ -4,6 +4,9 @@
 @section('contenido')
 <x-encabezado titulo="Créditos">
     Compras a crédito con saldo pendiente. Cada 30 días se le recuerda el pago al cliente: por correo sale solo; si no tiene correo, envíalo por WhatsApp desde aquí.
+    <x-slot:acciones>
+        <a href="{{ route('gestion.creditos.cuentas') }}" target="_blank" rel="noopener" class="btn btn-linea"><x-icono nombre="pdf" class="size-4" /> Cuentas por cobrar</a>
+    </x-slot:acciones>
 </x-encabezado>
 
 <dl class="mb-6 grid grid-cols-2 gap-px border border-linea bg-linea sm:grid-cols-3">
@@ -12,11 +15,11 @@
     <div class="col-span-2 bg-white p-4 sm:col-span-1"><dt class="apoyo text-sm">Toca recordar hoy</dt><dd class="font-rotulo text-3xl font-extrabold cifra">{{ $conteos['por_recordar'] }}</dd></div>
 </dl>
 
-<x-pestanas :opciones="['vigentes' => 'Vigentes', 'por_recordar' => 'Por recordar', 'saldados' => 'Saldados']" :actual="$estado" ruta="gestion.creditos.index" :conteos="$conteos" :atencion="['por_recordar']" />
+<x-pestanas :opciones="['vigentes' => 'Vigentes', 'vencidos' => 'Vencidos', 'por_recordar' => 'Por recordar', 'saldados' => 'Saldados']" :actual="$estado" ruta="gestion.creditos.index" :conteos="$conteos" :atencion="['vencidos', 'por_recordar']" />
 
 @if($creditos->isEmpty())
     <div class="lobulo px-6 py-10 text-center">
-        <p class="text-lg font-bold">{{ match ($estado) { 'por_recordar' => 'No hay recordatorios pendientes.', 'saldados' => 'Todavía no hay créditos saldados.', default => 'No hay créditos con saldo pendiente.' } }}</p>
+        <p class="text-lg font-bold">{{ match ($estado) { 'por_recordar' => 'No hay recordatorios pendientes.', 'vencidos' => 'No hay créditos vencidos.', 'saldados' => 'Todavía no hay créditos saldados.', default => 'No hay créditos con saldo pendiente.' } }}</p>
         <p class="apoyo mt-1">Para vender a crédito, autoriza el crédito en la ficha del cliente.</p>
     </div>
 @else
@@ -30,14 +33,16 @@
                             <a href="{{ route('gestion.pedidos.show', $pedido) }}" class="enlace font-extrabold cifra">{{ $pedido->codigo }}</a>
                             <span class="estado estado-{{ $pedido->estado }}">{{ ucfirst($pedido->estado) }}</span>
                             <span class="estado estado-{{ $pedido->estado_pago }}">{{ $pedido->etiquetaPago() }}</span>
+                            @if($pedido->creditoVencido())<span class="estado estado-agotado">Vencido hace {{ $pedido->diasDeAtraso() }} {{ $pedido->diasDeAtraso() === 1 ? 'día' : 'días' }}</span>@endif
                             @if($pedido->recordatorioVencido())<span class="estado estado-por_verificar">Toca recordar</span>@endif
                         </p>
                         <p class="mt-1 font-semibold"><a href="{{ route('gestion.clientes.show', $pedido->cliente) }}" class="hover:underline">{{ $pedido->cliente->nombre }}</a>
                             <span class="apoyo cifra text-sm">· {{ $pedido->cliente->identificacion }} · {{ $pedido->cliente->telefono }}</span></p>
-                        <dl class="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-4">
+                        <dl class="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-5">
                             <div><dt class="apoyo">Compra</dt><dd class="font-bold cifra">{{ $pedido->fecha->format('d/m/Y') }} · @usd($pedido->total)</dd></div>
                             <div><dt class="apoyo">Abonado</dt><dd class="font-bold cifra">@usd($pedido->abonadoUsd())</dd></div>
                             <div><dt class="apoyo">Saldo</dt><dd class="font-bold text-tierra cifra">@usd($pedido->saldoUsd())</dd></div>
+                            <div><dt class="apoyo">Vence</dt><dd class="font-bold cifra">{{ $pedido->credito_vence_en?->format('d/m/Y') ?? 'Al confirmar' }}</dd></div>
                             <div><dt class="apoyo">Próximo recordatorio</dt>
                                 <dd class="font-bold cifra">
                                     @if($proximo){{ $proximo->isPast() ? 'Vencido (' . $proximo->format('d/m/Y') . ')' : $proximo->format('d/m/Y') }}
@@ -59,6 +64,7 @@
                                     @csrf<input type="hidden" name="via" value="correo"><button class="btn btn-linea btn-mini"><x-icono nombre="enviar" class="size-4" /> Por correo</button>
                                 </form>
                             @endif
+                            <a href="{{ route('gestion.clientes.estado-cuenta', $pedido->id_cliente) }}" target="_blank" rel="noopener" class="btn btn-linea btn-mini"><x-icono nombre="pdf" class="size-4" /> Estado de cuenta</a>
                             <a href="{{ route('gestion.pedidos.show', $pedido) }}#t-pagos" class="btn btn-sol btn-mini">Registrar abono</a>
                         </div>
                     @endif

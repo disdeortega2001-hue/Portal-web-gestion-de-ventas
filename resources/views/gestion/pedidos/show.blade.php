@@ -47,6 +47,9 @@
                     <div><dt class="apoyo">Próximo recordatorio</dt>
                         <dd class="font-bold cifra">{{ $proximo ? ($proximo->isPast() ? 'Vencido' : $proximo->format('d/m/Y')) : ($pedido->estaPendiente() ? 'Al confirmar la venta' : '—') }}</dd></div>
                 </dl>
+                @if($pedido->credito_vence_en)
+                    <p @class(['mt-3 text-sm font-bold', 'text-coral-tinta' => $pedido->creditoVencido()])>{{ $pedido->creditoVencido() ? 'Venció' : 'Vence' }} el <span class="cifra">{{ $pedido->credito_vence_en->format('d/m/Y') }}</span>@if($pedido->creditoVencido()) · <span class="cifra">{{ $pedido->diasDeAtraso() }}</span> días de atraso@endif</p>
+                @endif
                 <p class="apoyo mt-3 text-sm">La deuda está en dólares: cada abono en bolívares se descuenta a la tasa del día en que se paga. Puede retirar la mercancía sin haber pagado todo.</p>
             </section>
         @endif

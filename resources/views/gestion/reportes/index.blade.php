@@ -6,7 +6,7 @@
 
 @php
     $tipo = request('tipo', 'ventas');
-    // Períodos de un toque: llenan «Desde» y «Hasta»; el reporte se genera con «Ver en pantalla»
+    // Períodos de un toque: llenan «Desde» y «Hasta» y quedan marcados; el reporte se genera con «Ver en pantalla»
     $hoy = now();
     $periodos = [
         'Hoy' => [$hoy->toDateString(), $hoy->toDateString()],
@@ -15,35 +15,52 @@
         'Mes pasado' => [$hoy->copy()->subMonthNoOverflow()->startOfMonth()->toDateString(), $hoy->copy()->subMonthNoOverflow()->endOfMonth()->toDateString()],
         'Este año' => [$hoy->copy()->startOfYear()->toDateString(), $hoy->toDateString()],
     ];
+    $desde = request('desde', $hoy->copy()->startOfMonth()->toDateString());
+    $hasta = request('hasta', $hoy->toDateString());
+    // Dos períodos pueden coincidir (el día 1, «Hoy» y «Este mes»): al abrir se marca solo el más amplio
+    $periodoElegido = collect($periodos)->reverse()->search(fn ($p) => $p === [$desde, $hasta]) ?: null;
 @endphp
-<form method="GET" action="{{ route('gestion.reportes.index') }}" class="lobulo panel-tapa p-5 pt-7 needs-validation lg:p-6 lg:pt-8" novalidate id="form-reporte"
-      x-data="{ tipo: '{{ $tipo }}', periodo(d, h) { $refs.desde.value = d; $refs.hasta.min = d; $refs.hasta.value = h; } }">
-    <div class="mb-4 flex flex-wrap items-center gap-2">
-        <span class="mr-1 text-sm font-semibold text-tinta-suave">Período:</span>
-        @foreach($periodos as $texto => [$d, $h])
-            <button type="button" class="capsula !min-h-9 !pr-3.5 !text-[0.9375rem]" @click="periodo('{{ $d }}', '{{ $h }}')"
-                    @if(request('desde') === $d && request('hasta') === $h) aria-current="true" @endif>{{ $texto }}</button>
-        @endforeach
+{{-- Tres pasos en una sola tarjeta: qué reporte y de cuándo; afinar si hace falta; ver o descargar --}}
+<form method="GET" action="{{ route('gestion.reportes.index') }}" class="lobulo overflow-hidden needs-validation" novalidate id="form-reporte"
+      x-data="{ tipo: @js($tipo), desde: @js($desde), hasta: @js($hasta), elegido: @js($periodoElegido),
+                periodo(texto, d, h) { this.elegido = texto; this.desde = d; this.hasta = h; } }">
+    <div class="flex flex-wrap items-end gap-x-8 gap-y-4 p-5 lg:px-6">
+        <fieldset>
+            <legend class="etiqueta">Reporte de</legend>
+            <div class="segmentos">
+                @foreach(['ventas' => 'Ventas', 'inventario' => 'Inventario'] as $valor => $texto)
+                    <label class="segmento cursor-pointer has-[:checked]:bg-white has-[:checked]:text-tierra-oscura has-[:checked]:shadow-[0_1px_2px_rgb(5_43_112/0.12),0_4px_12px_-6px_rgb(5_43_112/0.35)] has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-tierra">
+                        <input type="radio" name="tipo" value="{{ $valor }}" x-model="tipo" class="sr-only" required @checked($tipo === $valor)> {{ $texto }}
+                    </label>
+                @endforeach
+            </div>
+        </fieldset>
+        <fieldset class="min-w-0 max-w-full">
+            <legend class="etiqueta">Período</legend>
+            <div class="sin-barra overflow-x-auto">
+                <div class="segmentos">
+                    @foreach($periodos as $texto => [$d, $h])
+                        <button type="button" class="segmento" @click="periodo(@js($texto), @js($d), @js($h))" :aria-current="elegido === @js($texto) ? 'true' : null">{{ $texto }}</button>
+                    @endforeach
+                </div>
+            </div>
+        </fieldset>
     </div>
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <div>
-            <label for="tipo" class="etiqueta">Reporte *</label>
-            <select id="tipo" name="tipo" class="campo" required x-model="tipo">
-                <option value="ventas" @selected($tipo === 'ventas')>Ventas</option>
-                <option value="inventario" @selected($tipo === 'inventario')>Inventario</option>
-            </select>
+
+    <div class="grid gap-4 border-t border-linea p-5 sm:grid-cols-2 lg:px-6 xl:flex">
+        <div class="grid grid-cols-2 gap-2 sm:col-span-2 xl:w-[23rem] xl:shrink-0">
+            <div>
+                <label for="desde" class="etiqueta">Desde *</label>
+                <input type="date" id="desde" name="desde" class="campo cifra max-sm:!px-2 max-sm:!text-[0.9375rem]" required max="{{ now()->toDateString() }}"
+                       value="{{ $desde }}" x-model="desde" @input="elegido = null">
+            </div>
+            <div>
+                <label for="hasta" class="etiqueta">Hasta *</label>
+                <input type="date" id="hasta" name="hasta" class="campo cifra max-sm:!px-2 max-sm:!text-[0.9375rem]" required :min="desde"
+                       value="{{ $hasta }}" x-model="hasta" @input="elegido = null">
+            </div>
         </div>
-        <div>
-            <label for="desde" class="etiqueta">Desde *</label>
-            <input type="date" id="desde" name="desde" class="campo cifra" required max="{{ now()->toDateString() }}"
-                   value="{{ request('desde', now()->startOfMonth()->toDateString()) }}" x-ref="desde" @change="$refs.hasta.min = $event.target.value">
-        </div>
-        <div>
-            <label for="hasta" class="etiqueta">Hasta *</label>
-            <input type="date" id="hasta" name="hasta" class="campo cifra" required x-ref="hasta" min="{{ request('desde', now()->startOfMonth()->toDateString()) }}"
-                   value="{{ request('hasta', now()->toDateString()) }}">
-        </div>
-        <div>
+        <div class="min-w-0 xl:flex-1">
             <label for="id_producto" class="etiqueta">Producto</label>
             <select id="id_producto" name="id_producto" class="campo">
                 <option value="">Todos</option>
@@ -52,7 +69,7 @@
                 @endforeach
             </select>
         </div>
-        <div>
+        <div class="min-w-0 xl:flex-1">
             <label for="id_vendedor" class="etiqueta" id="etiqueta-vendedor" x-text="tipo === 'ventas' ? 'Vendedor' : 'Usuario responsable'">{{ $tipo === 'ventas' ? 'Vendedor' : 'Usuario responsable' }}</label>
             <select id="id_vendedor" name="id_vendedor" class="campo">
                 <option value="">Todos</option>
@@ -61,7 +78,7 @@
                 @endforeach
             </select>
         </div>
-        <div id="campo-categoria" x-show="tipo === 'inventario'" @if($tipo === 'ventas') x-cloak @endif>
+        <div id="campo-categoria" class="min-w-0 xl:flex-1" x-show="tipo === 'inventario'" @if($tipo === 'ventas') x-cloak @endif>
             <label for="id_categoria" class="etiqueta">Categoría</label>
             <select id="id_categoria" name="id_categoria" class="campo">
                 <option value="">Todas</option>
@@ -71,10 +88,14 @@
             </select>
         </div>
     </div>
-    <div class="mt-5 flex flex-wrap gap-2">
-        <button class="btn btn-tierra"><x-icono nombre="tabla" class="size-4" /> Ver en pantalla</button>
-        <button class="btn btn-linea" formaction="{{ route('gestion.reportes.exportar') }}" name="formato" value="pdf"><x-icono nombre="pdf" class="size-4" /> Descargar PDF</button>
-        <button class="btn btn-linea" formaction="{{ route('gestion.reportes.exportar') }}" name="formato" value="excel"><x-icono nombre="excel" class="size-4" /> Descargar Excel</button>
+
+    <div class="flex flex-wrap items-center justify-between gap-3 border-t border-linea bg-agua px-5 py-4 lg:px-6">
+        <button class="btn btn-sol"><x-icono nombre="tabla" class="size-4" /> Ver en pantalla</button>
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="text-sm font-semibold text-tinta-suave">Descargar</span>
+            <button class="btn btn-linea btn-mini" formaction="{{ route('gestion.reportes.exportar') }}" name="formato" value="pdf" aria-label="Descargar PDF"><x-icono nombre="pdf" class="size-4" /> PDF</button>
+            <button class="btn btn-linea btn-mini" formaction="{{ route('gestion.reportes.exportar') }}" name="formato" value="excel" aria-label="Descargar Excel"><x-icono nombre="excel" class="size-4" /> Excel</button>
+        </div>
     </div>
 </form>
 

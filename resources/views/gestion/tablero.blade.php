@@ -48,72 +48,115 @@
 
 {{--
     Las cifras se imprimen desde el servidor: el tablero se lee aunque JavaScript o los gráficos no carguen.
-    JavaScript solo las refresca cada 60 s (data-m) y dibuja los gráficos.
+    JavaScript solo las refresca cada 60 s (data-m) y dibuja el gráfico.
 --}}
-<section aria-label="Indicadores" class="lobulo-tierra grid overflow-hidden sm:grid-cols-2 xl:grid-cols-4">
-    <div class="border-white/15 p-5 sm:border-r xl:p-6">
-        <p class="text-sm font-bold text-white/75">Ventas de hoy</p>
-        <p class="titular mt-2 text-[2rem] cifra" data-m="ventas_hoy.total" data-formato="usd">{{ $usd($m['ventas_hoy']['total']) }}</p>
-        <p class="mt-1 text-sm text-white/75"><span data-m="ventas_hoy.pedidos" class="cifra">{{ $m['ventas_hoy']['pedidos'] }}</span> pedidos confirmados</p>
-    </div>
-    <div class="border-t border-white/15 p-5 sm:border-t-0 xl:border-r xl:p-6">
-        <p class="text-sm font-bold text-white/75">Ventas del mes</p>
-        <p class="titular mt-2 text-[2rem] cifra" data-m="ventas_mes.total" data-formato="usd">{{ $usd($m['ventas_mes']['total']) }}</p>
-        <p class="mt-1 text-sm text-white/75"><span data-m="ventas_mes.pedidos" class="cifra">{{ $m['ventas_mes']['pedidos'] }}</span> pedidos confirmados</p>
-    </div>
-    <a href="{{ route('gestion.cotizaciones.index') }}" class="group border-t border-white/15 p-5 transition-colors hover:bg-white/5 sm:border-r xl:border-t-0 xl:p-6">
-        <p class="flex items-center justify-between text-sm font-bold text-white/75">Cotizaciones pendientes <x-icono nombre="flecha" class="size-4 transition-transform group-hover:translate-x-1" /></p>
-        <p class="titular mt-2 text-[2rem] cifra" data-m="cotizaciones.pendientes">{{ $m['cotizaciones']['pendientes'] }}</p>
-        <p class="mt-1 text-sm"><span class="bg-sol px-2 py-0.5 font-bold text-tinta"><span data-m="cotizaciones.atrasadas" class="cifra">{{ $m['cotizaciones']['atrasadas'] }}</span> con más de 24 h</span></p>
-    </a>
-    <a href="{{ route('gestion.inventario.index', ['bajo_stock' => 1]) }}" class="group border-t border-white/15 p-5 transition-colors hover:bg-white/5 xl:border-t-0 xl:p-6">
-        <p class="flex items-center justify-between text-sm font-bold text-white/75">Bajo stock / agotados <x-icono nombre="flecha" class="size-4 transition-transform group-hover:translate-x-1" /></p>
-        <p class="titular mt-2 text-[2rem] cifra"><span data-m="stock.bajo">{{ $m['stock']['bajo'] }}</span> / <span data-m="stock.agotados" class="text-coral">{{ $m['stock']['agotados'] }}</span></p>
-        <p class="mt-1 text-sm text-white/75">Umbral: <span data-m="stock.umbral" class="cifra">{{ $m['stock']['umbral'] }}</span> unidades</p>
-    </a>
-</section>
+<div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
+    {{-- Por atender: lo primero en el celular. Solo lo que espera a alguien se pinta de amarillo --}}
+    <section class="sobre-azul order-1 overflow-hidden rounded-lobulo bg-rialto text-white lg:order-2 lg:col-span-4" aria-labelledby="t-atender">
+        <h2 id="t-atender" class="seccion-titulo px-5 pb-3 pt-5">Por atender</h2>
+        <ul class="divide-y divide-white/15 border-t border-white/15">
+            <li>
+                <a href="{{ route('gestion.cotizaciones.index') }}" class="fila-atender">
+                    <span @class(['cuenta-atender', 'con-pendientes' => $m['cotizaciones']['pendientes'] > 0]) data-m="cotizaciones.pendientes" data-contador>{{ $m['cotizaciones']['pendientes'] }}</span>
+                    <span class="min-w-0 flex-1"><span class="block font-bold">Cotizaciones pendientes</span>
+                        <span class="block text-sm text-white/75"><span data-m="cotizaciones.atrasadas" class="cifra">{{ $m['cotizaciones']['atrasadas'] }}</span> con más de 24 h</span></span>
+                    <x-icono nombre="flecha" class="size-4 shrink-0" />
+                </a>
+            </li>
+            @if(auth()->user()->puedeAdministrar())
+                @php($pagosPorVerificar = \App\Models\Pago::where('estado', \App\Models\Pago::POR_VERIFICAR)->count())
+                @php($creditosPorRecordar = \App\Http\Controllers\Gestion\CreditoController::porRecordar())
+                <li>
+                    <a href="{{ route('gestion.pagos.index') }}" class="fila-atender">
+                        <span @class(['cuenta-atender', 'con-pendientes' => $pagosPorVerificar > 0])>{{ $pagosPorVerificar }}</span>
+                        <span class="min-w-0 flex-1 font-bold">Pagos por verificar</span>
+                        <x-icono nombre="flecha" class="size-4 shrink-0" />
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('gestion.creditos.index', ['estado' => 'por_recordar']) }}" class="fila-atender">
+                        <span @class(['cuenta-atender', 'con-pendientes' => $creditosPorRecordar > 0])>{{ $creditosPorRecordar }}</span>
+                        <span class="min-w-0 flex-1 font-bold">Créditos por recordar</span>
+                        <x-icono nombre="flecha" class="size-4 shrink-0" />
+                    </a>
+                </li>
+            @endif
+            <li>
+                <a href="{{ route('gestion.inventario.index', ['bajo_stock' => 1]) }}" class="fila-atender">
+                    <span @class(['cuenta-atender', 'con-pendientes' => $m['stock']['bajo'] > 0]) data-m="stock.bajo" data-contador>{{ $m['stock']['bajo'] }}</span>
+                    <span class="min-w-0 flex-1"><span class="block font-bold">Productos con bajo stock</span>
+                        <span class="block text-sm text-white/75">Umbral: <span data-m="stock.umbral" class="cifra">{{ $m['stock']['umbral'] }}</span> unidades</span></span>
+                    <x-icono nombre="flecha" class="size-4 shrink-0" />
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('gestion.inventario.index', ['bajo_stock' => 1]) }}" class="fila-atender">
+                    <span @class(['cuenta-atender', 'con-pendientes' => $m['stock']['agotados'] > 0]) data-m="stock.agotados" data-contador>{{ $m['stock']['agotados'] }}</span>
+                    <span class="min-w-0 flex-1 font-bold">Productos agotados</span>
+                    <x-icono nombre="flecha" class="size-4 shrink-0" />
+                </a>
+            </li>
+        </ul>
+    </section>
 
-<div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
-    {{-- Orden en el celular: lo que pide acción primero (alertas), los gráficos después --}}
-    <section class="lobulo order-1 p-5 lg:order-3 lg:col-span-6 xl:p-6" aria-labelledby="t-alertas">
-        <h2 id="t-alertas" class="seccion-titulo">Alertas de inventario</h2>
-        <div class="mt-3 overflow-x-auto">
-            <table class="tabla">
-                <thead><tr><th class="hidden sm:table-cell">Código</th><th>Producto</th><th class="!text-right">Stock</th></tr></thead>
-                <tbody id="tabla-alertas">
-                @forelse($m['stock']['alertas'] as $p)
-                    <tr>
-                        <td class="hidden sm:table-cell"><span class="codigo">{{ $p['codigo_fabrica'] }}</span></td>
-                        <td>{{ $p['nombre'] }}<span class="codigo mt-0.5 block sm:hidden">{{ $p['codigo_fabrica'] }}</span></td>
-                        <td class="text-right">
-                            @if($p['stock'] === 0)<span class="estado estado-agotado">Agotado</span>
-                            @else<span class="estado estado-bajo cifra">Bajo stock: {{ $p['stock'] }}</span>@endif
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="3" class="apoyo">Sin alertas: todo el inventario está sobre el umbral.</td></tr>
-                @endforelse
-                </tbody>
-            </table>
+    {{-- Ventas: las cifras y su gráfico juntos, en una sola hoja --}}
+    <section class="lobulo order-2 lg:order-1 lg:col-span-8" aria-labelledby="t-ventas">
+        <dl class="grid divide-y divide-linea border-b border-linea sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            <div class="p-5 xl:px-6">
+                <dt class="text-sm font-bold text-tinta-suave">Ventas de hoy</dt>
+                <dd class="titular mt-2 text-2xl text-rialto cifra" data-m="ventas_hoy.total" data-formato="usd">{{ $usd($m['ventas_hoy']['total']) }}</dd>
+                <dd class="apoyo mt-1 text-sm"><span data-m="ventas_hoy.pedidos" class="cifra">{{ $m['ventas_hoy']['pedidos'] }}</span> pedidos confirmados</dd>
+            </div>
+            <div class="p-5 xl:px-6">
+                <dt class="text-sm font-bold text-tinta-suave">Ventas del mes</dt>
+                <dd class="titular mt-2 text-2xl text-rialto cifra" data-m="ventas_mes.total" data-formato="usd">{{ $usd($m['ventas_mes']['total']) }}</dd>
+                <dd class="apoyo mt-1 text-sm"><span data-m="ventas_mes.pedidos" class="cifra">{{ $m['ventas_mes']['pedidos'] }}</span> pedidos confirmados</dd>
+            </div>
+            <div class="p-5 xl:px-6">
+                <dt class="text-sm font-bold text-tinta-suave">Conversión del mes</dt>
+                <dd class="titular mt-2 text-2xl text-rialto cifra"><span data-m="cotizaciones.conversion_mes">{{ number_format($m['cotizaciones']['conversion_mes'], 1, ',', '.') }}</span> %</dd>
+                <dd class="apoyo mt-1 text-sm">de las cotizaciones terminó en pedido</dd>
+            </div>
+        </dl>
+        <div class="p-5 xl:p-6">
+            <h2 id="t-ventas" class="font-bold">Ventas de los últimos <span class="sm:hidden">14</span><span class="hidden sm:inline">30</span> días (USD)</h2>
+            <div class="grafico relative mt-3 h-64"><canvas id="grafico-ventas" aria-label="Gráfico de ventas diarias" role="img"></canvas></div>
+            <p class="apoyo mt-2 text-sm" data-sin-graficos hidden>No se pudo cargar el gráfico. Las cifras de arriba están al día.</p>
         </div>
     </section>
 
-    <section class="lobulo order-2 p-5 lg:order-1 lg:col-span-8 xl:p-6" aria-labelledby="t-ventas">
-        <h2 id="t-ventas" class="seccion-titulo">Ventas de los últimos <span class="sm:hidden">14</span><span class="hidden sm:inline">30</span> días (USD)</h2>
-        <div class="grafico relative mt-4 h-64"><canvas id="grafico-ventas" aria-label="Gráfico de ventas diarias" role="img"></canvas></div>
-        <p class="apoyo mt-2 text-sm" data-sin-graficos hidden>No se pudieron cargar los gráficos. Las cifras de arriba están al día.</p>
+    {{-- Más vendidos: lista con su barra, se lee sin depender de ningún gráfico --}}
+    <section class="lobulo order-4 p-5 lg:order-3 lg:col-span-6 xl:p-6" aria-labelledby="t-top">
+        <h2 id="t-top" class="seccion-titulo">Más vendidos del mes</h2>
+        @php($maximo = max(array_column($m['mas_vendidos'], 'unidades') ?: [1]))
+        <ol id="lista-top" class="mt-4 space-y-4">
+            @foreach($m['mas_vendidos'] as $p)
+                <li>
+                    <div class="flex items-baseline justify-between gap-3">
+                        <span class="min-w-0"><span class="codigo">{{ $p['codigo'] }}</span> <span class="apoyo text-sm">{{ $p['nombre'] }}</span></span>
+                        <span class="shrink-0 font-bold cifra">{{ $p['unidades'] }} und.</span>
+                    </div>
+                    <div class="mt-1.5 h-2 rounded-[2px] bg-agua-honda"><div class="h-full rounded-[2px] bg-tierra" style="width: {{ round($p['unidades'] / $maximo * 100) }}%"></div></div>
+                </li>
+            @endforeach
+        </ol>
+        <p class="apoyo mt-4" id="sin-ventas" @unless(empty($m['mas_vendidos'])) hidden @endunless>Aún no hay ventas confirmadas este mes.</p>
     </section>
 
-    <section class="order-3 rounded-lobulo bg-tierra-clara p-5 text-tinta lg:order-2 lg:col-span-4 xl:p-6" aria-labelledby="t-conversion">
-        <h2 id="t-conversion" class="seccion-titulo">Conversión del mes</h2>
-        <p class="titular mt-4 text-6xl cifra"><span data-m="cotizaciones.conversion_mes">{{ number_format($m['cotizaciones']['conversion_mes'], 1, ',', '.') }}</span> %</p>
-        <p class="mt-3 max-w-xs">De las cotizaciones recibidas este mes, este porcentaje terminó en pedido.</p>
-    </section>
-
-    <section class="lobulo order-4 p-5 lg:col-span-6 xl:p-6" aria-labelledby="t-top">
-        <h2 id="t-top" class="seccion-titulo">Más vendidos del mes (unidades)</h2>
-        <div class="grafico relative mt-4 h-60"><canvas id="grafico-top" aria-label="Productos más vendidos del mes" role="img"></canvas></div>
-        <p class="apoyo mt-2 text-sm" id="sin-ventas" @unless(empty($m['mas_vendidos'])) hidden @endunless>Aún no hay ventas confirmadas este mes.</p>
+    {{-- Alertas de inventario: cuáles son, con su existencia --}}
+    <section class="lobulo order-3 p-5 lg:order-4 lg:col-span-6 xl:p-6" aria-labelledby="t-alertas">
+        <h2 id="t-alertas" class="seccion-titulo">Alertas de inventario</h2>
+        <ul id="tabla-alertas" class="mt-3 divide-y divide-linea">
+            @forelse($m['stock']['alertas'] as $p)
+                <li class="flex items-center justify-between gap-3 py-2.5">
+                    <span class="min-w-0"><span class="block">{{ $p['nombre'] }}</span><span class="codigo block">{{ $p['codigo_fabrica'] }}</span></span>
+                    @if($p['stock'] === 0)<span class="estado estado-agotado shrink-0">Agotado</span>
+                    @else<span class="estado estado-bajo shrink-0 cifra">Bajo stock: {{ $p['stock'] }}</span>@endif
+                </li>
+            @empty
+                <li class="apoyo py-2.5">Sin alertas: todo el inventario está sobre el umbral.</li>
+            @endforelse
+        </ul>
     </section>
 </div>
 @endsection
@@ -121,7 +164,7 @@
 @push('scripts')
 @vite('resources/js/graficos.js')
 <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
-// Los módulos (gráficos) corren antes de DOMContentLoaded: aquí window.Chart ya existe si cargó
+// Los módulos (gráfico) corren antes de DOMContentLoaded: aquí window.Chart ya existe si cargó
 document.addEventListener('DOMContentLoaded', function () {
     const URL_DATOS = @json(route('gestion.tablero.datos'));
     const usd = new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -130,25 +173,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const celular = window.matchMedia('(max-width: 639.98px)');
     function escapar(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
-    // Gráficos: solo si Chart.js cargó. Sin él, el tablero sigue mostrando todas las cifras.
-    let graficoVentas = null, graficoTop = null;
+    // Gráfico: solo si Chart.js cargó. Sin él, el tablero sigue mostrando todas las cifras.
+    let graficoVentas = null;
     if (window.Chart) {
         graficoVentas = new Chart(document.getElementById('grafico-ventas'), {
             type: 'bar',
-            data: { labels: [], datasets: [{ label: 'Ventas USD', data: [], backgroundColor: '#0d5192', hoverBackgroundColor: '#052b70', borderRadius: 999, borderSkipped: false, maxBarThickness: 22 }] },
+            data: { labels: [], datasets: [{ label: 'Ventas USD', data: [], backgroundColor: '#0d5192', hoverBackgroundColor: '#052b70', borderRadius: 3, borderSkipped: false, maxBarThickness: 22 }] },
             options: {
                 maintainAspectRatio: false, animation: false,
                 plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f1b2d', padding: 10, cornerRadius: 12, callbacks: { label: c => 'USD ' + usd.format(c.parsed.y) } } },
                 scales: { y: { beginAtZero: true, border: { display: false }, ticks: { callback: v => usd.format(v) } }, x: { grid: { display: false }, border: { color: '#0f1b2d' }, ticks: { maxTicksLimit: 8 } } }
-            }
-        });
-        graficoTop = new Chart(document.getElementById('grafico-top'), {
-            type: 'bar',
-            data: { labels: [], datasets: [{ label: 'Unidades', data: [], backgroundColor: '#2a9d6f', hoverBackgroundColor: '#0d5192', borderRadius: 999, borderSkipped: false, maxBarThickness: 26 }] },
-            options: {
-                indexAxis: 'y', maintainAspectRatio: false, animation: false,
-                plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f1b2d', padding: 10, cornerRadius: 12 } },
-                scales: { x: { beginAtZero: true, border: { display: false }, ticks: { precision: 0 } }, y: { grid: { display: false }, border: { color: '#0f1b2d' }, ticks: { font: { weight: 700 } } } }
             }
         });
     } else {
@@ -162,6 +196,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (v === undefined) return;
             el.textContent = el.dataset.formato === 'usd' ? 'USD ' + usd.format(v)
                 : (el.dataset.m === 'cotizaciones.conversion_mes' ? decimal1.format(v) : v);
+            if (el.hasAttribute('data-contador')) el.classList.toggle('con-pendientes', Number(v) > 0);
         });
         if (graficoVentas) {
             // En el celular, 30 barras quedan de ~8 px: se muestran los últimos 14 días
@@ -170,18 +205,16 @@ document.addEventListener('DOMContentLoaded', function () {
             graficoVentas.data.datasets[0].data = m.serie_ventas.valores.slice(dias);
             graficoVentas.update();
         }
-        if (graficoTop) {
-            graficoTop.data.labels = m.mas_vendidos.map(p => p.codigo);
-            graficoTop.data.datasets[0].data = m.mas_vendidos.map(p => p.unidades);
-            graficoTop.options.plugins.tooltip.callbacks = { title: i => m.mas_vendidos[i[0].dataIndex].nombre };
-            graficoTop.update();
-        }
+        const maximo = Math.max(1, ...m.mas_vendidos.map(p => p.unidades));
+        document.getElementById('lista-top').innerHTML = m.mas_vendidos.map(p => '<li><div class="flex items-baseline justify-between gap-3"><span class="min-w-0"><span class="codigo">' + escapar(p.codigo)
+            + '</span> <span class="apoyo text-sm">' + escapar(p.nombre) + '</span></span><span class="shrink-0 font-bold cifra">' + p.unidades + ' und.</span></div>'
+            + '<div class="mt-1.5 h-2 rounded-[2px] bg-agua-honda"><div class="h-full rounded-[2px] bg-tierra" style="width: ' + Math.round(p.unidades / maximo * 100) + '%"></div></div></li>').join('');
         document.getElementById('sin-ventas').hidden = m.mas_vendidos.length > 0;
         document.getElementById('tabla-alertas').innerHTML = m.stock.alertas.length
-            ? m.stock.alertas.map(p => '<tr><td class="hidden sm:table-cell"><span class="codigo">' + escapar(p.codigo_fabrica) + '</span></td><td>' + escapar(p.nombre)
-                + '<span class="codigo mt-0.5 block sm:hidden">' + escapar(p.codigo_fabrica) + '</span></td><td class="text-right">'
-                + (p.stock === 0 ? '<span class="estado estado-agotado">Agotado</span>' : '<span class="estado estado-bajo cifra">Bajo stock: ' + p.stock + '</span>') + '</td></tr>').join('')
-            : '<tr><td colspan="3" class="apoyo">Sin alertas: todo el inventario está sobre el umbral.</td></tr>';
+            ? m.stock.alertas.map(p => '<li class="flex items-center justify-between gap-3 py-2.5"><span class="min-w-0"><span class="block">' + escapar(p.nombre)
+                + '</span><span class="codigo block">' + escapar(p.codigo_fabrica) + '</span></span>'
+                + (p.stock === 0 ? '<span class="estado estado-agotado shrink-0">Agotado</span>' : '<span class="estado estado-bajo shrink-0 cifra">Bajo stock: ' + p.stock + '</span>') + '</li>').join('')
+            : '<li class="apoyo py-2.5">Sin alertas: todo el inventario está sobre el umbral.</li>';
     }
 
     let ultimas = @json($metricas);

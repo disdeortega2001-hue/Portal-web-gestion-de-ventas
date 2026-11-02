@@ -45,6 +45,15 @@ class CuentaController extends Controller
         ]);
     }
 
+    /** Estado de cuenta en PDF de las compras a crédito propias. */
+    public function estadoCuenta(Request $request, \App\Services\ComprobanteService $documentos): \Illuminate\Http\Response
+    {
+        $cliente = $request->user()->cliente;
+        abort_unless($cliente, 404);
+
+        return $documentos->estadoCuenta($cliente)->download('Estado de cuenta.pdf');
+    }
+
     /** Detalle de un pedido propio: cómo pagarlo, reportar el pago y seguir su estado. */
     public function pedido(Request $request, Pedido $pedido): View
     {
@@ -84,7 +93,7 @@ class CuentaController extends Controller
         foreach ($cotizacion->detalles()->with('producto')->get() as $detalle) {
             $producto = $detalle->producto;
             $disponible = $producto && ! $producto->trashed() && $producto->activo
-                ? $producto->stock - $carrito->cantidadDe($producto->id) : 0;
+                ? $producto->disponible() - $carrito->cantidadDe($producto->id) : 0;
             if ($disponible <= 0) {
                 $omitidos[] = $producto?->codigo_fabrica ?? 'un producto retirado';
                 continue;

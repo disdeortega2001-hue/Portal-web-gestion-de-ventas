@@ -88,6 +88,7 @@ Route::middleware(['auth', 'rol:cliente'])->prefix('mi-cuenta')->name('cuenta.')
     Route::get('/cotizaciones', [CuentaController::class, 'cotizaciones'])->name('cotizaciones');
     Route::post('/cotizaciones/{cotizacion}/repetir', [CuentaController::class, 'repetir'])->middleware('throttle:20,1')->name('cotizaciones.repetir');
     Route::get('/pedidos', [CuentaController::class, 'pedidos'])->name('pedidos');
+    Route::get('/estado-de-cuenta', [CuentaController::class, 'estadoCuenta'])->name('estado-cuenta');
     Route::get('/pedidos/{pedido}', [CuentaController::class, 'pedido'])->name('pedidos.show');
     Route::post('/pedidos/{pedido}/pago', [CompraController::class, 'reportarPago'])->middleware('throttle:10,1')->name('pedidos.pago');
     Route::post('/pedidos/{pedido}/devolucion', [CompraController::class, 'solicitarDevolucion'])->middleware('throttle:10,1')->name('pedidos.devolucion');
@@ -150,6 +151,8 @@ Route::middleware(['auth', 'rol:administrativo,directivo'])->prefix('gestion')->
     Route::post('/pedidos/{pedido}/pagos', [Gestion\PagoController::class, 'registrar'])->name('pedidos.pagos.store');
 
     Route::get('/creditos', [Gestion\CreditoController::class, 'index'])->name('creditos.index');
+    Route::get('/creditos/cuentas-por-cobrar', [Gestion\CreditoController::class, 'cuentasPorCobrar'])->name('creditos.cuentas');
+    Route::get('/clientes/{cliente}/estado-cuenta', [Gestion\CreditoController::class, 'estadoCuenta'])->name('clientes.estado-cuenta');
     Route::post('/creditos/{pedido}/recordar', [Gestion\CreditoController::class, 'recordar'])->middleware('throttle:30,1')->name('creditos.recordar');
     Route::put('/clientes/{cliente}/credito', [Gestion\CreditoController::class, 'actualizarCliente'])->name('clientes.credito');
 
@@ -182,6 +185,7 @@ Route::middleware(['auth', 'rol:directivo'])->prefix('admin')->name('admin.')->g
 
     Route::resource('usuarios', Admin\UsuarioController::class)->except('show');
 
+    Route::get('registro-de-cambios', [Admin\RegistroController::class, 'index'])->name('registro.index');
     Route::get('respaldos', [Admin\RespaldoController::class, 'index'])->name('respaldos.index');
     Route::post('respaldos', [Admin\RespaldoController::class, 'store'])->middleware('throttle:6,1')->name('respaldos.store');
     Route::get('respaldos/{nombre}', [Admin\RespaldoController::class, 'descargar'])->name('respaldos.descargar');

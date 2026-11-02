@@ -60,6 +60,10 @@
                     @if($pedido->estado_pago === 'por_verificar')
                         <p class="mt-4 rounded-[8px] bg-white/10 px-4 py-3">Estamos verificando tu último abono; al confirmarlo se descuenta del saldo.</p>
                     @endif
+                    @if($pedido->credito_vence_en && ! $pedido->estaPagado())
+                        <p class="mt-4 font-bold">{{ $pedido->creditoVencido() ? 'Venció' : 'Vence' }} el <span class="cifra">{{ $pedido->credito_vence_en->format('d/m/Y') }}</span>@if($pedido->creditoVencido()): abona para volver a comprar a crédito.@endif</p>
+                    @endif
+                    @unless($sinCuenta)<a href="{{ route('cuenta.estado-cuenta') }}" class="btn btn-linea-clara btn-mini mt-4"><x-icono nombre="pdf" class="size-4" /> Estado de cuenta</a>@endunless
                     @if($proximo = $pedido->proximoRecordatorio())
                         <p class="mt-4 text-sm text-white/75">Abona cuando quieras. Te recordamos el saldo cada 30 días; el próximo aviso es el <span class="cifra">{{ $proximo->format('d/m/Y') }}</span>.</p>
                     @endif

@@ -11,6 +11,12 @@ class DetallePedido extends Model
 
     protected $fillable = ['id_pedido', 'id_producto', 'cantidad', 'precio_unitario', 'exento_iva', 'subtotal'];
 
+    /** Una línea nueva cambia lo reservado. */
+    protected static function booted(): void
+    {
+        static::created(fn () => app(\App\Support\Reservas::class)->olvidar());
+    }
+
     protected $casts = [
         'cantidad' => 'integer',
         'precio_unitario' => 'decimal:2',

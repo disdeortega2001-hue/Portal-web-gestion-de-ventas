@@ -3,10 +3,12 @@
 
 @section('contenido')
 <x-encabezado titulo="Cotizaciones">Las pendientes más antiguas primero: el cliente espera tu llamada.</x-encabezado>
-<x-pestanas :opciones="['pendiente' => 'Pendientes', 'convertida' => 'Convertidas', 'rechazada' => 'Rechazadas', 'todas' => 'Todas']" :actual="$estado" ruta="gestion.cotizaciones.index" :conteos="$conteos" :atencion="['pendiente']" />
-<x-buscador :accion="route('gestion.cotizaciones.index')" :valor="$busqueda" placeholder="Código, cliente, cédula o teléfono" :mantener="['estado' => $estado]" />
-
-<div class="lobulo overflow-x-auto">
+<div class="lobulo overflow-hidden">
+    <div class="border-b border-linea px-4 pt-4 sm:px-5 sm:pt-5 [&>*:last-child]:!mb-4">
+        <x-pestanas :opciones="['pendiente' => 'Pendientes', 'convertida' => 'Convertidas', 'rechazada' => 'Rechazadas', 'todas' => 'Todas']" :actual="$estado" ruta="gestion.cotizaciones.index" :conteos="$conteos" :atencion="['pendiente']" />
+        <x-buscador :accion="route('gestion.cotizaciones.index')" :valor="$busqueda" placeholder="Código, cliente, cédula o teléfono" :mantener="['estado' => $estado]" />
+    </div>
+    <div class="overflow-x-auto">
     <table class="tabla">
         <thead><tr><th>Código</th><th>Fecha</th><th>Cliente</th><th>Teléfono</th><th class="!text-right">Ítems</th><th class="!text-right">Total</th><th>Estado</th><th class="!text-right"><span class="sr-only">Contactar</span></th></tr></thead>
         <tbody>
@@ -30,6 +32,7 @@
         @endforelse
         </tbody>
     </table>
+    </div>
 </div>
 {{ $cotizaciones->links() }}
 @endsection

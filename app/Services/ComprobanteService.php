@@ -2,8 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\Cliente;
+use App\Models\Configuracion;
 use App\Models\Pago;
 use App\Models\Pedido;
+use App\Support\Credito;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 /**
@@ -31,6 +34,25 @@ class ComprobanteService
             'emitido' => $porVerificar ? now() : ($pagos->max('verificado_en') ?? now()),
             'vistaPrevia' => $porVerificar !== null,
         ])->setPaper('letter');
+    }
+
+    /** Estado de cuenta: compras a crédito con saldo pendiente y sus abonos. */
+    public function estadoCuenta(Cliente $cliente): \Barryvdh\DomPDF\PDF
+    {
+        $pedidos = Credito::pedidosConSaldo($cliente);
+
+        return Pdf::loadView('pedidos.estado-cuenta', [
+            'cliente' => $cliente,
+            'pedidos' => $pedidos,
+            'deuda' => $pedidos->sum(fn (Pedido $p) => (float) $p->saldoUsd()),
+            'tasa' => Configuracion::tasaCambio(),
+        ])->setPaper('letter');
+    }
+
+    /** Cuentas por cobrar de todos los clientes, por días de atraso. */
+    public function cuentasPorCobrar(): \Barryvdh\DomPDF\PDF
+    {
+        return Pdf::loadView('gestion.creditos.cuentas-pdf', ['cuentas' => Credito::cuentasPorCobrar()])->setPaper('letter', 'landscape');
     }
 
     public function nombreArchivo(Pedido $pedido): string

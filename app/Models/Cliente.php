@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RegistraCambios;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Cliente extends Model
 {
-    use SoftDeletes;
+    use RegistraCambios, SoftDeletes;
 
     protected $table = 'clientes';
 
@@ -21,7 +22,23 @@ class Cliente extends Model
         'solicitud_vinculacion_en' => 'datetime',
         'credito_habilitado' => 'boolean',
         'limite_credito' => 'decimal:2',
+        'plazo_credito_dias' => 'integer',
     ];
+
+    public function camposRegistrados(): array
+    {
+        return ['credito_habilitado' => 'Crédito autorizado', 'limite_credito' => 'Límite de crédito (USD)', 'plazo_credito_dias' => 'Plazo de crédito (días)'];
+    }
+
+    public function entidadRegistro(): string
+    {
+        return 'Cliente';
+    }
+
+    public function referenciaRegistro(): string
+    {
+        return "{$this->nombre} · {$this->identificacion}";
+    }
 
     /** ¿Tiene cotizaciones o pedidos? Una ficha con historial no se asocia a una cuenta sin verificar. */
     public function tieneHistorial(): bool

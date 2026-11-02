@@ -96,6 +96,7 @@ class AvisoClienteService
                 ]))
                 : [
                     "Te recordamos que tu compra a crédito {$pedido->codigo} del {$pedido->fecha->format('d/m/Y')} tiene un saldo pendiente de {$saldo}.",
+                    ...($pedido->credito_vence_en ? [($pedido->creditoVencido() ? 'Venció el ' : 'Vence el ') . $pedido->credito_vence_en->format('d/m/Y') . '.'] : []),
                     'Puedes abonar por Pago Móvil, transferencia o Zelle y reportarlo desde tu pedido, o pagar en la tienda.',
                 ];
         }

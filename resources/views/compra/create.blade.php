@@ -78,7 +78,7 @@
                                     <span class="mt-2 block text-sm font-bold text-tierra cifra">
                                         {{ $opcion['moneda'] === 'USD' ? 'Debes USD ' . number_format((float) $r['total'], 2, ',', '.') . ' (con IGTF)' : 'Debes Bs. ' . number_format((float) $r['total_bs'], 2, ',', '.') . ' (con IVA)' }}
                                     </span>
-                                    @unless($opcion['alcanza'])<span class="mt-1 block text-sm font-semibold text-coral-tinta">Pasa de tu crédito disponible.</span>@endunless
+                                    @unless($opcion['alcanza'])<span class="mt-1 block text-sm font-semibold text-coral-tinta">{{ $credito['vencido'] ? 'Tienes un crédito vencido: abona para volver a usarlo.' : 'Pasa de tu crédito disponible.' }}</span>@endunless
                                 </span>
                             </label>
                         @endforeach

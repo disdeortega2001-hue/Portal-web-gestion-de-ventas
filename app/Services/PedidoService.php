@@ -10,6 +10,7 @@ use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Usuario;
 use App\Support\Credito;
+use App\Support\Reservas;
 use App\Support\MetodosPago;
 use Illuminate\Support\Facades\DB;
 use LogicException;
@@ -82,6 +83,9 @@ class PedidoService
             $pedido = $this->registrarPedido($cliente->id, $vendedor, $lineas, null, ['a_credito' => $aCredito], $moneda);
 
             // La deuda ya incluye este pedido: si pasa del límite, la excepción hace ROLLBACK
+            if ($aCredito && Credito::tieneVencido($cliente)) {
+                throw new LogicException("{$cliente->nombre} tiene un crédito vencido: debe abonar antes de comprar otra vez a crédito.");
+            }
             if ($aCredito && ($cliente->limite_credito !== null) && Credito::deudaUsd($cliente) > (float) $cliente->limite_credito + 0.005) {
                 throw new LogicException('El pedido pasa del crédito disponible de ' . $cliente->nombre
                     . ' (límite USD ' . number_format((float) $cliente->limite_credito, 2, ',', '.') . ').');
@@ -103,6 +107,16 @@ class PedidoService
     public function crearEnLinea(Cliente $cliente, iterable $lineas, string $metodoPago, string $entrega, ?string $observaciones): Pedido
     {
         return DB::transaction(function () use ($cliente, $lineas, $metodoPago, $entrega, $observaciones) {
+            // Con las filas bloqueadas, dos compras simultáneas no pueden apartar la misma última unidad
+            $bloqueados = Producto::whereIn('id', collect($lineas)->map(fn ($l) => $l['producto']->id))->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            app(Reservas::class)->olvidar();
+            foreach ($lineas as $linea) {
+                $producto = $bloqueados[$linea['producto']->id];
+                if ((int) $linea['cantidad'] > $producto->disponible()) {
+                    throw new StockInsuficienteException("Ya no hay suficiente existencia de {$producto->codigo_fabrica} (quedan {$producto->disponible()}). Ajusta la cantidad.");
+                }
+            }
+
             $items = collect($lineas)->map(fn ($l) => [
                 'id_producto' => $l['producto']->id,
                 'precio' => (string) $l['producto']->precio,
@@ -189,6 +203,8 @@ class PedidoService
                 'estado' => Pedido::CONFIRMADO,
                 'fecha_confirmacion' => now(),
                 'id_usuario' => $pedido->id_usuario ?? $usuario->id,
+                // El plazo del crédito corre desde que se confirma la venta
+                'credito_vence_en' => $pedido->a_credito ? now()->addDays($pedido->cliente->plazo_credito_dias ?: Credito::PLAZO_DIAS)->toDateString() : null,
             ]);
 
             return $pedido;

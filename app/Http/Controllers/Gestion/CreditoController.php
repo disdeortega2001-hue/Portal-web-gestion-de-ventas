@@ -7,9 +7,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Cliente;
 use App\Models\Pedido;
 use App\Services\AvisoClienteService;
+use App\Services\ComprobanteService;
 use App\Support\Credito;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 /**
@@ -38,10 +40,14 @@ class CreditoController extends Controller
         if ($estado === 'por_recordar') {
             $creditos = $creditos->filter->recordatorioVencido()->values();
         }
+        if ($estado === 'vencidos') {
+            $creditos = $creditos->filter->creditoVencido()->sortByDesc(fn (Pedido $p) => $p->diasDeAtraso())->values();
+        }
 
         $vigentes = Pedido::with('pagos')->where('a_credito', true)->where('estado', '!=', Pedido::ANULADO)->where('estado_pago', '!=', Pedido::PAGADO)->get();
         $conteos = [
             'vigentes' => $vigentes->count(),
+            'vencidos' => $vigentes->filter->creditoVencido()->count(),
             'por_recordar' => $vigentes->filter->recordatorioVencido()->count(),
             'saldados' => Pedido::where('a_credito', true)->where('estado', '!=', Pedido::ANULADO)->where('estado_pago', Pedido::PAGADO)->count(),
         ];
@@ -83,19 +89,36 @@ class CreditoController extends Controller
         $datos = $request->validate([
             'credito_habilitado' => ['boolean'],
             'limite_credito' => ['nullable', 'numeric', 'min:0', 'max:9999999999', 'decimal:0,2'],
+            'plazo_credito_dias' => ['nullable', 'integer', 'min:1', 'max:365'],
         ], [
             'limite_credito.numeric' => 'El límite debe ser un monto en dólares.',
             'limite_credito.decimal' => 'El límite admite máximo 2 decimales.',
+            'plazo_credito_dias.integer' => 'El plazo debe ser un número de días.',
+            'plazo_credito_dias.min' => 'El plazo debe ser de al menos 1 día.',
+            'plazo_credito_dias.max' => 'El plazo no puede pasar de 365 días.',
         ]);
 
         $cliente->forceFill([
             'credito_habilitado' => (bool) ($datos['credito_habilitado'] ?? false),
             'limite_credito' => $datos['limite_credito'] ?? null,
+            'plazo_credito_dias' => $datos['plazo_credito_dias'] ?? Credito::PLAZO_DIAS,
         ])->save();
 
         return back()->with('exito', $cliente->credito_habilitado
             ? "Crédito autorizado para {$cliente->nombre}" . ($cliente->limite_credito !== null ? ' hasta USD ' . number_format((float) $cliente->limite_credito, 2, ',', '.') : ' sin límite') . '.'
             : "{$cliente->nombre} ya no puede comprar a crédito. Lo que debe sigue pendiente.");
+    }
+
+    /** Estado de cuenta del cliente en PDF. */
+    public function estadoCuenta(Cliente $cliente, ComprobanteService $documentos): Response
+    {
+        return $documentos->estadoCuenta($cliente)->stream("Estado de cuenta {$cliente->identificacion}.pdf");
+    }
+
+    /** Cuentas por cobrar de todos los clientes, por días de atraso, en PDF. */
+    public function cuentasPorCobrar(ComprobanteService $documentos): Response
+    {
+        return $documentos->cuentasPorCobrar()->stream('Cuentas por cobrar ' . now()->format('Y-m-d') . '.pdf');
     }
 
     /** Cuántos créditos esperan recordatorio (para el menú y el tablero). */

@@ -41,9 +41,9 @@ class CotizacionController extends Controller
 
         // Revalida stock al momento de cotizar (pudo cambiar desde que se agregó)
         foreach ($lineas as $linea) {
-            if ($linea['cantidad'] > $linea['producto']->stock) {
+            if ($linea['cantidad'] > $linea['producto']->disponible()) {
                 throw ValidationException::withMessages([
-                    'carrito' => "Ya no hay suficiente stock de {$linea['producto']->codigo_fabrica} (quedan {$linea['producto']->stock}). Ajusta la cantidad.",
+                    'carrito' => "Ya no hay suficiente stock de {$linea['producto']->codigo_fabrica} (quedan {$linea['producto']->disponible()}). Ajusta la cantidad.",
                 ]);
             }
         }

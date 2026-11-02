@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RegistraCambios;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Cache;
  */
 class Configuracion extends Model
 {
-    use SoftDeletes;
+    use RegistraCambios, SoftDeletes;
 
     protected $table = 'configuraciones';
 
@@ -24,6 +25,21 @@ class Configuracion extends Model
     {
         static::saved(fn () => Cache::forget(self::CLAVE_CACHE));
         static::deleted(fn () => Cache::forget(self::CLAVE_CACHE));
+    }
+
+    public function camposRegistrados(): array
+    {
+        return ['valor' => 'Valor'];
+    }
+
+    public function entidadRegistro(): string
+    {
+        return 'Configuración';
+    }
+
+    public function referenciaRegistro(): string
+    {
+        return ucfirst(str_replace('_', ' ', $this->clave));
     }
 
     public static function valor(string $clave, mixed $porDefecto = null): mixed
