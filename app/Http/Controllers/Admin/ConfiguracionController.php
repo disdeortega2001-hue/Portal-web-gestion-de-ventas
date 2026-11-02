@@ -31,7 +31,7 @@ class ConfiguracionController extends Controller
     /** Tasa del día: el administrativo la actualiza a diario; el resto de la configuración es del directivo. */
     public function tasa(): View
     {
-        $configuraciones = Configuracion::whereIn('clave', ['tasa_cambio', 'tasa_fuente', 'tasa_fecha_valor'])->get()->keyBy('clave');
+        $configuraciones = Configuracion::whereIn('clave', ['tasa_cambio', 'tasa_fuente', 'tasa_fecha_valor', 'tasa_consultada_en'])->get()->keyBy('clave');
 
         return view('admin.tasa', compact('configuraciones'));
     }
@@ -50,6 +50,7 @@ class ConfiguracionController extends Controller
             Configuracion::updateOrCreate(['clave' => 'tasa_fuente'], ['valor' => 'manual']);
         }
         $configuracion->save();
+        Configuracion::updateOrCreate(['clave' => 'tasa_consultada_en'], ['valor' => now()->toDateTimeString()]);
 
         return back()->with('exito', 'Tasa guardada: Bs. ' . number_format((float) $datos['tasa_cambio'], 4, ',', '.') . ' por dólar. Ya se aplica en el catálogo y en la compra.');
     }

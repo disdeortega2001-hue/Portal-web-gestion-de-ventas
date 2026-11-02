@@ -185,7 +185,7 @@
 </section>
 
 {{-- Dónde estamos --}}
-<section aria-labelledby="t-visitanos" class="sobre-azul relative mt-16 flex flex-col gap-6 overflow-hidden rounded-[10px] bg-rialto p-7 text-white sm:flex-row sm:items-center sm:justify-between lg:mt-20 lg:p-10" data-revelar>
+<section aria-labelledby="t-visitanos" class="sobre-azul relative mt-16 flex flex-col gap-6 overflow-hidden rounded-[10px] bg-tierra-oscura p-7 text-white sm:flex-row sm:items-center sm:justify-between lg:mt-20 lg:p-10" data-revelar>
     <x-arcos class="pointer-events-none absolute inset-y-0 right-0 h-full w-[28rem]" />
     <div class="relative">
         <h2 id="t-visitanos" class="titular text-3xl">Visítanos o consulta desde tu finca</h2>

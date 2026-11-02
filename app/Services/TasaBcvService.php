@@ -83,6 +83,7 @@ class TasaBcvService
         $guardar('tasa_cambio', (string) $datos['tasa'], 'Tasa oficial USD → Bs. (BCV)');
         $guardar('tasa_fuente', 'BCV', 'Origen de la tasa: BCV (automática) o manual');
         $guardar('tasa_fecha_valor', $datos['fecha_valor']?->toDateString() ?? now()->toDateString(), 'Fecha valor publicada por el BCV');
+        $guardar('tasa_consultada_en', now()->toDateTimeString(), 'Última consulta al BCV, aunque la tasa no haya cambiado');
 
         return $datos;
     }

@@ -29,7 +29,8 @@ class Configuracion extends Model
 
     public function camposRegistrados(): array
     {
-        return ['valor' => 'Valor'];
+        // Lo que anota el portal por su cuenta (origen y hora de la tasa) no es un cambio de nadie
+        return in_array($this->clave, ['tasa_fuente', 'tasa_fecha_valor', 'tasa_consultada_en'], true) ? [] : ['valor' => 'Valor'];
     }
 
     public function entidadRegistro(): string

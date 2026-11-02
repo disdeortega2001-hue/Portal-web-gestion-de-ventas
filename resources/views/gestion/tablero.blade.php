@@ -52,14 +52,14 @@
 --}}
 <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
     {{-- Por atender: lo primero en el celular. Solo lo que espera a alguien se pinta de amarillo --}}
-    <section class="sobre-azul order-1 overflow-hidden rounded-lobulo bg-rialto text-white lg:order-2 lg:col-span-4" aria-labelledby="t-atender">
-        <h2 id="t-atender" class="seccion-titulo px-5 pb-3 pt-5">Por atender</h2>
-        <ul class="divide-y divide-white/15 border-t border-white/15">
+    <section class="lobulo order-1 overflow-hidden lg:order-2 lg:col-span-4" aria-labelledby="t-atender">
+        <h2 id="t-atender" class="seccion-titulo bg-rialto px-5 py-3.5 text-white">Por atender</h2>
+        <ul class="divide-y divide-linea">
             <li>
                 <a href="{{ route('gestion.cotizaciones.index') }}" class="fila-atender">
                     <span @class(['cuenta-atender', 'con-pendientes' => $m['cotizaciones']['pendientes'] > 0]) data-m="cotizaciones.pendientes" data-contador>{{ $m['cotizaciones']['pendientes'] }}</span>
                     <span class="min-w-0 flex-1"><span class="block font-bold">Cotizaciones pendientes</span>
-                        <span class="block text-sm text-white/75"><span data-m="cotizaciones.atrasadas" class="cifra">{{ $m['cotizaciones']['atrasadas'] }}</span> con más de 24 h</span></span>
+                        <span class="apoyo block text-sm"><span data-m="cotizaciones.atrasadas" class="cifra">{{ $m['cotizaciones']['atrasadas'] }}</span> con más de 24 h</span></span>
                     <x-icono nombre="flecha" class="size-4 shrink-0" />
                 </a>
             </li>
@@ -85,7 +85,7 @@
                 <a href="{{ route('gestion.inventario.index', ['bajo_stock' => 1]) }}" class="fila-atender">
                     <span @class(['cuenta-atender', 'con-pendientes' => $m['stock']['bajo'] > 0]) data-m="stock.bajo" data-contador>{{ $m['stock']['bajo'] }}</span>
                     <span class="min-w-0 flex-1"><span class="block font-bold">Productos con bajo stock</span>
-                        <span class="block text-sm text-white/75">Umbral: <span data-m="stock.umbral" class="cifra">{{ $m['stock']['umbral'] }}</span> unidades</span></span>
+                        <span class="apoyo block text-sm">Umbral: <span data-m="stock.umbral" class="cifra">{{ $m['stock']['umbral'] }}</span> unidades</span></span>
                     <x-icono nombre="flecha" class="size-4 shrink-0" />
                 </a>
             </li>
@@ -219,6 +219,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let ultimas = @json($metricas);
     pintar(ultimas);
+    // Chart.js mide las etiquetas al dibujar: se repite al cargar la fuente para que no queden cortadas
+    if (graficoVentas && document.fonts) document.fonts.ready.then(() => graficoVentas.update());
     celular.addEventListener('change', function () { pintar(ultimas); });
 
     // Tiempo real: cada 60 s, solo con la pestaña visible (ahorra datos del plan móvil)

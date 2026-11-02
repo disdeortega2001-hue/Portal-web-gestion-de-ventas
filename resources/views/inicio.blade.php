@@ -17,7 +17,7 @@
 
 @section('contenido')
 {{-- ======== Portada: fotos a sangre que se relevan con zoom lento; el texto entra escalonado ======== --}}
-<section id="portada" aria-labelledby="t-portada" class="sobre-azul relative isolate flex min-h-[calc(100svh-4rem)] items-center overflow-hidden bg-noche text-white lg:min-h-[calc(100svh-4.5rem)]"
+<section id="portada" aria-labelledby="t-portada" class="sobre-azul relative isolate flex min-h-[32rem] items-center overflow-hidden bg-noche text-white lg:min-h-[34rem]"
          x-data="portada({{ count($diapositivas) }})">
     <div class="absolute inset-0 -z-10" aria-hidden="true">
         @foreach($diapositivas as $i => [$grande, $movil, $leyenda])
@@ -26,17 +26,18 @@
                 <img src="{{ asset($grande) }}" alt="" class="size-full object-cover" @if($i === 0) fetchpriority="high" @else loading="lazy" @endif decoding="async">
             </picture>
         @endforeach
-        <div class="absolute inset-0 bg-gradient-to-r from-noche/90 via-tierra-oscura/60 to-tierra/15"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-noche/90 via-transparent to-transparent"></div>
+        <div class="absolute inset-0 bg-noche/50 sm:bg-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-noche/85 via-tierra-oscura/50 to-tierra/10"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-noche/70 via-transparent to-transparent"></div>
         <x-arcos class="absolute inset-y-0 right-0 hidden h-full w-[48rem] lg:block" />
-    </div>
+            </div>
     {{-- Sin JavaScript se ve la primera foto --}}
     <noscript><style>[data-primera]{opacity:1;transform:none}</style></noscript>
 
     <div class="mx-auto w-full max-w-[1320px] px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
         <div class="max-w-3xl">
-            <h1 id="t-portada" class="titular text-[2.6rem] sm:text-6xl lg:text-7xl" data-entrar style="--orden:1">El campo no se detiene, <em>nosotros tampoco</em></h1>
-            <p class="mt-5 max-w-xl text-lg text-white/85 sm:text-xl" data-entrar style="--orden:2">Desde 1963 llevamos maquinaria y repuestos al productor guariqueño, temporada tras temporada.</p>
+            <h1 id="t-portada" class="max-w-2xl text-3xl font-extrabold leading-tight sm:text-4xl lg:text-5xl" data-entrar style="--orden:1">El campo no se detiene, <span class="text-sol">nosotros tampoco</span></h1>
+            <p class="mt-4 max-w-xl text-lg text-white/85" data-entrar style="--orden:2">Desde 1963 llevamos maquinaria y repuestos al productor guariqueño, temporada tras temporada.</p>
 
             <form method="GET" action="{{ route('catalogo.index') }}" role="search" class="mt-8 flex max-w-xl gap-2">
                 <label for="q-inicio" class="sr-only">Buscar por código de fábrica, pieza o modelo</label>
@@ -110,7 +111,7 @@
             </div>
             <div class="relative" data-revelar style="--orden:1">
                 <div class="relative overflow-hidden rounded-[10px] bg-white">
-                    <p class="relative z-10 bg-rialto px-6 py-3 text-right text-lg font-black uppercase tracking-[0.04em] text-white">{{ $estrella->categoria->nombre }}</p>
+                    <p class="relative z-10 bg-tierra px-6 py-3 text-right text-lg font-black uppercase tracking-[0.04em] text-white">{{ $estrella->categoria->nombre }}</p>
                     <x-arcos tono="oscuro" class="absolute inset-0 h-full w-full" />
                     <img src="{{ $estrella->urlImagen() }}" alt="{{ $estrella->nombre }}" class="relative aspect-[4/3] w-full object-contain p-8 mix-blend-multiply" loading="lazy">
                 </div>
@@ -171,19 +172,15 @@
 </section>
 
 {{-- ======== Cómo cotizar ======== --}}
-<section aria-labelledby="t-pasos" class="sobre-azul relative isolate overflow-hidden bg-noche py-16 text-white lg:py-24">
-    {{-- Foto de fondo con el azul encima --}}
-    <img src="{{ asset('img/portada/campo-3.webp') }}" alt="" class="absolute inset-0 -z-10 size-full object-cover" loading="lazy">
-    <div class="absolute inset-0 -z-10 bg-gradient-to-br from-noche/95 via-tierra-oscura/85 to-tierra/75" aria-hidden="true"></div>
-    <x-arcos class="absolute inset-y-0 right-0 h-full w-[40rem]" />
+<section aria-labelledby="t-pasos" class="border-y border-linea bg-tierra-clara/60 py-16 lg:py-24">
     <div class="relative mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
-        <h2 id="t-pasos" class="titular subrayado text-4xl sm:text-5xl" data-revelar>Tu cotización en <em>tres pasos</em></h2>
+        <h2 id="t-pasos" class="titular subrayado text-4xl text-rialto sm:text-5xl" data-revelar>Tu cotización en <em>tres pasos</em></h2>
         <ol class="mt-12 grid gap-8 sm:grid-cols-3">
             @foreach([['Elige', 'Busca por código o modelo y agrega los repuestos.'], ['Revisa', 'Eliges si pagas en dólares o en bolívares y ves el impuesto y el total al instante.'], ['Envía', 'Recibes tu cotización en PDF y te contactamos por WhatsApp.']] as $i => [$paso, $texto])
-                <li class="rounded-[10px] border border-white/15 bg-white/5 p-7 backdrop-blur-sm" data-revelar style="--orden:{{ $i }}">
-                    <span class="text-6xl font-black text-white cifra">0{{ $i + 1 }}</span>
-                    <p class="mt-3 text-2xl font-black uppercase">{{ $paso }}</p>
-                    <p class="mt-2 text-white/80">{{ $texto }}</p>
+                <li data-revelar style="--orden:{{ $i }}">
+                    <span class="text-4xl font-black text-tierra cifra">0{{ $i + 1 }}</span>
+                    <p class="mt-2 text-xl font-bold">{{ $paso }}</p>
+                    <p class="apoyo mt-1">{{ $texto }}</p>
                 </li>
             @endforeach
         </ol>

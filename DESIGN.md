@@ -74,7 +74,7 @@ rounded:
 
 ## Overview
 
-**Verde de campo.** El color principal es el verde del logo Rialto, elegido por la empresa: encabezado, menú del panel, franjas de cifras, pie y títulos. El azul de las marcas que representa es el fondo sobre las fotos (portada y cabeceras) y el color de la información: enlaces, botones secundarios y gráficos. El acento es un amarillo más claro que el de la marca, a pedido de la empresa.  La portada abre con fotos de campo y de la sede a sangre, que se relevan solas con un zoom lento. Encima van arcos azules translúcidos y titulares en mayúsculas con una palabra resaltada en amarillo. Al bajar, cada bloque entra subiendo con suavidad y las cifras cuentan hasta su valor, en la línea de cicmelinst.com.
+**Verde de campo.** El verde del logo Rialto viste la estructura: encabezado, menú del panel, pie, títulos e insignias. El azul de las marcas va sobre las fotos (portada y cabeceras) y en la información: enlaces, botones secundarios, gráficos y totales. Las tarjetas y los fondos llevan el color muy suave para que nada se vea cargado, a pedido de la empresa. El acento es un amarillo más claro que el de la marca, a pedido de la empresa.  La portada abre con fotos de campo y de la sede a sangre, que se relevan solas con un zoom lento. Encima van arcos azules translúcidos y titulares en mayúsculas con una palabra resaltada en amarillo. Al bajar, cada bloque entra subiendo con suavidad y las cifras cuentan hasta su valor, en la línea de cicmelinst.com.
 
 Hay dos mundos que comparten tokens. El público (portada, catálogo, historia, contacto) es expresivo: fotos, arcos y movimiento. El de gestión (tablero, pedidos, inventario, reportes) es sobrio: el verde Rialto en el menú, el azul y el amarillo en el contenido, sin fotos ni animaciones de entrada, pensado para escanear.
 
@@ -107,7 +107,7 @@ Hay dos mundos que comparten tokens. El público (portada, catálogo, historia, 
 ### Named Rules
 - **Cada color tiene un trabajo.** Verde: la empresa. Azul: la información. Amarillo: lo que hay que hacer. Blanco sobre oscuro: dónde estás. Si un color no cumple su trabajo, ahí no va.
 - **Un amarillo por vista.** El amarillo marca la acción principal; si todo es amarillo, nada lo es.
-- **Verde en la estructura, azul sobre las fotos.** Barras, paneles y pie son verdes; lo que va sobre una foto es azul; los botones siguen siendo amarillo (acción) y azul (secundario).
+- **Verde en la estructura, azul sobre las fotos, color suave en lo demás.** Barras y pie son verdes; lo que va sobre una foto es azul; las tarjetas apenas llevan tinte; los botones siguen siendo amarillo (acción) y azul (secundario).
 
 ## Typography
 

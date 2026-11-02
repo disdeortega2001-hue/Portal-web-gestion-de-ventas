@@ -46,6 +46,7 @@ class ImpuestosYTasaBcvTest extends TestCase
         $this->assertSame(888.1183, Configuracion::tasaCambio());
         $this->assertSame('BCV', Configuracion::valor('tasa_fuente'));
         $this->assertSame('2026-10-28', Configuracion::valor('tasa_fecha_valor'));
+        $this->assertNotNull(Configuracion::valor('tasa_consultada_en'));
     }
 
     public function test_si_el_bcv_falla_la_tasa_anterior_sigue_vigente(): void
@@ -120,5 +121,18 @@ class ImpuestosYTasaBcvTest extends TestCase
 
         $pedido = Pedido::firstOrFail();
         $this->assertSame(['IGTF', '3.00', '103.00'], [$pedido->tipo_impuesto, (string) $pedido->impuesto, (string) $pedido->total]);
+    }
+
+    public function test_la_pantalla_de_tasa_muestra_la_vigente_y_avisa_si_esta_vieja(): void
+    {
+        Configuracion::updateOrCreate(['clave' => 'tasa_fuente'], ['valor' => 'BCV']);
+        Configuracion::updateOrCreate(['clave' => 'tasa_consultada_en'], ['valor' => now()->toDateTimeString()]);
+        $administrativo = $this->crearUsuario('administrativo');
+
+        $this->actingAs($administrativo)->get(route('admin.tasa.edit'))->assertOk()
+            ->assertSee('Bs. 36,5000')->assertSee('BCV')->assertSee('cada hora')->assertDontSee('más de un día');
+
+        $this->travel(2)->days();
+        $this->get(route('admin.tasa.edit'))->assertSee('más de un día');
     }
 }

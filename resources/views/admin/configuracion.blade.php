@@ -36,7 +36,7 @@
                 @else
                     Escrita a mano.
                 @endif
-                Última actualización: <span class="cifra">{{ $actualizado('tasa_cambio') }}</span>. El portal la trae sola del BCV a las 7:00 y a las 17:00; si escribes otra, se usa la tuya hasta la próxima actualización.</p>
+                Última actualización: <span class="cifra">{{ $actualizado('tasa_cambio') }}</span>. El portal la consulta sola cada hora, de 6:00 a 20:00; si escribes otra, se usa la tuya hasta la próxima consulta.</p>
         </div>
         <div class="mt-5 grid gap-5 sm:grid-cols-2">
             <div>

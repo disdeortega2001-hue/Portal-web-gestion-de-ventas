@@ -6,8 +6,9 @@
 
 /*
  * Rialto 7 — verde de campo. Cada color tiene un trabajo:
- * - Verde Rialto: la empresa (encabezado, menú del panel, franjas de cifras, pie y títulos).
- * - Azul: el fondo sobre las fotos y la información (enlaces, botones secundarios y gráficos).
+ * - Verde Rialto: la empresa (encabezado, menú del panel, pie, títulos e insignias).
+ * - Azul: el fondo sobre las fotos y la información (enlaces, botones secundarios, gráficos y totales).
+ * - Tarjetas y fondos con el color muy suave, para que la estructura tenga color sin verse cargada.
  * - Amarillo: lo que hay que hacer (acción principal, monto por pagar, avisos por atender) y la frase destacada del título.
  * - Blanco sobre fondos oscuros: dónde estás (opción activa del menú, lo seleccionado).
  * - Estados: verde listo, amarillo pálido atención, azul en proceso, rojo problema.
@@ -108,8 +109,8 @@
      * para que el texto y las tarjetas blancas se lean igual que sobre el fondo liso.
      * Uso: class="fondo-foto" style="--foto: url(...)"; con «fondo-foto-verde» el velo tira al azul (se conserva el nombre).
      */
-    .fondo-foto { background: linear-gradient(180deg, rgb(244 246 249 / 0.70), rgb(231 236 242 / 0.62)), var(--foto) center / cover no-repeat, var(--color-agua); }
-    .fondo-foto-verde { background-image: linear-gradient(180deg, rgb(244 246 249 / 0.70), rgb(220 232 245 / 0.64)), var(--foto); }
+    .fondo-foto { background: linear-gradient(180deg, rgb(244 246 249 / 0.84), rgb(236 240 245 / 0.78)), var(--foto) center / cover no-repeat, var(--color-agua); }
+    .fondo-foto-verde { background-image: linear-gradient(180deg, rgb(244 246 249 / 0.84), rgb(220 232 245 / 0.78)), var(--foto); }
     /* En computadora la foto queda fija y el contenido se desliza encima; en el celular se desplaza con la página */
     @media (min-width: 1024px) { .fondo-foto-fijo { background-attachment: fixed; } }
 
@@ -164,9 +165,9 @@
     .capsula-quitar { @apply pr-3; }
 
     /* ---- Tablero: lista «Por atender»; el número se pinta de amarillo solo si algo espera ---- */
-    .fila-atender { @apply flex min-h-16 items-center gap-3.5 px-5 py-3 text-white no-underline transition-colors; }
-    @media (hover: hover) { .fila-atender:hover { @apply bg-white/10; } }
-    .cuenta-atender { @apply grid h-10 min-w-10 shrink-0 place-items-center rounded-[6px] bg-white/15 px-2 text-lg font-extrabold text-white/80 cifra; }
+    .fila-atender { @apply flex min-h-16 items-center gap-3.5 px-5 py-3 text-tinta no-underline transition-colors; }
+    @media (hover: hover) { .fila-atender:hover { @apply bg-agua; } }
+    .cuenta-atender { @apply grid h-10 min-w-10 shrink-0 place-items-center rounded-[6px] bg-agua-honda px-2 text-lg font-extrabold text-tinta-suave cifra; }
     .cuenta-atender.con-pendientes { @apply bg-sol text-noche; }
 
     /* ---- Pestañas de estado: control segmentado (riel claro, la activa en blanco elevada) ---- */
@@ -221,7 +222,7 @@
 
     /* ---- Paneles ---- */
     .lobulo { @apply rounded-lobulo border border-linea bg-white; }
-    .lobulo-tierra { @apply rounded-lobulo bg-rialto text-white; }
+    .lobulo-tierra { @apply rounded-lobulo bg-tierra-oscura text-white; }
     /* Tarjeta que se eleva al pasar el cursor */
     .tarjeta-viva { transition: transform 0.35s var(--ease-salida), box-shadow 0.35s var(--ease-salida), border-color 0.2s; }
     @media (hover: hover) {
@@ -235,11 +236,11 @@
      */
     .tarjeta-producto {
         border-radius: var(--radius-lobulo);
-        border: 1px solid rgb(11 74 59 / 0.35);
-        background: linear-gradient(160deg, rgb(11 74 59 / 0.30), rgb(42 157 111 / 0.16)), rgb(255 255 255 / 0.68);
+        border: 1px solid rgb(11 74 59 / 0.18);
+        background: linear-gradient(160deg, rgb(11 74 59 / 0.09), rgb(42 157 111 / 0.04)), #fff;
     }
     @media (prefers-reduced-transparency: reduce) { .tarjeta-producto { background-color: #fff; } }
-    @media (hover: hover) { .tarjeta-producto.tarjeta-viva:hover { border-color: var(--color-rialto); box-shadow: 0 18px 40px -22px rgb(11 74 59 / 0.55); } }
+    @media (hover: hover) { .tarjeta-producto.tarjeta-viva:hover { border-color: var(--color-rialto); box-shadow: 0 18px 40px -22px rgb(11 74 59 / 0.5); } }
     .foto-producto { background: #fff; }
 
     /* ---- Estados ---- */
