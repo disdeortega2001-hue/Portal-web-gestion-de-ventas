@@ -27,7 +27,7 @@
             </template>
             <div x-show="!cliente" class="relative mt-4">
                 <label for="q-cliente" class="etiqueta">Nombre, cédula o teléfono</label>
-                <input id="q-cliente" x-ref="qCliente" type="search" class="campo" autocomplete="off" placeholder="Ej. Rondón o 12345678"
+                <input id="q-cliente" x-ref="qCliente" type="search" class="campo" autocomplete="off" placeholder="Ej. El Samán o 40123456"
                        x-model="qCliente" @input.debounce.250ms="buscarCliente()" @keydown.enter.prevent="clientes[0] && elegirCliente(clientes[0])">
                 <ul x-show="clientes.length" x-cloak class="absolute inset-x-0 top-full z-20 mt-1 max-h-72 overflow-y-auto border border-linea bg-white">
                     <template x-for="c in clientes" :key="c.id">

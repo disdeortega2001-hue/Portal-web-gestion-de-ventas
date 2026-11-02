@@ -108,8 +108,6 @@ class DatabaseSeeder extends Seeder
     {
         return [
             Cliente::create(['id_usuario' => $usuarioCliente->id, 'identificacion' => 'J-40123456-7', 'nombre' => 'Agropecuaria El Samán C.A.', 'telefono' => '0414-4561230', 'correo' => 'cliente@rialto7.test', 'direccion' => 'Finca El Samán, vía Tucupido, Valle de la Pascua']),
-            Cliente::create(['identificacion' => 'V-12345678', 'nombre' => 'José Gregorio Rondón', 'telefono' => '0426-3412345', 'correo' => null, 'direccion' => 'Hato La Esperanza, sector Paso Real, Infante']),
-            Cliente::create(['identificacion' => 'V-9876543', 'nombre' => 'María Hernández', 'telefono' => '0235-3419876', 'correo' => 'mhernandez@example.com', 'direccion' => 'Parcela 14, asentamiento Las Mercedes, Chaguaramas']),
         ];
     }
 
@@ -135,7 +133,7 @@ class DatabaseSeeder extends Seeder
             $vendedor = $vendedores[$i % 2];
             // Cobrado en la tienda: el pago queda verificado y la venta se confirma en el mismo paso
             $metodo = $metodos[$i % 5];
-            $this->cobrar($pedidos->crearDirecto($clientes[$i % 3], $lineas, $vendedor, MetodosPago::moneda($metodo)), $metodo, $vendedor);
+            $this->cobrar($pedidos->crearDirecto($clientes[0], $lineas, $vendedor, MetodosPago::moneda($metodo)), $metodo, $vendedor);
         }
     }
 
@@ -147,7 +145,7 @@ class DatabaseSeeder extends Seeder
         $linea = fn (string $codigo, int $cantidad) => ['producto' => $p[$codigo], 'precio' => (string) $p[$codigo]->precio, 'cantidad' => $cantidad];
 
         // 1. Pendiente (bandeja del vendedor)
-        $cotizaciones->crear($clientes[1], collect([
+        $cotizaciones->crear($clientes[0], collect([
             $linea('0501052742R', 4),
             $linea('0501047573R', 8),
         ]), 'Necesito retirar el sábado.');
@@ -161,14 +159,14 @@ class DatabaseSeeder extends Seeder
         $this->cobrar($pedidos->crearDesdeCotizacion($c2, $vendedor), 'transferencia', $vendedor);
 
         // 3. Convertida en pedido pendiente de confirmar
-        $c3 = $cotizaciones->crear($clientes[2], collect([
+        $c3 = $cotizaciones->crear($clientes[0], collect([
             $linea('07665', 1),
             $linea('52429', 1),
         ]));
         $pedidos->crearDesdeCotizacion($c3, $vendedor);
 
         // 4. Pedido de mostrador confirmado
-        $p4 = $pedidos->crearDirecto($clientes[1], [
+        $p4 = $pedidos->crearDirecto($clientes[0], [
             ['id_producto' => $p['CC56']->id, 'cantidad' => 2],
         ], $vendedor);
         $this->cobrar($p4, 'efectivo', $vendedor);

@@ -11,7 +11,7 @@
 
 <form method="GET" action="{{ route('gestion.clientes.index') }}" role="search" class="mb-5 flex max-w-2xl gap-2">
     <label for="q" class="sr-only">Buscar cliente</label>
-    <input type="search" id="q" name="q" value="{{ $busqueda }}" class="campo flex-1" placeholder="Ej. Rondón, V-12345678 o 0426…" autofocus>
+    <input type="search" id="q" name="q" value="{{ $busqueda }}" class="campo flex-1" placeholder="Ej. El Samán, J-40123456-7 o 0414…" autofocus>
     <button class="btn btn-tierra"><x-icono nombre="buscar" class="size-4" /> Buscar</button>
     @if($busqueda !== '')<a href="{{ route('gestion.clientes.index') }}" class="btn btn-linea">Limpiar</a>@endif
 </form>
