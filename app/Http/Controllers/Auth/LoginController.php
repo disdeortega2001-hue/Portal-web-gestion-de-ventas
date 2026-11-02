@@ -58,6 +58,12 @@ class LoginController extends Controller
         RateLimiter::clear($claveLimite);
         $request->session()->regenerate();   // Evita fijación de sesión
 
+        // Un cliente que llegó por /panel va a su cuenta, no a una pantalla del personal que le daría 403
+        $pendiente = ltrim((string) parse_url((string) $request->session()->get('url.intended'), PHP_URL_PATH), '/');
+        if (! $usuario->esPersonal() && Str::startsWith($pendiente, ['gestion/', 'admin/'])) {
+            $request->session()->forget('url.intended');
+        }
+
         return redirect()->intended($this->destinoSegunRol($request->user()));
     }
 

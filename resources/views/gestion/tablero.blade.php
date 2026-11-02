@@ -175,8 +175,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Gráfico: solo si Chart.js cargó. Sin él, el tablero sigue mostrando todas las cifras.
     let graficoVentas = null;
-    if (window.Chart) {
-        graficoVentas = new Chart(document.getElementById('grafico-ventas'), {
+    function crearGrafico() {
+        return new Chart(document.getElementById('grafico-ventas'), {
             type: 'bar',
             data: { labels: [], datasets: [{ label: 'Ventas USD', data: [], backgroundColor: '#0d5192', hoverBackgroundColor: '#052b70', borderRadius: 3, borderSkipped: false, maxBarThickness: 22 }] },
             options: {
@@ -185,6 +185,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 scales: { y: { beginAtZero: true, border: { display: false }, ticks: { callback: v => usd.format(v) } }, x: { grid: { display: false }, border: { color: '#0f1b2d' }, ticks: { maxTicksLimit: 8 } } }
             }
         });
+    }
+    if (window.Chart) {
+        graficoVentas = crearGrafico();
     } else {
         document.querySelectorAll('.grafico').forEach(el => el.hidden = true);
         document.querySelectorAll('[data-sin-graficos]').forEach(el => el.hidden = false);
@@ -219,8 +222,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let ultimas = @json($metricas);
     pintar(ultimas);
-    // Chart.js mide las etiquetas al dibujar: se repite al cargar la fuente para que no queden cortadas
-    if (graficoVentas && document.fonts) document.fonts.ready.then(() => graficoVentas.update());
+    // Chart.js guarda el ancho de cada etiqueta y update() lo reutiliza: al cargar la fuente se crea de nuevo para que no queden cortadas
+    if (graficoVentas && document.fonts) {
+        document.fonts.load('13px "Raleway Variable"').then(function () {
+            graficoVentas.destroy();
+            graficoVentas = crearGrafico();
+            pintar(ultimas);
+        });
+    }
     celular.addEventListener('change', function () { pintar(ultimas); });
 
     // Tiempo real: cada 60 s, solo con la pestaña visible (ahorra datos del plan móvil)

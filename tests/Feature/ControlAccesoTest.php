@@ -197,4 +197,13 @@ class ControlAccesoTest extends TestCase
         $this->post(route('login'), ['usuario' => $vendedor->correo, 'contrasena' => 'Clave1234'])
             ->assertRedirect(route('gestion.tablero'));
     }
+
+    public function test_un_cliente_que_entra_por_panel_va_a_su_cuenta_y_no_a_un_403(): void
+    {
+        $this->followingRedirects()->get('/panel')->assertOk();
+        $cliente = $this->crearUsuario('cliente');
+
+        $this->post(route('login'), ['usuario' => $cliente->correo, 'contrasena' => 'Clave1234'])
+            ->assertRedirect(route('cuenta.cotizaciones'));
+    }
 }
