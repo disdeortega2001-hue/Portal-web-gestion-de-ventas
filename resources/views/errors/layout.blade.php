@@ -8,7 +8,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
-    <meta name="theme-color" content="#0d5192">
+    <meta name="theme-color" content="#0b4a3b">
     <title>@yield('titulo') · Inversiones Rialto 7</title>
     <link rel="icon" type="image/png" href="{{ asset('img/favicon.png') }}">
     @if(is_file(public_path('build/manifest.json')))@vite(['resources/css/app.css'])@endif
@@ -33,7 +33,7 @@
             </div>
         </div>
     </main>
-    <footer class="bg-tierra-oscura"><div class="franja franja-fina" aria-hidden="true"></div>
+    <footer class="bg-rialto-oscuro"><div class="franja franja-fina" aria-hidden="true"></div>
         <p class="mx-auto max-w-[1320px] px-4 py-5 text-sm text-white/70 sm:px-6 lg:px-8">Inversiones Rialto 7 C.A. · Valle de la Pascua desde 1963</p>
     </footer>
 </body>

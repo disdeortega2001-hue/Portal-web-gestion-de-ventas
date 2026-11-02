@@ -53,12 +53,12 @@
     </form>
 
     <p class="mt-5 flex max-w-3xl flex-wrap items-center gap-x-2 gap-y-1 text-[0.9375rem] text-white/80">
-        <x-icono nombre="check-circulo" class="size-4 text-sol" />
+        <x-icono nombre="check-circulo" class="size-4 text-white" />
         <span>Agente autorizado exclusivo en Venezuela:</span>
         @foreach(['Marchesan Tatu', 'Colombo Aemco', 'Vicon', 'Lumagi'] as $marca)
-            <a href="{{ route('catalogo.index', ['marca' => $marca]) }}" class="font-bold text-white hover:text-sol">{{ $marca }}</a>@unless($loop->last)<span aria-hidden="true">·</span>@endunless
+            <a href="{{ route('catalogo.index', ['marca' => $marca]) }}" class="font-bold text-white hover:underline">{{ $marca }}</a>@unless($loop->last)<span aria-hidden="true">·</span>@endunless
         @endforeach
-        <a href="{{ route('nosotros') }}" class="ml-1 font-semibold text-sol underline">Conócenos</a>
+        <a href="{{ route('nosotros') }}" class="ml-1 font-semibold text-white underline">Conócenos</a>
     </p>
 @endsection
 

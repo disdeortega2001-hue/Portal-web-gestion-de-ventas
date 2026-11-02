@@ -18,12 +18,6 @@
         ['usuarios', 'Atención cercana', 'Te atiende gente del llano que conoce tu trabajo.'],
         ['caja', 'Conocimiento de cada pieza', 'Te ayudamos a dar con el repuesto correcto.'],
     ];
-    $cifras = [
-        [$anios, '+', 'años de trayectoria'],
-        [count($marcas), '', 'marcas exclusivas'],
-        [$totalProductos, '', 'productos en línea'],
-        ['24/7', '', 'catálogo abierto'],
-    ];
 @endphp
 
 @section('cabecera')
@@ -35,16 +29,12 @@
         </div>
     </div>
 
-    {{-- Las cifras como la pizarra de boxes: números grandes en celdas rectas --}}
-    <dl class="mt-8 grid max-w-4xl grid-cols-2 border-l border-t border-white/20 sm:grid-cols-4 lg:mt-10">
-        @foreach($cifras as [$valor, $extra, $etiqueta])
-            <div class="border-b border-r border-white/20 px-4 py-4">
-                <dt class="sr-only">{{ $etiqueta }}</dt>
-                <dd class="titular cifra text-5xl">@if(is_int($valor))<span data-contar="{{ $valor }}">{{ $valor }}</span>@else{{ $valor }}@endif<span class="text-sol">{{ $extra }}</span></dd>
-                <dd class="mt-1.5 text-sm font-semibold text-white/75">{{ $etiqueta }}</dd>
-            </div>
-        @endforeach
-    </dl>
+    {{-- La historia en una línea: de Inversiones Campagna a Inversiones Rialto 7, la misma familia --}}
+    <ol class="mt-8 flex max-w-3xl flex-col gap-4 sm:flex-row sm:items-center lg:mt-10">
+        <li><span class="titular cifra block text-4xl text-white">1963</span><span class="mt-1 block font-semibold text-white/85">Inversiones Campagna</span></li>
+        <li class="hidden h-px flex-1 bg-white/35 sm:block" aria-hidden="true"></li>
+        <li><span class="titular cifra block text-4xl text-white">{{ now()->year }}</span><span class="mt-1 block font-semibold text-white/85">Inversiones Rialto 7 C.A.</span></li>
+    </ol>
 @endsection
 
 @section('contenido')
@@ -52,10 +42,10 @@
 <section aria-labelledby="t-historia" class="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
     <figure class="relative" data-revelar>
         <img src="{{ asset('img/portada/sede-fachada.jpg') }}" alt="Fachada del Edificio Campagna, sede de Inversiones Rialto 7 en Valle de la Pascua" width="1600" height="1000" class="aspect-[16/10] w-full rounded-[10px] object-cover" loading="lazy">
-        <figcaption class="absolute -bottom-5 left-5 rounded-[8px] bg-tierra-oscura px-5 py-3 text-sm font-bold text-white shadow-[0_18px_40px_-20px_rgb(5_43_112/0.6)]">Edificio Campagna · Valle de la Pascua</figcaption>
+        <figcaption class="absolute -bottom-5 left-5 rounded-[8px] bg-rialto px-5 py-3 text-sm font-bold text-white shadow-[0_18px_40px_-20px_rgb(5_43_112/0.6)]">Edificio Campagna · Valle de la Pascua</figcaption>
     </figure>
     <div data-revelar style="--orden:1">
-        <h2 id="t-historia" class="titular subrayado text-4xl text-tierra-oscura sm:text-5xl">Una empresa <em>familiar</em> del llano guariqueño</h2>
+        <h2 id="t-historia" class="titular subrayado text-4xl text-rialto sm:text-5xl">Una empresa <em>familiar</em> del llano guariqueño</h2>
         <p class="mt-6 text-lg text-tinta-suave">Empezamos en 1963 como Inversiones Campagna. Hoy, como Inversiones Rialto 7 C.A., seguimos en manos de la familia fundadora y somos el único agente autorizado en Venezuela de cuatro marcas de maquinaria y repuestos.</p>
     </div>
 </section>
@@ -83,7 +73,7 @@
          }"
          @keydown.arrow-right.prevent="ir(i + 1)" @keydown.arrow-left.prevent="ir(i - 1)">
     <div class="flex flex-wrap items-end justify-between gap-6" data-revelar>
-        <h2 id="t-trayectoria" class="titular subrayado text-4xl text-tierra-oscura sm:text-5xl">Nuestra trayectoria</h2>
+        <h2 id="t-trayectoria" class="titular subrayado text-4xl text-rialto sm:text-5xl">Nuestra trayectoria</h2>
         <div class="flex items-center gap-3">
             <div class="lobulo panel-tapa px-5 pb-3 pt-5" aria-hidden="true">
                 <p class="titular cifra text-5xl text-tierra"><span x-text="@js(array_column($hitos, 0))[i]">{{ $hitos[0][0] }}</span> <span class="text-2xl text-tinta-suave">/ {{ now()->year }}</span></p>
@@ -104,7 +94,7 @@
                 <li class="flex flex-col items-center">
                     <button type="button" class="grid size-6 place-items-center rounded-full border-[3px] bg-agua transition-transform duration-300"
                             :class="i >= {{ $k }} ? 'border-tierra' : 'border-linea'" @click="ir({{ $k }})" aria-label="Ir a {{ $cuando }}">
-                        <span class="size-2.5 rounded-full" :class="i === {{ $k }} ? 'bg-sol' : (i > {{ $k }} ? 'bg-tierra' : 'bg-transparent')"></span>
+                        <span class="size-2.5 rounded-full" :class="i === {{ $k }} ? 'bg-tierra' : (i > {{ $k }} ? 'bg-tierra/40' : 'bg-transparent')"></span>
                     </button>
                     <span class="cifra mt-2 text-xs font-bold" :class="i === {{ $k }} ? 'text-tierra' : 'text-tinta-suave'">{{ $cuando }}</span>
                 </li>
@@ -121,7 +111,7 @@
                 <img src="{{ asset('img/portada/' . $foto) }}" alt="{{ $titulo }}" width="1000" height="750" loading="lazy"
                      class="-mx-6 mb-5 aspect-[4/3] w-[calc(100%+3rem)] max-w-none object-cover">
                 <span class="font-rotulo text-lg self-start px-3 py-1 font-extrabold cifra transition-colors duration-300"
-                      :class="i === {{ $k }} ? 'bg-sol text-tinta' : 'bg-agua-honda text-tinta-suave'">{{ $cuando }}</span>
+                      :class="i === {{ $k }} ? 'bg-tierra text-white' : 'bg-agua-honda text-tinta-suave'">{{ $cuando }}</span>
                 <h3 class="mt-4 font-rotulo text-2xl font-extrabold uppercase leading-tight">{{ $titulo }}</h3>
                 <p class="mt-2 text-tinta-suave">{{ $texto }}</p>
                 <div class="mt-auto flex items-center gap-3 pt-6">
@@ -145,7 +135,7 @@
 {{-- Pilares, junto a la foto del equipo --}}
 <section aria-labelledby="t-pilares" class="mt-16 grid grid-cols-1 items-center gap-10 lg:mt-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
     <div>
-        <h2 id="t-pilares" class="titular subrayado text-4xl text-tierra-oscura sm:text-5xl" data-revelar>Lo que nos <em>define</em></h2>
+        <h2 id="t-pilares" class="titular subrayado text-4xl text-rialto sm:text-5xl" data-revelar>Lo que nos <em>define</em></h2>
         <ul class="mt-8 grid gap-4">
             @foreach($pilares as $k => [$icono, $titulo, $texto])
                 <li class="lobulo tarjeta-viva flex items-start gap-5 p-5 sm:p-6" data-revelar style="--orden:{{ $k }}">
@@ -160,7 +150,7 @@
     </div>
     <figure class="relative" data-revelar style="--orden:1">
         <img src="{{ asset('img/portada/sede-equipo.jpg') }}" alt="El equipo de Inversiones Rialto 7 celebrando el 63 aniversario en la tienda" width="1000" height="750" class="w-full rounded-[10px] object-cover" loading="lazy">
-        <figcaption class="absolute -bottom-6 right-6 rounded-[8px] bg-sol px-6 py-4 text-tierra-oscura shadow-[0_18px_40px_-20px_rgb(5_43_112/0.6)]">
+        <figcaption class="absolute -bottom-6 right-6 rounded-[8px] bg-rialto px-6 py-4 text-white shadow-[0_18px_40px_-20px_rgb(5_43_112/0.6)]">
             <span class="block text-4xl font-black leading-none cifra"><span data-contar="{{ $anios }}">{{ $anios }}</span></span>
             <span class="text-xs font-extrabold uppercase tracking-[0.08em]">años en la misma familia</span>
         </figcaption>
@@ -170,7 +160,7 @@
 {{-- Marcas de representación exclusiva --}}
 <section aria-labelledby="t-marcas" class="mt-20 lg:mt-24">
     <div class="flex flex-wrap items-end justify-between gap-4" data-revelar>
-        <h2 id="t-marcas" class="titular subrayado text-4xl text-tierra-oscura sm:text-5xl">Agente autorizado <em>exclusivo</em> en Venezuela</h2>
+        <h2 id="t-marcas" class="titular subrayado text-4xl text-rialto sm:text-5xl">Agente autorizado <em>exclusivo</em> en Venezuela</h2>
         <p class="max-w-sm text-tinta-suave">Repuestos y equipos originales, con el respaldo directo del fabricante.</p>
     </div>
 
@@ -195,7 +185,7 @@
 </section>
 
 {{-- Dónde estamos --}}
-<section aria-labelledby="t-visitanos" class="sobre-azul relative mt-16 flex flex-col gap-6 overflow-hidden rounded-[10px] bg-tierra-oscura p-7 text-white sm:flex-row sm:items-center sm:justify-between lg:mt-20 lg:p-10" data-revelar>
+<section aria-labelledby="t-visitanos" class="sobre-azul relative mt-16 flex flex-col gap-6 overflow-hidden rounded-[10px] bg-rialto p-7 text-white sm:flex-row sm:items-center sm:justify-between lg:mt-20 lg:p-10" data-revelar>
     <x-arcos class="pointer-events-none absolute inset-y-0 right-0 h-full w-[28rem]" />
     <div class="relative">
         <h2 id="t-visitanos" class="titular text-3xl">Visítanos o consulta desde tu finca</h2>

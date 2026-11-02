@@ -91,7 +91,7 @@
                 <legend class="text-sm font-bold text-white/80">El cliente paga en</legend>
                 <div class="mt-2 grid grid-cols-2 gap-2">
                     @foreach(['USD' => 'Dólares', 'VES' => 'Bolívares'] as $valor => $texto)
-                        <label class="flex cursor-pointer items-center justify-center gap-2 rounded-[6px] border border-white/30 px-3 py-2 font-bold has-[:checked]:border-sol has-[:checked]:bg-sol has-[:checked]:text-tinta">
+                        <label class="flex cursor-pointer items-center justify-center gap-2 rounded-[6px] border border-white/30 px-3 py-2 font-bold has-[:checked]:border-white has-[:checked]:bg-white has-[:checked]:text-tierra-oscura">
                             <input type="radio" name="moneda_pago" value="{{ $valor }}" x-model="moneda" class="sr-only" @checked(old('moneda_pago', 'USD') === $valor)> {{ $texto }}
                         </label>
                     @endforeach

@@ -38,7 +38,6 @@ class NosotrosController extends Controller
 
         return view('nosotros', [
             'anios' => now()->year - self::FUNDACION,
-            'totalProductos' => $productos->count(),
             'marcas' => $marcas,
         ]);
     }

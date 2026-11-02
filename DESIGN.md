@@ -1,13 +1,15 @@
 ---
 name: Rialto 7
-description: Portal de ventas de repuestos y maquinaria agrícola de Inversiones Rialto 7, en el azul y amarillo de las marcas que representa.
+description: Portal de ventas de repuestos y maquinaria agrícola de Inversiones Rialto 7, en el azul de las marcas que representa, el verde de su logo y un acento amarillo claro.
 colors:
   azul-principal: "#0d5192"
   azul-profundo: "#052b70"
   azul-noche: "#031c46"
   azul-claro: "#dce8f5"
-  amarillo: "#ffd300"
-  amarillo-claro: "#fff4b3"
+  amarillo: "#ffe04d"
+  amarillo-oscuro: "#d1a800"
+  amarillo-claro: "#fff6c2"
+  amarillo-tinta: "#5f4400"
   verde-rialto: "#0b4a3b"
   verde-rialto-oscuro: "#062a21"
   verde-rialto-vivo: "#2a9d6f"
@@ -25,7 +27,6 @@ colors:
   rojo-senal-tinta: "#a2271b"
   azul-info: "#2f6fb0"
   azul-info-claro: "#deeaf6"
-  lila-pendiente-claro: "#efe8fa"
 typography:
   display:
     fontFamily: "Raleway Variable, system-ui, sans-serif"
@@ -73,9 +74,9 @@ rounded:
 
 ## Overview
 
-**Azul de campo.** El portal viste los colores de las marcas que Rialto 7 representa en Venezuela: el azul profundo y el amarillo de Marchesan Tatu. El verde del logo Rialto es el tercer color: pie de página, degradados sobre las fotos, subrayados y secciones de apoyo. La portada abre con fotos de campo y de la sede a sangre, que se relevan solas con un zoom lento. Encima van arcos azules translúcidos y titulares en mayúsculas con una palabra resaltada en amarillo. Al bajar, cada bloque entra subiendo con suavidad y las cifras cuentan hasta su valor, en la línea de cicmelinst.com.
+**Verde de campo.** El color principal es el verde del logo Rialto, elegido por la empresa: encabezado, menú del panel, franjas de cifras, pie y títulos. El azul de las marcas que representa es el fondo sobre las fotos (portada y cabeceras) y el color de la información: enlaces, botones secundarios y gráficos. El acento es un amarillo más claro que el de la marca, a pedido de la empresa.  La portada abre con fotos de campo y de la sede a sangre, que se relevan solas con un zoom lento. Encima van arcos azules translúcidos y titulares en mayúsculas con una palabra resaltada en amarillo. Al bajar, cada bloque entra subiendo con suavidad y las cifras cuentan hasta su valor, en la línea de cicmelinst.com.
 
-Hay dos mundos que comparten tokens. El público (portada, catálogo, historia, contacto) es expresivo: fotos, arcos y movimiento. El de gestión (tablero, pedidos, inventario, reportes) es sobrio: el mismo azul y amarillo, sin fotos ni animaciones de entrada, pensado para escanear.
+Hay dos mundos que comparten tokens. El público (portada, catálogo, historia, contacto) es expresivo: fotos, arcos y movimiento. El de gestión (tablero, pedidos, inventario, reportes) es sobrio: el verde Rialto en el menú, el azul y el amarillo en el contenido, sin fotos ni animaciones de entrada, pensado para escanear.
 
 ## Colors
 
@@ -85,25 +86,28 @@ Hay dos mundos que comparten tokens. El público (portada, catálogo, historia, 
 - **Azul noche** `#031c46`: pie de página y degradados sobre fotos.
 
 ### Secondary
-- **Amarillo** `#ffd300`: la acción principal (Agregar, Mi cotización), la palabra resaltada en titulares sobre azul, el subrayado de 5 px bajo los títulos y el foco del teclado.
+- **Amarillo** `#ffe04d`: lo que hay que hacer: la acción principal (Agregar, Mi cotización), el monto por pagar, los avisos por atender y la frase destacada del título sobre fondo oscuro. No se usa como adorno.
 - **Verde Rialto** `#0b4a3b` (profundo `#062a21`, vivo `#2a9d6f`):
   - fondo del logo y sello «desde 1963»;
   - degradados azul→verde sobre las fotos de las cabeceras;
-  - remate verde del subrayado y de la línea amarilla;
+  - la línea bajo los títulos y bajo las cabeceras;
+  - el encabezado público y el menú del panel;
+  - las insignias de la empresa (años de trayectoria);
   - pie de página (azul noche a verde profundo) y sección «Tres pasos»;
   - el segundo arco decorativo.
   - las tarjetas de los productos (`.tarjeta-producto`): verde del logo claro y semitransparente, con la foto del producto sobre un recuadro casi blanco.
 
 ### Tertiary (señales)
-- Verde disponible `#2e9b5f`, rojo señal `#d63a2c`, azul info `#2f6fb0` y lila pendiente: estados de existencia y de pedido. Siempre con su versión clara de fondo.
+- Verde disponible `#2e9b5f`, rojo señal `#d63a2c`, azul info `#2f6fb0` (también pendiente y en proceso): estados de existencia y de pedido. Siempre con su versión clara de fondo.
 
 ### Neutral
 - Fondo `#f4f6f9`, fondo hondo `#e7ecf2`, blanco para paneles, línea `#d3dbe5`.
 - Tinta `#0f1b2d` para el texto; tinta suave `#4a5668` para el texto de apoyo.
 
 ### Named Rules
+- **Cada color tiene un trabajo.** Verde: la empresa. Azul: la información. Amarillo: lo que hay que hacer. Blanco sobre oscuro: dónde estás. Si un color no cumple su trabajo, ahí no va.
 - **Un amarillo por vista.** El amarillo marca la acción principal; si todo es amarillo, nada lo es.
-- **El verde acompaña, no manda.** Va en fondos, degradados y detalles; los botones siguen siendo amarillo (acción) y azul (secundario).
+- **Verde en la estructura, azul sobre las fotos.** Barras, paneles y pie son verdes; lo que va sobre una foto es azul; los botones siguen siendo amarillo (acción) y azul (secundario).
 
 ## Typography
 
@@ -111,13 +115,13 @@ Raleway variable en todo el portal, con números de forma «lining» (Raleway tr
 
 ### Hierarchy
 - **Titular** (`.titular`): peso 900, mayúsculas, interlineado 1.02. La palabra clave va en `<em>`: amarillo sobre azul, azul sobre claro.
-- **Subrayado** (`.subrayado`): barra amarilla de 5 px bajo el titular de cada sección.
+- **Subrayado** (`.subrayado`): barra verde de 5 px bajo el titular de cada sección.
 - **Cuerpo**: 17 px, interlineado 1.55, líneas de 60 a 75 caracteres.
 - **Etiquetas**: 13 px, peso 800, mayúsculas, espaciado 0.08em.
 - **Cifras**: peso 900 con números tabulares para precios, existencias y códigos.
 
 ### Named Rules
-- No se usan rótulos pequeños encima de los titulares: el subrayado amarillo hace ese trabajo.
+- No se usan rótulos pequeños encima de los titulares: el subrayado verde hace ese trabajo.
 
 ## Layout
 
@@ -142,7 +146,7 @@ Raleway variable en todo el portal, con números de forma «lining» (Raleway tr
 
 ## Components
 
-- **Botones:** `.btn-sol` (amarillo, acción principal), `.btn-tierra` (azul), `.btn-linea` (borde azul) y `.btn-linea-clara` (borde blanco sobre azul). Al pasar el cursor suben 2 px.
+- **Botones:** `.btn-sol` (placa amarilla con canto oscuro, en minúsculas; acción principal), `.btn-tierra` (azul), `.btn-linea` (borde azul) y `.btn-linea-clara` (borde blanco sobre azul). Al pasar el cursor suben 2 px.
 - **Tarjeta de producto:**
   - foto sobre fondo claro con el círculo de existencias;
   - código de fábrica en azul, grande;
@@ -162,6 +166,6 @@ Raleway variable en todo el portal, con números de forma «lining» (Raleway tr
 - **Sí:** toda cabecera de página pública lleva una foto de fondo (campo o sede) con el degradado azul y verde encima.
 - **Sí:** en lugar del fondo blanco o gris liso, el contenido de las páginas públicas y las secciones claras de la portada van sobre una foto de campo o de la sede con un velo claro (`.fondo-foto`, al estilo de Tatu). En computadora la foto queda fija y el contenido se desliza encima. Las tarjetas y formularios siguen en blanco para leerse bien.
 - **Sí:** respetar «reducir movimiento». Sin animaciones, todo se muestra de una vez y la portada no rota.
-- **Sí:** el texto mínimo de 4.5:1 de contraste; el amarillo solo lleva texto azul profundo o tinta.
+- **Sí:** el texto mínimo de 4.5:1 de contraste; el amarillo solo lleva texto azul profundo o tinta, nunca blanco.
 - **No:** texto con degradado, rótulos encima de los titulares, iconos hechos con caracteres ni sombras duras.
 - **No:** botones o enlaces en verde; el verde vive en fondos y detalles.

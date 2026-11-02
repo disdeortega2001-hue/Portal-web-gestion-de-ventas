@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (window.Chart) {
         graficoVentas = new Chart(document.getElementById('grafico-ventas'), {
             type: 'bar',
-            data: { labels: [], datasets: [{ label: 'Ventas USD', data: [], backgroundColor: '#0d5192', hoverBackgroundColor: '#ffd300', borderRadius: 999, borderSkipped: false, maxBarThickness: 22 }] },
+            data: { labels: [], datasets: [{ label: 'Ventas USD', data: [], backgroundColor: '#0d5192', hoverBackgroundColor: '#052b70', borderRadius: 999, borderSkipped: false, maxBarThickness: 22 }] },
             options: {
                 maintainAspectRatio: false, animation: false,
                 plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f1b2d', padding: 10, cornerRadius: 12, callbacks: { label: c => 'USD ' + usd.format(c.parsed.y) } } },
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         graficoTop = new Chart(document.getElementById('grafico-top'), {
             type: 'bar',
-            data: { labels: [], datasets: [{ label: 'Unidades', data: [], backgroundColor: '#ffd300', hoverBackgroundColor: '#0d5192', borderRadius: 999, borderSkipped: false, maxBarThickness: 26 }] },
+            data: { labels: [], datasets: [{ label: 'Unidades', data: [], backgroundColor: '#2a9d6f', hoverBackgroundColor: '#0d5192', borderRadius: 999, borderSkipped: false, maxBarThickness: 26 }] },
             options: {
                 indexAxis: 'y', maintainAspectRatio: false, animation: false,
                 plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0f1b2d', padding: 10, cornerRadius: 12 } },

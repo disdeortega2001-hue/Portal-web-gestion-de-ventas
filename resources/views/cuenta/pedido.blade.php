@@ -30,7 +30,7 @@
         @endif
         {{-- Pago verificado: el comprobante y, si ya se entregó, quién lo recibió --}}
         @if($pedido->tieneComprobante())
-            <section aria-labelledby="t-comprobante" class="sobre-azul relative overflow-hidden rounded-[10px] bg-tierra-oscura p-6 text-white sm:p-8">
+            <section aria-labelledby="t-comprobante" class="sobre-azul relative overflow-hidden rounded-[10px] bg-rialto p-6 text-white sm:p-8">
                 <x-arcos class="absolute inset-y-0 right-0 h-full w-80" />
                 <div class="relative">
                     @if($pedido->estaEntregado())
@@ -47,7 +47,7 @@
             </section>
         {{-- Compra a crédito: lo que debe, lo abonado y cuándo le recordamos --}}
         @elseif($pedido->a_credito && $pedido->estado !== 'anulado')
-            <section aria-labelledby="t-credito" class="sobre-azul relative overflow-hidden rounded-[10px] bg-tierra-oscura p-6 text-white sm:p-8">
+            <section aria-labelledby="t-credito" class="sobre-azul relative overflow-hidden rounded-[10px] bg-rialto p-6 text-white sm:p-8">
                 <x-arcos class="absolute inset-y-0 right-0 h-full w-80" />
                 <div class="relative">
                     <h2 id="t-credito" class="titular text-3xl">Compra a <em>crédito</em></h2>
@@ -70,7 +70,7 @@
             </section>
         {{-- Pago reportado: ya no hace falta repetir las instrucciones --}}
         @elseif($pedido->estado_pago === 'por_verificar')
-            <section aria-labelledby="t-verificando" class="sobre-azul relative overflow-hidden rounded-[10px] bg-tierra-oscura p-6 text-white sm:p-8">
+            <section aria-labelledby="t-verificando" class="sobre-azul relative overflow-hidden rounded-[10px] bg-rialto p-6 text-white sm:p-8">
                 <x-arcos class="absolute inset-y-0 right-0 h-full w-80" />
                 <div class="relative">
                     <h2 id="t-verificando" class="titular text-3xl">Estamos verificando <em>tu pago</em></h2>
@@ -79,7 +79,7 @@
             </section>
         {{-- Cómo pagar: lo primero que necesita quien acaba de comprar --}}
         @elseif($pedido->estado !== 'anulado' && ! $pedido->estaPagado())
-            <section aria-labelledby="t-pagar" class="sobre-azul relative overflow-hidden rounded-[10px] bg-tierra-oscura p-6 text-white sm:p-8">
+            <section aria-labelledby="t-pagar" class="sobre-azul relative overflow-hidden rounded-[10px] bg-rialto p-6 text-white sm:p-8">
                 <x-arcos class="absolute inset-y-0 right-0 h-full w-80" />
                 <div class="relative">
                     <h2 id="t-pagar" class="titular text-3xl">Paga con <em>{{ $pedido->nombreMetodoPago() }}</em></h2>
@@ -108,7 +108,7 @@
         @if($pedido->aceptaReporteDePago())
             @php($credito = $pedido->a_credito)
             <section aria-labelledby="t-reporte">
-                <h2 id="t-reporte" class="titular subrayado text-3xl text-tierra-oscura">{{ $credito ? 'Reporta un abono' : 'Reporta tu pago' }}</h2>
+                <h2 id="t-reporte" class="titular subrayado text-3xl text-rialto">{{ $credito ? 'Reporta un abono' : 'Reporta tu pago' }}</h2>
                 <form method="POST" action="{{ $urlPago }}" enctype="multipart/form-data" class="needs-validation lobulo mt-8 grid gap-4 p-5 sm:grid-cols-2 sm:p-6" novalidate
                       @if($credito) x-data="{ metodo: @js(old('metodo', array_key_first($metodosAbono))), metodos: @js($metodosAbono), usd: @js($pedido->saldoUsd()), bs: @js($pedido->saldoBs()) }" @endif>
                     @csrf

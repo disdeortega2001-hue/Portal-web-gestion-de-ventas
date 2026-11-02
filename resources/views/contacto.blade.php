@@ -19,7 +19,7 @@
     {{-- Canales directos --}}
     <div class="space-y-4">
         @if($wa)
-            <a href="{{ $wa }}" target="_blank" rel="noopener" class="lobulo-tierra panel-tapa flex items-center gap-5 p-6 pt-8 no-underline hover:bg-tierra-oscura">
+            <a href="{{ $wa }}" target="_blank" rel="noopener" class="lobulo-tierra panel-tapa flex items-center gap-5 p-6 pt-8 no-underline hover:bg-rialto-oscuro">
                 <span class="ruedo size-16"><x-icono nombre="whatsapp" class="size-8 text-tierra" /></span>
                 <span>
                     <span class="block font-rotulo text-3xl font-extrabold uppercase">WhatsApp</span>

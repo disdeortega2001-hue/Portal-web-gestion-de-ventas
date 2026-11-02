@@ -5,9 +5,14 @@
 @source "../views";
 
 /*
- * Rialto 7 — azul de campo.
- * Azul y amarillo de las marcas que representa (como Marchesan Tatu) y el verde del logo Rialto como
- * tercer color: pie de página, degradados sobre las fotos, subrayados y secciones de apoyo. Fotos de campo a sangre, titulares en mayúsculas
+ * Rialto 7 — verde de campo. Cada color tiene un trabajo:
+ * - Verde Rialto: la empresa (encabezado, menú del panel, franjas de cifras, pie y títulos).
+ * - Azul: el fondo sobre las fotos y la información (enlaces, botones secundarios y gráficos).
+ * - Amarillo: lo que hay que hacer (acción principal, monto por pagar, avisos por atender) y la frase destacada del título.
+ * - Blanco sobre fondos oscuros: dónde estás (opción activa del menú, lo seleccionado).
+ * - Estados: verde listo, amarillo pálido atención, azul en proceso, rojo problema.
+ * Azul de las marcas que representa, verde del logo Rialto (pie de página, degradados sobre las fotos,
+ * subrayados y secciones de apoyo) y amarillo claro como acento. Fotos de campo a sangre, titulares en mayúsculas
  * con palabras resaltadas en amarillo, arcos azules sobre las imágenes y entradas suaves al desplazarse.
  * Los nombres de los colores se conservan de versiones anteriores para no tocar la lógica de las vistas:
  * «tierra» es el azul principal, «sol» el amarillo y «agua» el fondo.
@@ -31,16 +36,16 @@
     --color-tinta: #0f1b2d;
     --color-tinta-suave: #4a5668;
     --color-linea: #d3dbe5;
-    --color-sol: #ffd300;             /* amarillo: acción principal y resaltado */
-    --color-sol-clara: #fff4b3;
+    --color-sol: #ffe04d;             /* amarillo claro: acción principal y resaltado */
+    --color-sol-oscura: #d1a800;      /* canto de los botones amarillos */
+    --color-sol-clara: #fff6c2;
+    --color-sol-tinta: #5f4400;       /* texto sobre el amarillo claro */
     --color-coral: #d63a2c;
     --color-coral-clara: #fbe3e0;
     --color-coral-tinta: #a2271b;
     --color-laguna: #2f6fb0;
     --color-laguna-clara: #deeaf6;
     --color-laguna-tinta: #1b4f86;
-    --color-lila: #c9b6ea;
-    --color-lila-clara: #efe8fa;
 
     --radius-lobulo: 8px;
 
@@ -56,9 +61,11 @@
         line-height: 1.55;
         font-variant-numeric: lining-nums;   /* Raleway trae números antiguos por defecto */
     }
-    ::selection { background: var(--color-sol); color: var(--color-tinta); }
+    ::selection { background: var(--color-tierra-clara); color: var(--color-tinta); }
     input, textarea { caret-color: var(--color-tierra); }
-    :focus-visible { outline: 3px solid var(--color-sol); outline-offset: 2px; border-radius: 4px; }
+    /* Foco: azul sobre claro; amarillo sobre fondos oscuros, donde el azul no se vería */
+    :focus-visible { outline: 3px solid var(--color-tierra); outline-offset: 2px; border-radius: 4px; }
+    .sobre-azul :focus-visible { outline-color: var(--color-sol); }
     a { text-underline-offset: 0.2em; text-decoration-thickness: 2px; }
     h1, h2, h3 { text-wrap: balance; }
     [x-cloak] { display: none !important; }
@@ -90,27 +97,27 @@
     .apoyo { @apply text-tinta-suave; }
     .seccion-titulo { @apply text-xl font-extrabold uppercase tracking-[0.01em]; }
 
-    /* Barra amarilla bajo los títulos de sección, como en las páginas de las marcas */
+    /* Línea verde bajo los títulos de sección */
     .subrayado { @apply relative pb-4; }
     .subrayado::after { content: ""; position: absolute; left: 0; bottom: 0; width: 5.5rem; height: 5px; border-radius: 3px;
-        background: linear-gradient(90deg, var(--color-sol) 0 64%, transparent 64% 70%, var(--color-rialto-vivo) 70% 100%); }
+        background: linear-gradient(90deg, var(--color-rialto-vivo) 0 64%, transparent 64% 70%, var(--color-rialto-vivo) 70% 100%); }
     .subrayado-centro::after { left: 50%; transform: translateX(-50%); }
 
     /*
      * Fondo fotográfico claro: la foto del campo o de la sede con un velo claro encima
      * para que el texto y las tarjetas blancas se lean igual que sobre el fondo liso.
-     * Uso: class="fondo-foto" style="--foto: url(...)"; con «fondo-foto-verde» el velo tira al verde Rialto.
+     * Uso: class="fondo-foto" style="--foto: url(...)"; con «fondo-foto-verde» el velo tira al azul (se conserva el nombre).
      */
     .fondo-foto { background: linear-gradient(180deg, rgb(244 246 249 / 0.70), rgb(231 236 242 / 0.62)), var(--foto) center / cover no-repeat, var(--color-agua); }
-    .fondo-foto-verde { background-image: linear-gradient(180deg, rgb(244 246 249 / 0.70), rgb(220 235 228 / 0.64)), var(--foto); }
+    .fondo-foto-verde { background-image: linear-gradient(180deg, rgb(244 246 249 / 0.70), rgb(220 232 245 / 0.64)), var(--foto); }
     /* En computadora la foto queda fija y el contenido se desliza encima; en el celular se desplaza con la página */
     @media (min-width: 1024px) { .fondo-foto-fijo { background-attachment: fixed; } }
 
-    /* Compatibilidad con la versión anterior: la franja ahora es una línea amarilla fina */
-    .franja { height: 4px; background: linear-gradient(90deg, var(--color-sol) 0 72%, var(--color-rialto-vivo) 72% 100%); }
+    /* Compatibilidad con la versión anterior: la franja ahora es una línea verde fina */
+    .franja { height: 4px; background: var(--color-rialto-vivo); }
     .franja-fina { height: 3px; }
-    .franja-v { width: 4px; background: var(--color-sol); }
-    .franja-clara { background: var(--color-sol); }
+    .franja-v { width: 4px; background: var(--color-rialto-vivo); }
+    .franja-clara { background: var(--color-rialto-vivo); }
     .panel-tapa { @apply relative; }
 
     /* Círculo numerado: existencia, pasos y conteos */
@@ -131,8 +138,9 @@
     /* La respuesta está en el toque, no al soltar: rápida y sin rebote */
     .btn:active:not(:disabled) { transform: scale(0.97); transition: transform 0.08s ease-out; }
     .btn:disabled, .btn[aria-disabled="true"] { @apply opacity-55 cursor-not-allowed; }
-    /* Contraste alto: texto azul noche sobre amarillo, bordes de 2 px en los botones de contorno */
-    .btn-sol { @apply bg-sol text-noche hover:bg-[#ffdf33]; border: 2px solid #e0b800; box-shadow: 0 6px 18px -8px rgb(160 120 0 / 0.75); }
+    /* Acción principal: placa amarilla con el canto oscuro abajo y texto azul noche, en minúsculas; al tocarla se hunde */
+    .btn-sol { @apply bg-sol font-bold normal-case text-noche hover:bg-[#ffe873]; letter-spacing: 0; box-shadow: inset 0 -3px 0 var(--color-sol-oscura), 0 6px 14px -8px rgb(6 42 33 / 0.7); }
+    .btn-sol:active:not(:disabled) { box-shadow: inset 0 1px 0 var(--color-sol-oscura); }
     .btn-tierra { @apply bg-tierra-oscura text-white hover:bg-noche; border: 2px solid var(--color-tierra-oscura); box-shadow: 0 6px 18px -8px rgb(5 43 112 / 0.8); }
     .btn-linea { @apply bg-white text-noche border-tierra-oscura hover:bg-tierra-oscura hover:text-white; border-width: 2px; }
     .btn-linea-clara { @apply bg-noche/40 text-white border-white hover:bg-white hover:text-tierra-oscura; border-width: 2px; backdrop-filter: blur(4px); }
@@ -152,7 +160,7 @@
     .capsula:hover { @apply border-tierra text-tierra; }
     .capsula .conteo { @apply grid min-w-8 h-8 place-items-center rounded-[4px] bg-agua px-1.5 text-sm font-extrabold cifra; }
     .capsula[aria-current] { @apply bg-tierra border-tierra text-white; }
-    .capsula[aria-current] .conteo { @apply bg-sol text-tierra-oscura; }
+    .capsula[aria-current] .conteo { @apply bg-white text-tierra-oscura; }
     .capsula-quitar { @apply pr-3; }
 
     /* ---- Pestañas de estado: control segmentado (riel claro, la activa en blanco elevada) ---- */
@@ -169,12 +177,12 @@
     .segmento:active { transform: scale(0.97); transition: transform 0.08s ease-out; }
     .segmento[aria-current] { @apply bg-white text-tierra-oscura; box-shadow: 0 1px 2px rgb(5 43 112 / 0.12), 0 4px 12px -6px rgb(5 43 112 / 0.35); }
     .segmento .punto { @apply size-2 shrink-0 rounded-full bg-tinta-suave/40; }
-    .segmento[data-estado="pendiente"] .punto, .segmento[data-estado="sin_pago"] .punto { background: #8a63c9; }
-    .segmento[data-estado="por_verificar"] .punto { background: #e0a800; }
+    .segmento[data-estado="pendiente"] .punto, .segmento[data-estado="sin_pago"] .punto { background: var(--color-laguna); }
+    .segmento[data-estado="por_verificar"] .punto { background: var(--color-sol-oscura); }
     .segmento[data-estado="convertida"] .punto, .segmento[data-estado="confirmado"] .punto, .segmento[data-estado="verificado"] .punto { background: var(--color-sabana); }
     .segmento[data-estado="rechazada"] .punto, .segmento[data-estado="rechazado"] .punto, .segmento[data-estado="anulado"] .punto { background: var(--color-coral); }
     .segmento[data-estado="devolucion"] .punto, .segmento[data-estado="vigentes"] .punto { background: var(--color-laguna); }
-    .segmento[data-estado="por_recordar"] .punto { background: #e0a800; }
+    .segmento[data-estado="por_recordar"] .punto { background: var(--color-sol-oscura); }
     .segmento[data-estado="saldados"] .punto { background: var(--color-sabana); }
     .segmento[data-estado="todas"] .punto, .segmento[data-estado="todos"] .punto { display: none; }
     .segmento .conteo { @apply grid h-6 min-w-6 place-items-center rounded-[4px] bg-white/80 px-1.5 text-xs font-extrabold text-tinta-suave; }
@@ -206,7 +214,7 @@
 
     /* ---- Paneles ---- */
     .lobulo { @apply rounded-lobulo border border-linea bg-white; }
-    .lobulo-tierra { @apply rounded-lobulo bg-tierra text-white; }
+    .lobulo-tierra { @apply rounded-lobulo bg-rialto text-white; }
     /* Tarjeta que se eleva al pasar el cursor */
     .tarjeta-viva { transition: transform 0.35s var(--ease-salida), box-shadow 0.35s var(--ease-salida), border-color 0.2s; }
     @media (hover: hover) {
@@ -231,14 +239,14 @@
     .estado { @apply inline-flex items-center gap-1.5 rounded-[4px] px-2.5 py-1 text-[0.8125rem] font-bold uppercase tracking-[0.03em] leading-tight whitespace-nowrap; }
     .estado::before { content: ""; @apply size-2 rounded-full bg-current; }
     .estado-disponible, .estado-confirmado, .estado-convertida, .estado-activo { @apply bg-sabana-clara text-[#14613a]; }
-    .estado-bajo { @apply bg-sol-clara text-[#5f4400]; }
+    .estado-bajo { @apply bg-sol-clara text-sol-tinta; }
     .estado-agotado, .estado-anulado, .estado-rechazada, .estado-inactivo { @apply bg-coral-clara text-coral-tinta; }
-    .estado-pendiente { @apply bg-lila-clara text-[#4c2a7a]; }
+    .estado-pendiente { @apply bg-laguna-clara text-laguna-tinta; }
     .estado-info { @apply bg-laguna-clara text-laguna-tinta; }
     /* Pagos */
     .estado-pagado, .estado-verificado { @apply bg-sabana-clara text-[#14613a]; }
-    .estado-por_verificar { @apply bg-sol-clara text-[#5f4400]; }
-    .estado-sin_pago { @apply bg-lila-clara text-[#4c2a7a]; }
+    .estado-por_verificar { @apply bg-sol-clara text-sol-tinta; }
+    .estado-sin_pago { @apply bg-laguna-clara text-laguna-tinta; }
     .estado-parcial { @apply bg-laguna-clara text-laguna-tinta; }
     .estado-rechazado { @apply bg-coral-clara text-coral-tinta; }
     .estado-reembolsado, .estado-entregado { @apply bg-laguna-clara text-laguna-tinta; }

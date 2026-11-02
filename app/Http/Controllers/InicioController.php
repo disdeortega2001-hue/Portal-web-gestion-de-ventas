@@ -55,7 +55,6 @@ class InicioController extends Controller
             'categorias' => $categorias,
             'estrella' => $estrella,
             'anios' => now()->year - NosotrosController::FUNDACION,
-            'totalProductos' => $productos->count(),
             'disponibles' => $productos->where('stock', '>', 0)->count(),
             'tasa' => (float) ($tasa?->valor ?? 0),
             'tasaActualizada' => $tasa?->updated_at,
