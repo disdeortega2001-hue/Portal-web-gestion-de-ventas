@@ -16,8 +16,8 @@
 @endphp
 
 @section('contenido')
-{{-- ======== Portada: fotos a sangre que se relevan con zoom lento; el texto entra escalonado ======== --}}
-<section id="portada" aria-labelledby="t-portada" class="sobre-azul relative isolate flex min-h-[32rem] items-center overflow-hidden bg-noche text-white lg:min-h-[34rem]"
+{{-- ======== Portada: fotos a sangre bajo el azul; el buscador es una placa de fábrica remachada ======== --}}
+<section id="portada" aria-labelledby="t-portada" class="portada sobre-azul bajo-barra relative isolate overflow-hidden bg-noche text-white"
          x-data="portada({{ count($diapositivas) }})">
     <div class="absolute inset-0 -z-10" aria-hidden="true">
         @foreach($diapositivas as $i => [$grande, $movil, $leyenda])
@@ -26,52 +26,58 @@
                 <img src="{{ asset($grande) }}" alt="" class="size-full object-cover" @if($i === 0) fetchpriority="high" @else loading="lazy" @endif decoding="async">
             </picture>
         @endforeach
-        <div class="absolute inset-0 bg-noche/50 sm:bg-transparent"></div>
-        <div class="absolute inset-0 bg-gradient-to-r from-noche/85 via-tierra-oscura/50 to-tierra/10"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-noche/70 via-transparent to-transparent"></div>
+        <div class="absolute inset-0 bg-noche/55 lg:bg-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-noche/95 via-tierra-oscura/75 to-tierra/25"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-noche/90 via-noche/10 to-transparent"></div>
         <x-arcos class="absolute inset-y-0 right-0 hidden h-full w-[48rem] lg:block" />
-            </div>
+    </div>
     {{-- Sin JavaScript se ve la primera foto --}}
     <noscript><style>[data-primera]{opacity:1;transform:none}</style></noscript>
 
-    <div class="mx-auto w-full max-w-[1320px] px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-        <div class="max-w-3xl">
-            <h1 id="t-portada" class="max-w-2xl text-3xl font-extrabold leading-tight sm:text-4xl lg:text-5xl" data-entrar style="--orden:1">El campo no se detiene, <span class="text-sol">nosotros tampoco</span></h1>
-            <p class="mt-4 max-w-xl text-lg text-white/85" data-entrar style="--orden:2">Desde 1963 llevamos maquinaria y repuestos al productor guariqueño, temporada tras temporada.</p>
+    <div class="mx-auto grid w-full max-w-[1320px] gap-10 px-4 pb-20 pt-12 sm:px-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:px-8 lg:pb-28 lg:pt-20">
+        <div class="max-w-2xl">
+            <p class="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.18em] text-white/80" data-entrar style="--orden:0">
+                <span class="h-0.5 w-8 bg-sol" aria-hidden="true"></span> Valle de la Pascua · Guárico
+            </p>
+            <h1 id="t-portada" class="titular mt-5 text-[2.15rem] sm:text-5xl lg:text-[3.5rem]" data-entrar style="--orden:1">El campo no se detiene, <em>nosotros tampoco</em></h1>
+            <p class="mt-5 max-w-xl text-lg text-white/85" data-entrar style="--orden:2">Desde 1963 llevamos maquinaria y repuestos al productor guariqueño, temporada tras temporada.</p>
 
-            <form method="GET" action="{{ route('catalogo.index') }}" role="search" class="mt-8 flex max-w-xl gap-2">
-                <label for="q-inicio" class="sr-only">Buscar por código de fábrica, pieza o modelo</label>
-                <input type="search" id="q-inicio" name="q" placeholder="Código de fábrica, pieza o modelo" maxlength="100" enterkeyhint="search" autocomplete="off"
-                       class="campo !min-h-14 flex-1 !border-transparent !text-lg">
-                <button class="btn btn-sol btn-grande !min-h-14" type="submit"><x-icono nombre="buscar" class="size-5" /><span class="sr-only sm:not-sr-only">Buscar</span></button>
-            </form>
-            <div class="mt-4 flex flex-wrap gap-3" data-entrar style="--orden:3">
-                <a href="{{ route('catalogo.index') }}" class="btn btn-linea-clara">Ver el catálogo <span class="chip"><x-icono nombre="flecha" class="size-4" /></span></a>
-                @if($whatsapp)<a href="{{ $whatsapp }}" target="_blank" rel="noopener" class="btn btn-linea-clara"><x-icono nombre="whatsapp" class="size-5" /> Escríbenos</a>@endif
+            {{-- Placa de fábrica: el buscador, con sus cuatro remaches --}}
+            <div class="placa mt-9 max-w-xl" data-entrar style="--orden:3">
+                <form method="GET" action="{{ route('catalogo.index') }}" role="search">
+                    <div class="flex items-baseline justify-between gap-3">
+                        <label for="q-inicio" class="text-sm font-black uppercase tracking-[0.08em] text-tierra-oscura">Busca tu repuesto</label>
+                        <span class="hidden text-xs font-semibold text-tinta-suave sm:block">Código de fábrica, pieza o modelo</span>
+                    </div>
+                    <div class="mt-3 flex gap-2">
+                        <input type="search" id="q-inicio" name="q" placeholder="Código, pieza o modelo" maxlength="100" enterkeyhint="search" autocomplete="off"
+                               class="campo !min-h-14 flex-1 !text-lg">
+                        <button class="btn btn-sol btn-grande !min-h-14" type="submit"><x-icono nombre="buscar" class="size-5" /><span class="sr-only sm:not-sr-only">Buscar</span></button>
+                    </div>
+                </form>
+                <div class="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-dashed border-linea pt-4 text-sm font-bold">
+                    <a href="{{ route('catalogo.index') }}" class="enlace inline-flex items-center gap-1.5">Ver el catálogo completo <x-icono nombre="flecha" class="size-4" /></a>
+                    @if($whatsapp)<a href="{{ $whatsapp }}" target="_blank" rel="noopener" class="enlace inline-flex items-center gap-1.5"><x-icono nombre="whatsapp" class="size-4" /> Pregunta por WhatsApp</a>@endif
+                </div>
             </div>
         </div>
-    </div>
 
-    {{-- Leyenda de la foto actual (solo la de la sede la tiene) --}}
-    @foreach($diapositivas as $i => [, , $leyenda])
-        @if($leyenda)<p x-show="actual === {{ $i }}" x-transition.opacity class="absolute bottom-7 left-4 hidden max-w-sm items-center gap-2 text-sm font-semibold text-white/80 sm:flex lg:left-8"><x-icono nombre="ubicacion" class="size-4" /> {{ $leyenda }}</p>@endif
-    @endforeach
-
-    {{-- Puntos con barra de avance --}}
-    <div class="absolute bottom-8 left-1/2 flex -translate-x-1/2 gap-2" x-cloak>
-        @foreach($diapositivas as $i => $d)
-            <button type="button" class="relative h-2 overflow-hidden rounded-full transition-all duration-500" :class="actual === {{ $i }} ? 'w-10' : 'w-2'"
-                    @click="ir({{ $i }})" aria-label="Ver foto {{ $i + 1 }}" :aria-current="actual === {{ $i }}">
-                <span class="absolute inset-0 rounded-full bg-white/35"></span>
-                <template x-if="actual === {{ $i }}"><span class="punto-progreso absolute inset-0 rounded-full bg-white" :style="`--duracion:${duracion}ms`"></span></template>
-            </button>
-        @endforeach
+        {{-- Selector de fotos: número, avance y leyenda --}}
+        <div class="flex flex-wrap items-center gap-4 lg:flex-col lg:items-end" x-cloak>
+            <p class="cifra text-sm font-bold text-white/80" aria-hidden="true"><span class="text-2xl font-black text-white" x-text="String(actual + 1).padStart(2, '0')">01</span> / {{ str_pad(count($diapositivas), 2, '0', STR_PAD_LEFT) }}</p>
+            <div class="flex gap-1.5">
+                @foreach($diapositivas as $i => $d)
+                    <button type="button" class="relative h-1.5 w-8 overflow-hidden rounded-full sm:w-10" @click="ir({{ $i }})" aria-label="Ver foto {{ $i + 1 }}" :aria-current="actual === {{ $i }}">
+                        <span class="absolute inset-0 rounded-full bg-white/30"></span>
+                        <template x-if="actual === {{ $i }}"><span class="punto-progreso absolute inset-0 rounded-full bg-sol" :style="`--duracion:${duracion}ms`"></span></template>
+                    </button>
+                @endforeach
+            </div>
+            @foreach($diapositivas as $i => [, , $leyenda])
+                @if($leyenda)<p x-show="actual === {{ $i }}" x-transition.opacity class="hidden max-w-xs items-center gap-2 text-sm font-semibold text-white/80 sm:flex"><x-icono nombre="ubicacion" class="size-4 shrink-0" /> {{ $leyenda }}</p>@endif
+            @endforeach
+        </div>
     </div>
-    {{-- Indicador para bajar --}}
-    <a href="#marcas" class="absolute bottom-8 right-8 hidden flex-col items-center gap-2 text-white/60 lg:flex" aria-label="Bajar a las marcas">
-        <span class="text-[0.6875rem] font-bold uppercase tracking-[0.2em] [writing-mode:vertical-lr]">Desliza</span>
-        <span class="flex h-9 w-6 justify-center rounded-full border-2 border-white/40 pt-1.5"><span class="rueda-scroll h-2 w-1 rounded-full bg-white"></span></span>
-    </a>
 </section>
 
 {{-- ======== Marcas exclusivas ======== --}}
@@ -94,28 +100,36 @@
     </div>
 </section>
 
-{{-- ======== Equipo estrella, al estilo de las fichas de línea de los fabricantes ======== --}}
-@if($estrella)
-    <section aria-labelledby="t-estrella" class="fondo-foto fondo-foto-fijo overflow-hidden" style="--foto: url('{{ asset('img/portada/campo-1.webp') }}')">
-        <div class="mx-auto grid max-w-[1320px] items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-24">
-            <div data-revelar>
-                <h2 id="t-estrella" class="titular text-4xl text-rialto sm:text-5xl">{{ $estrella->nombre }}</h2>
-                <p class="mt-2 text-lg font-extrabold uppercase tracking-[0.04em] text-tierra">{{ $estrella->categoria->nombre }} · {{ $estrella->marca }}</p>
-                <p class="mt-5 max-w-lg text-lg text-tinta-suave">{{ $estrella->descripcion ?: 'Equipo original con el respaldo directo del fabricante.' }}</p>
-                <dl class="mt-6 flex flex-wrap gap-x-10 gap-y-4">
-                    <div><dt class="text-sm font-semibold text-tinta-suave">Código de fábrica</dt><dd class="text-xl font-black text-tierra cifra">{{ $estrella->codigo_fabrica }}</dd></div>
-                    <div><dt class="text-sm font-semibold text-tinta-suave">Precio</dt><dd class="text-xl font-black cifra">@usd($estrella->precio)</dd></div>
-                    <div><dt class="text-sm font-semibold text-tinta-suave">Disponibles</dt><dd class="text-xl font-black cifra">{{ $estrella->disponible() }}</dd></div>
-                </dl>
-                <a href="{{ route('catalogo.show', $estrella) }}" class="btn btn-tierra mt-8">Saber más <span class="chip"><x-icono nombre="flecha" class="size-4" /></span></a>
-            </div>
-            <div class="relative" data-revelar style="--orden:1">
-                <div class="relative overflow-hidden rounded-[10px] bg-white">
-                    <p class="relative z-10 bg-tierra px-6 py-3 text-right text-lg font-black uppercase tracking-[0.04em] text-white">{{ $estrella->categoria->nombre }}</p>
-                    <x-arcos tono="oscuro" class="absolute inset-0 h-full w-full" />
-                    <img src="{{ $estrella->urlImagen() }}" alt="{{ $estrella->nombre }}" class="relative aspect-[4/3] w-full object-contain p-8 mix-blend-multiply" loading="lazy">
+{{-- ======== Compra por tipo de equipo: las categorías reales, con la foto de un producto suyo ======== --}}
+@if($categorias->isNotEmpty())
+    <section aria-labelledby="t-tipos" class="bg-white py-16 lg:py-24">
+        <div class="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-wrap items-end justify-between gap-4" data-revelar>
+                <div>
+                    <h2 id="t-tipos" class="titular subrayado text-4xl text-rialto sm:text-5xl">Compra por <em>tipo de equipo</em></h2>
+                    <p class="mt-3 text-tinta-suave">Entra directo a lo que necesitas para tu maquinaria.</p>
                 </div>
             </div>
+            <ul class="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
+                @foreach($categorias as $k => $c)
+                    <li data-revelar style="--orden:{{ $k }}">
+                        <a href="{{ route('catalogo.index', ['categoria' => $c['categoria']->id]) }}" class="tipo-equipo group block h-full overflow-hidden rounded-[10px] border border-linea bg-agua">
+                            <span class="block aspect-[4/3] overflow-hidden bg-white">
+                                @if($c['foto'])
+                                    <img src="{{ $c['foto']->urlImagen() }}" alt="" class="size-full object-contain p-4 mix-blend-multiply transition-transform duration-500 group-hover:scale-105" loading="lazy">
+                                @endif
+                            </span>
+                            <span class="flex items-end justify-between gap-2 border-t-4 border-rialto-vivo px-4 py-3">
+                                <span>
+                                    <span class="block font-black uppercase leading-tight tracking-[0.02em] text-rialto">{{ $c['categoria']->nombre }}</span>
+                                    <span class="mt-0.5 block text-sm text-tinta-suave">{{ $c['productos'] }} {{ $c['productos'] === 1 ? 'producto' : 'productos' }}</span>
+                                </span>
+                                <x-icono nombre="flecha" class="size-5 shrink-0 text-tierra transition-transform group-hover:translate-x-1" />
+                            </span>
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
         </div>
     </section>
 @endif

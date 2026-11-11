@@ -36,15 +36,22 @@ class InicioController extends Controller
             'productos' => $productos->where('marca', $nombre)->count(),
         ])->values();
 
-        // La foto de la portada: el equipo de mayor valor con foto y existencia
-        $estrella = $productos->whereNotNull('imagen')->where('stock', '>', 0)->sortByDesc('precio')->first();
+        // Entrada por tipo de equipo: cada categoría con su cantidad y la foto de un producto suyo (el de más existencia)
+        $categorias = $productos->whereNotNull('categoria')->groupBy('id_categoria')
+            ->map(fn ($grupo) => [
+                'categoria' => $grupo->first()->categoria,
+                'productos' => $grupo->count(),
+                'foto' => $grupo->whereNotNull('imagen')->sortByDesc('stock')->first(),
+            ])
+            ->sortByDesc('productos')
+            ->values();
 
         $tasa = Configuracion::where('clave', 'tasa_cambio')->first();
 
         return view('inicio', [
             'destacados' => $destacados,
             'marcas' => $marcas,
-            'estrella' => $estrella,
+            'categorias' => $categorias,
             'anios' => now()->year - NosotrosController::FUNDACION,
             'disponibles' => $productos->where('stock', '>', 0)->count(),
             'tasa' => (float) ($tasa?->valor ?? 0),

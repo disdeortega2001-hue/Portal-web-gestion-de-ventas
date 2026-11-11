@@ -38,7 +38,8 @@ return [
 
         'public' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
+            // Donde no hay enlace simbólico (Wasmer), las imágenes se guardan directo en public/storage
+            'root' => env('DISCO_PUBLICO_RAIZ', storage_path('app/public')),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
             'throw' => false,

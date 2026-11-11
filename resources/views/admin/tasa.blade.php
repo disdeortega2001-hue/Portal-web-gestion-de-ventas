@@ -23,7 +23,7 @@
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div>
                 <h2 id="t-vigente" class="font-bold text-tinta-suave">Tasa vigente</h2>
-                <p class="titular mt-1 text-4xl normal-case text-rialto cifra sm:text-5xl">Bs. {{ number_format($actual, 4, ',', '.') }}</p>
+                <p class="titular mt-1 text-4xl normal-case text-tierra-oscura cifra sm:text-5xl">Bs. {{ number_format($actual, 4, ',', '.') }}</p>
                 <p class="apoyo mt-1">por cada dólar · USD 100 = <span class="cifra">Bs. {{ number_format($actual * 100, 2, ',', '.') }}</span></p>
             </div>
             <button type="submit" form="form-bcv" class="btn btn-sol" data-cargando="Consultando el BCV…"><x-icono nombre="restaurar" class="size-4" /> Traer del BCV</button>

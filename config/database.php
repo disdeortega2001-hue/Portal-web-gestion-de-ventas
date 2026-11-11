@@ -48,7 +48,8 @@ return [
             'url' => env('DATABASE_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'forge'),
+            // Wasmer entrega el nombre de la base como DB_NAME
+            'database' => env('DB_DATABASE', env('DB_NAME', 'forge')),
             'username' => env('DB_USERNAME', 'forge'),
             'password' => env('DB_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
@@ -58,9 +59,11 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
+            // Con MYSQL_ATTR_SSL_CA la conexión va cifrada; los servidores con certificado propio (Wasmer) no se verifican
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => env('MYSQL_ATTR_SSL_CA') ? env('MYSQL_SSL_VERIFICAR', true) : null,
+            ], fn ($v) => $v !== null) : [],
         ],
 
         'pgsql' => [

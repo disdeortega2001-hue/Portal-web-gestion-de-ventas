@@ -104,17 +104,17 @@
         <dl class="grid divide-y divide-linea border-b border-linea sm:grid-cols-3 sm:divide-x sm:divide-y-0">
             <div class="p-5 xl:px-6">
                 <dt class="text-sm font-bold text-tinta-suave">Ventas de hoy</dt>
-                <dd class="titular mt-2 text-2xl text-rialto cifra" data-m="ventas_hoy.total" data-formato="usd">{{ $usd($m['ventas_hoy']['total']) }}</dd>
+                <dd class="titular mt-2 text-2xl text-tierra-oscura cifra" data-m="ventas_hoy.total" data-formato="usd">{{ $usd($m['ventas_hoy']['total']) }}</dd>
                 <dd class="apoyo mt-1 text-sm"><span data-m="ventas_hoy.pedidos" class="cifra">{{ $m['ventas_hoy']['pedidos'] }}</span> pedidos confirmados</dd>
             </div>
             <div class="p-5 xl:px-6">
                 <dt class="text-sm font-bold text-tinta-suave">Ventas del mes</dt>
-                <dd class="titular mt-2 text-2xl text-rialto cifra" data-m="ventas_mes.total" data-formato="usd">{{ $usd($m['ventas_mes']['total']) }}</dd>
+                <dd class="titular mt-2 text-2xl text-tierra-oscura cifra" data-m="ventas_mes.total" data-formato="usd">{{ $usd($m['ventas_mes']['total']) }}</dd>
                 <dd class="apoyo mt-1 text-sm"><span data-m="ventas_mes.pedidos" class="cifra">{{ $m['ventas_mes']['pedidos'] }}</span> pedidos confirmados</dd>
             </div>
             <div class="p-5 xl:px-6">
                 <dt class="text-sm font-bold text-tinta-suave">Conversión del mes</dt>
-                <dd class="titular mt-2 text-2xl text-rialto cifra"><span data-m="cotizaciones.conversion_mes">{{ number_format($m['cotizaciones']['conversion_mes'], 1, ',', '.') }}</span> %</dd>
+                <dd class="titular mt-2 text-2xl text-tierra-oscura cifra"><span data-m="cotizaciones.conversion_mes">{{ number_format($m['cotizaciones']['conversion_mes'], 1, ',', '.') }}</span> %</dd>
                 <dd class="apoyo mt-1 text-sm">de las cotizaciones terminó en pedido</dd>
             </div>
         </dl>

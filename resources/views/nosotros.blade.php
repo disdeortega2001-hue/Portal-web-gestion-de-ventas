@@ -21,20 +21,32 @@
 @endphp
 
 @section('cabecera')
-    <div class="flex items-start gap-6">
-        <span class="ruedo hidden size-24 text-5xl sm:grid" aria-hidden="true">7</span>
+    <div class="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-14">
         <div>
-            <h1 class="titular max-w-3xl text-5xl sm:text-6xl lg:text-7xl">Desde 1963 junto al <span class="text-sol">productor llanero</span></h1>
-            <p class="mt-3 max-w-2xl text-lg text-white/80">Una empresa familiar de Valle de la Pascua: maquinaria agrícola y repuestos para que el campo siga trabajando.</p>
+            <p class="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.18em] text-white/80">
+                <span class="h-0.5 w-8 bg-sol" aria-hidden="true"></span> Nuestra historia
+            </p>
+            <h1 class="titular mt-4 max-w-3xl text-4xl sm:text-5xl lg:text-[3.25rem]">Desde 1963 junto al <em>productor llanero</em></h1>
+            <p class="mt-4 max-w-2xl text-lg text-white/85">Una empresa familiar de Valle de la Pascua: maquinaria agrícola y repuestos para que el campo siga trabajando.</p>
         </div>
-    </div>
 
-    {{-- La historia en una línea: de Inversiones Campagna a Inversiones Rialto 7, la misma familia --}}
-    <ol class="mt-8 flex max-w-3xl flex-col gap-4 sm:flex-row sm:items-center lg:mt-10">
-        <li><span class="titular cifra block text-4xl text-white">1963</span><span class="mt-1 block font-semibold text-white/85">Inversiones Campagna</span></li>
-        <li class="hidden h-px flex-1 bg-white/35 sm:block" aria-hidden="true"></li>
-        <li><span class="titular cifra block text-4xl text-white">{{ now()->year }}</span><span class="mt-1 block font-semibold text-white/85">Inversiones Rialto 7 C.A.</span></li>
-    </ol>
+        {{-- Ficha del nombre: de Inversiones Campagna a Inversiones Rialto 7, la misma familia --}}
+        <ol class="relative rounded-[10px] border border-white/20 bg-noche/45 p-5 backdrop-blur-sm" aria-label="Los nombres de la empresa">
+            <li class="relative flex gap-4 pb-5">
+                <span class="relative z-10 mt-1 size-3.5 shrink-0 rounded-full border-2 border-white bg-noche" aria-hidden="true"></span>
+                <span><span class="cifra block text-sm font-bold text-white/70">1963</span><span class="block text-lg font-extrabold">Inversiones Campagna</span></span>
+            </li>
+            <li class="relative flex gap-4 pb-5">
+                <span class="relative z-10 mt-1.5 size-3.5 shrink-0" aria-hidden="true"></span>
+                <span class="text-sm italic text-white/75">La misma familia, el mismo oficio</span>
+            </li>
+            <li class="relative flex gap-4">
+                <span class="relative z-10 mt-1 size-3.5 shrink-0 rounded-full bg-sol" aria-hidden="true"></span>
+                <span><span class="cifra block text-sm font-bold text-white/70">2024</span><span class="block text-lg font-extrabold">Inversiones Rialto 7 C.A.</span></span>
+            </li>
+            <span class="absolute bottom-7 left-[1.66rem] top-7 w-px bg-white/35" aria-hidden="true"></span>
+        </ol>
+    </div>
 @endsection
 
 @section('contenido')

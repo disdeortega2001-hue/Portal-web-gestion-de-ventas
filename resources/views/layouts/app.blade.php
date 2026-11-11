@@ -74,7 +74,7 @@
 <a href="#contenido" class="btn btn-sol sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[70]">Saltar al contenido</a>
 
 @if($personal)
-    {{-- ======== Personal: riel verde Rialto a la izquierda; el logo va en placa blanca porque es verde ======== --}}
+    {{-- ======== Personal: riel verde Rialto a la izquierda, con canto amarillo; el logo va en placa blanca ======== --}}
     <div x-data="{ abierto: false }" @keydown.escape.window="abierto = false">
         <header class="sobre-azul sticky top-0 z-40 flex h-16 items-center gap-3 bg-rialto px-4 text-white lg:hidden">
             <button type="button" class="grid size-11 place-items-center hover:bg-white/10" @click="abierto = true" aria-label="Abrir menú" aria-controls="riel" :aria-expanded="abierto">
@@ -89,7 +89,7 @@
         <nav id="riel" aria-label="Menú del personal"
              class="sobre-azul panel-movil fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col bg-rialto text-white transition-transform duration-300 ease-[var(--ease-salida)] lg:translate-x-0"
              :class="abierto && 'translate-x-0'" :data-abierto="abierto">
-            <span class="franja-v pointer-events-none absolute inset-y-0 right-0" aria-hidden="true"></span>
+            <span class="pointer-events-none absolute inset-y-0 right-0 w-1 bg-sol" aria-hidden="true"></span>
             <div class="relative flex items-center gap-3 px-5 pb-4 pt-5">
                 <span class="grid size-14 shrink-0 place-items-center rounded-[8px] bg-white"><x-logo tamano="size-12" /></span>
                 <div class="leading-tight"><div class="text-2xl font-black uppercase">Rialto 7</div><div class="text-sm font-semibold text-white/75">Gestión de ventas</div></div>
@@ -129,35 +129,35 @@
         </nav>
     </div>
 @else
-    {{-- ======== Cliente: barra verde Rialto; el logo cuelga de ella en una placa blanca, como un letrero ======== --}}
+    {{-- ======== Cliente: barra de vidrio blanco translúcido; las fotos de arriba pasan por detrás y el logo cuelga en su placa ======== --}}
     @php($enlacesPublicos = [['inicio', 'inicio', 'Inicio'], ['catalogo.index', 'catalogo.*', 'Catálogo'], ['nosotros', 'nosotros', 'Nuestra historia'], ['contacto', 'contacto', 'Contacto']])
     <header x-data="{ menu: false, bajo: false }" @keydown.escape.window="menu = false" @scroll.window.throttle.100ms="bajo = window.scrollY > 8"
-            class="sobre-azul sticky top-0 z-40 bg-rialto text-white transition-shadow duration-300" :class="bajo && 'shadow-[0_8px_24px_-14px_rgb(6_42_33/0.7)]'">
+            class="barra-vidrio sticky top-0 z-40 text-noche transition-shadow duration-300" :class="bajo && 'shadow-[0_10px_30px_-18px_rgb(3_28_70/0.55)]'">
         <div class="mx-auto flex h-16 max-w-[1320px] items-center gap-3 px-4 sm:px-6 lg:h-[4.5rem] lg:gap-6 2xl:gap-8 lg:px-8">
             <a href="{{ route('inicio') }}" class="flex shrink-0 items-center gap-3 self-stretch no-underline" aria-label="Inversiones Rialto 7, ir al inicio">
-                <span class="grid h-[4.75rem] w-16 place-items-center self-start rounded-b-[10px] bg-white shadow-[0_8px_16px_-8px_rgb(6_42_33/0.6)] lg:h-[5.5rem] lg:w-[4.75rem]">
+                <span class="grid h-[4.75rem] w-16 place-items-center self-start rounded-b-[10px] bg-white shadow-[0_10px_20px_-10px_rgb(3_28_70/0.55)] ring-1 ring-linea/70 lg:h-[5.5rem] lg:w-[4.75rem]">
                     <x-logo tamano="size-12 lg:size-[3.75rem]" />
                 </span>
                 <span class="leading-none">
                     <span class="block whitespace-nowrap text-[1.375rem] font-black leading-none lg:text-2xl">Rialto 7</span>
-                    <span class="mt-1 hidden whitespace-nowrap text-[0.8125rem] font-medium text-white/80 xl:block">Repuestos y maquinaria agrícola</span>
+                    <span class="mt-1 hidden whitespace-nowrap text-[0.8125rem] font-medium text-tinta-suave xl:block">Repuestos y maquinaria agrícola</span>
                 </span>
             </a>
             <nav class="hidden items-stretch self-stretch lg:flex" aria-label="Principal">
                 @foreach($enlacesPublicos as [$ruta, $patron, $texto])
                     <a href="{{ route($ruta) }}" @if(request()->routeIs($patron)) aria-current="page" @endif
-                       class="flex items-center whitespace-nowrap border-b-4 border-transparent px-2.5 pt-1 text-base font-semibold text-white/85 transition-colors hover:text-white aria-[current]:border-white aria-[current]:font-bold aria-[current]:text-white xl:px-4">{{ $texto }}</a>
+                       class="flex items-center whitespace-nowrap border-b-4 border-transparent px-2.5 pt-1 text-base font-semibold text-tinta/80 transition-colors hover:text-rialto aria-[current]:border-rialto-vivo aria-[current]:font-bold aria-[current]:text-rialto xl:px-4">{{ $texto }}</a>
                 @endforeach
             </nav>
             <div class="ml-auto flex items-center gap-2">
                 @if($whatsappBarra)
-                    <a href="{{ $whatsappBarra }}" class="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 px-2 font-semibold text-white no-underline transition-colors hover:text-white/75" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp" title="Escríbenos por WhatsApp">
+                    <a href="{{ $whatsappBarra }}" class="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 px-2 font-semibold text-noche no-underline transition-colors hover:text-tierra" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp" title="Escríbenos por WhatsApp">
                         <x-icono nombre="whatsapp" /><span @class(['hidden', '2xl:inline' => auth()->check(), 'xl:inline' => auth()->guest()])>WhatsApp</span>
                     </a>
                 @endif
                 @auth
                     <div x-data="{ m: false }" class="relative hidden sm:block" @click.outside="m = false">
-                        <button type="button" class="inline-flex min-h-11 items-center gap-1.5 px-2 font-semibold text-white transition-colors hover:text-white/75" @click="m = !m" :aria-expanded="m" aria-haspopup="true">
+                        <button type="button" class="inline-flex min-h-11 items-center gap-1.5 px-2 font-semibold text-noche transition-colors hover:text-tierra" @click="m = !m" :aria-expanded="m" aria-haspopup="true">
                             <span class="max-w-28 truncate">{{ strtok($usuario->nombre, ' ') }}</span><x-icono nombre="abajo" class="size-4" />
                         </button>
                         <div x-show="m" x-cloak x-transition.origin.top.right class="absolute right-0 top-full mt-2 w-56 border border-linea bg-white p-1.5 text-tinta">
@@ -172,14 +172,14 @@
                         </div>
                     </div>
                 @else
-                    <a href="{{ route('login') }}" class="hidden min-h-11 items-center px-2 font-semibold text-white no-underline transition-colors hover:text-white/75 sm:inline-flex" title="Clientes y personal de Rialto 7">Ingresar</a>
+                    <a href="{{ route('login') }}" class="hidden min-h-11 items-center px-2 font-semibold text-noche no-underline transition-colors hover:text-tierra sm:inline-flex" title="Clientes y personal de Rialto 7">Ingresar</a>
                 @endauth
                 <a href="{{ route('carrito.index') }}" data-carrito-enlace aria-label="Mi cotización, {{ $itemsCarrito }} {{ $itemsCarrito === 1 ? 'producto' : 'productos' }}"
                    class="btn btn-sol !min-h-11 !pr-2 sm:!pr-2.5">
                     <x-icono nombre="cotizacion" /> <span class="hidden sm:inline lg:hidden xl:inline">Mi cotización</span>
                     <span class="ruedo size-8 !border-2 text-sm" data-carrito-contador @if(! $itemsCarrito) hidden @endif>{{ $itemsCarrito }}</span>
                 </a>
-                <button type="button" class="grid size-11 place-items-center text-white lg:hidden" @click="menu = !menu" :aria-expanded="menu" aria-controls="menu-movil" aria-label="Menú">
+                <button type="button" class="grid size-11 place-items-center text-noche lg:hidden" @click="menu = !menu" :aria-expanded="menu" aria-controls="menu-movil" aria-label="Menú">
                     <x-icono nombre="menu" />
                 </button>
             </div>
@@ -207,7 +207,7 @@
 
     {{-- Cabecera de página: banda azul sobre la foto, con los arcos de las marcas y la línea verde abajo --}}
     @hasSection('cabecera')
-        <div class="sobre-azul relative isolate overflow-hidden bg-noche text-white">
+        <div class="sobre-azul bajo-barra relative isolate overflow-hidden bg-noche text-white">
             {{-- Siempre una foto de fondo (campo o sede), con el degradado azul encima para leer el texto --}}
             <picture class="absolute inset-0 -z-10" aria-hidden="true">
                 <source media="(max-width: 767px)" srcset="{{ asset('img/portada/' . $fotoCabecera[1]) }}">
@@ -231,7 +231,7 @@
     'pb-16' => ! $personal && $__env->hasSection('ancho_completo'),
     'max-w-[1400px] py-6 lg:py-8' => $personal,
 ])>
-    {{-- En el área del personal, la cabecera de las páginas públicas es un panel verde dentro del contenido --}}
+    {{-- En el área del personal, la cabecera de las páginas públicas es un panel azul dentro del contenido --}}
     @if($personal && $__env->hasSection('cabecera'))
         <div class="lobulo-tierra panel-tapa mb-8 px-6 pb-7 pt-9 sm:px-8 lg:px-10 lg:pb-9 lg:pt-11">@yield('cabecera')</div>
     @endif
