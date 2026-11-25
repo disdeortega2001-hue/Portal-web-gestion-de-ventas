@@ -19,7 +19,6 @@ use Illuminate\View\View;
  * Inicio y cierre de sesión.
  *
  * El cliente entra con su cédula o RIF y el personal con su correo.
- * Los correos se normalizan para aceptar mayúsculas y espacios accidentales.
  */
 class LoginController extends Controller
 {
@@ -32,7 +31,7 @@ class LoginController extends Controller
 
     public function store(LoginRequest $request): RedirectResponse
     {
-        $acceso = trim((string) $request->string('usuario'));
+        $acceso = trim((string) $request->input('usuario'));
         $claveLimite = Str::lower($acceso) . '|' . $request->ip();
 
         if (RateLimiter::tooManyAttempts($claveLimite, self::MAX_INTENTOS)) {
@@ -81,7 +80,8 @@ class LoginController extends Controller
         if (str_contains($acceso, '@')) {
             $correo = mb_strtolower(trim($acceso));
 
-            return Usuario::whereRaw('LOWER(correo) = ?', [$correo])
+            return Usuario::query()
+                ->whereRaw('LOWER(TRIM(correo)) = ?', [$correo])
                 ->first();
         }
 
@@ -93,7 +93,8 @@ class LoginController extends Controller
             $normalizada = 'V' . $normalizada;
         }
 
-        return Cliente::whereRaw("REPLACE(UPPER(REPLACE(identificacion, '-', '')), '.', '') = ?", [$normalizada])
+        return Cliente::query()
+            ->whereRaw("REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM(identificacion)), '-', ''), '.', ''), ' ', ''), '_', '') = ?", [$normalizada])
             ->whereNotNull('id_usuario')
             ->first()?->usuario;
     }
