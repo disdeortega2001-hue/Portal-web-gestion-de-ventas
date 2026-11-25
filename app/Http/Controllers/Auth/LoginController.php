@@ -16,13 +16,10 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 /**
- * Inicio y cierre de sesión. Hace lo mismo que el de Laravel Breeze, pero
- * con los campos en español y limitando los intentos: 5 intentos fallidos por usuario + IP bloquean
- * el acceso durante 60 segundos.
+ * Inicio y cierre de sesión.
  *
- * El cliente entra con su cédula o RIF (como la escriba: «V-12345678», «v12345678» o «12345678»);
- * el personal, con su correo. La respuesta de error es la misma en ambos casos, para no revelar
- * qué cédulas o correos tienen cuenta.
+ * El cliente entra con su cédula o RIF y el personal con su correo.
+ * Los correos se normalizan para aceptar mayúsculas y espacios accidentales.
  */
 class LoginController extends Controller
 {
@@ -35,7 +32,7 @@ class LoginController extends Controller
 
     public function store(LoginRequest $request): RedirectResponse
     {
-        $acceso = trim((string) $request->input('usuario'));
+        $acceso = trim((string) $request->string('usuario'));
         $claveLimite = Str::lower($acceso) . '|' . $request->ip();
 
         if (RateLimiter::tooManyAttempts($claveLimite, self::MAX_INTENTOS)) {
@@ -47,7 +44,10 @@ class LoginController extends Controller
 
         $usuario = $this->buscarUsuario($acceso);
 
-        if (! $usuario || $usuario->estado !== 'activo' || ! Hash::check((string) $request->input('contrasena'), $usuario->contrasena)) {
+        if (! $usuario
+            || $usuario->estado !== 'activo'
+            || ! Hash::check((string) $request->input('contrasena'), $usuario->contrasena)
+        ) {
             RateLimiter::hit($claveLimite, 60);
             throw ValidationException::withMessages([
                 'usuario' => 'Los datos de acceso o la contraseña no son correctos.',
@@ -56,9 +56,8 @@ class LoginController extends Controller
 
         Auth::login($usuario, $request->boolean('recordar'));
         RateLimiter::clear($claveLimite);
-        $request->session()->regenerate();   // Evita fijación de sesión
+        $request->session()->regenerate();
 
-        // Un cliente que llegó por /panel va a su cuenta, no a una pantalla del personal que le daría 403
         $pendiente = ltrim((string) parse_url((string) $request->session()->get('url.intended'), PHP_URL_PATH), '/');
         if (! $usuario->esPersonal() && Str::startsWith($pendiente, ['gestion/', 'admin/'])) {
             $request->session()->forget('url.intended');
@@ -76,14 +75,16 @@ class LoginController extends Controller
         return redirect()->route('catalogo.index');
     }
 
-    /** Con «@» es un correo (personal o cliente que lo registró); si no, una cédula o RIF de cliente. */
+    /** Con «@» es un correo; si no, una cédula o RIF de cliente. */
     private function buscarUsuario(string $acceso): ?Usuario
     {
         if (str_contains($acceso, '@')) {
-            return Usuario::where('correo', Str::lower($acceso))->first();
+            $correo = mb_strtolower(trim($acceso));
+
+            return Usuario::whereRaw('LOWER(correo) = ?', [$correo])
+                ->first();
         }
 
-        // «v-12.345.678» → «V12345678»; sin letra se asume cédula venezolana (V)
         $normalizada = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $acceso));
         if ($normalizada === '') {
             return null;
@@ -92,7 +93,7 @@ class LoginController extends Controller
             $normalizada = 'V' . $normalizada;
         }
 
-        return Cliente::whereRaw("REPLACE(identificacion, '-', '') = ?", [$normalizada])
+        return Cliente::whereRaw("REPLACE(UPPER(REPLACE(identificacion, '-', '')), '.', '') = ?", [$normalizada])
             ->whereNotNull('id_usuario')
             ->first()?->usuario;
     }
